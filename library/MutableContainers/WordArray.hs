@@ -49,17 +49,17 @@ class Monad m => WordArrayMonad m where
   -- |
   -- Lookup an item at the index.
   lookup :: WordArray m e -> Index -> m (Maybe e)
-  getBitmap :: WordArray m e -> m Bitmap
+  bitmap :: WordArray m e -> m Bitmap
 
 -- |
 -- Check, whether there is an element at the index.
 isSet :: WordArrayMonad m => WordArray m e -> Index -> m Bool
-isSet w i = getBitmap w >>= return . Bitmap.isSet i
+isSet w i = bitmap w >>= return . Bitmap.isSet i
 
 -- |
 -- Get the amount of elements.
 size :: WordArrayMonad m => WordArray m e -> m Int
-size w = getBitmap w >>= return . Bitmap.size
+size w = bitmap w >>= return . Bitmap.size
 
 -- |
 -- Convert into a list representation.
@@ -77,7 +77,7 @@ instance WordArrayMonad STM where
   set (STMWordArray v) i e = readTVar v >>= writeTVar v . Immutable.set i e
   unset (STMWordArray v) i = readTVar v >>= writeTVar v . Immutable.unset i
   lookup (STMWordArray v) i = readTVar v >>= return . Immutable.lookup i
-  getBitmap (STMWordArray v) = readTVar v >>= return . Immutable.bitmap
+  bitmap (STMWordArray v) = readTVar v >>= return . Immutable.bitmap
 
 instance WordArrayMonad (ST s) where
   newtype WordArray (ST s) e = STWordArray (Primitive.WordArray s e)
@@ -85,7 +85,7 @@ instance WordArrayMonad (ST s) where
   set (STWordArray p) = Primitive.set p
   unset (STWordArray p) = Primitive.unset p
   lookup (STWordArray p) = Primitive.lookup p
-  getBitmap (STWordArray p) = Primitive.bitmap p
+  bitmap (STWordArray p) = Primitive.bitmap p
 
 instance WordArrayMonad IO where
   newtype WordArray IO e = IOWordArray (Primitive.WordArray RealWorld e)
@@ -93,6 +93,6 @@ instance WordArrayMonad IO where
   set (IOWordArray p) = Primitive.set p
   unset (IOWordArray p) = Primitive.unset p
   lookup (IOWordArray p) = Primitive.lookup p
-  getBitmap (IOWordArray p) = Primitive.bitmap p
+  bitmap (IOWordArray p) = Primitive.bitmap p
 
 
