@@ -44,6 +44,8 @@ library
     MutableContainers.WordArray.Bitmap
     MutableContainers.HashTable.Node
     MutableContainers.HashTable.Node.Leaf
+    MutableContainers.WordArray.Immutable
+    MutableContainers.WordArray.Primitive
   exposed-modules:
     MutableContainers.Array
     MutableContainers.WordArray
