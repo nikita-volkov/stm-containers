@@ -39,6 +39,7 @@ library
   other-modules:
     MutableContainers.Prelude
     MutableContainers.WordArray.Bitmap
+    MutableContainers.WordArray.Primitive
   exposed-modules:
     MutableContainers.WordArray
   build-depends:
