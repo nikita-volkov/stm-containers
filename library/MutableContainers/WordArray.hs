@@ -19,6 +19,7 @@ import Data.Primitive.MutVar
 import Control.Monad.Primitive
 import qualified MutableContainers.WordArray.Bitmap as Bitmap
 import qualified MutableContainers.WordArray.Primitive as Primitive
+import qualified MutableContainers.WordArray.Immutable as Immutable
 
 
 -- | 
@@ -71,52 +72,12 @@ toList w = forM [0 .. pred Bitmap.maxSize] $ lookup w
 -------------------------
 
 instance WordArrayMonad STM where
-  newtype WordArray STM e = STMWordArray (TVar (Bitmap, Array e))
-  singleton i e =
-    let b = Bitmap.set i 0
-        a = runST $ newArray 1 e >>= unsafeFreezeArray
-        in fmap STMWordArray (newTVar (b, a))
-  set (STMWordArray v) i e = do
-    (b, a) <- readTVar v
-    let sparseIndex = Bitmap.sparseIndex i b
-        size = Bitmap.size b
-    if Bitmap.isSet i b
-      then do
-        let a' = runST $ do
-              ma' <- newArray size undefined
-              forM_ [0 .. (size - 1)] $ \i -> indexArrayM a i >>= writeArray ma' i
-              writeArray ma' sparseIndex e
-              unsafeFreezeArray ma'
-        writeTVar v (b, a')
-      else do
-        let a' = runST $ do
-              ma' <- newArray (size + 1) undefined
-              forM_ [0 .. (sparseIndex - 1)] $ \i -> indexArrayM a i >>= writeArray ma' i
-              writeArray ma' sparseIndex e
-              forM_ [sparseIndex .. (size - 1)] $ \i -> indexArrayM a i >>= writeArray ma' (i + 1)
-              unsafeFreezeArray ma'
-            b' = Bitmap.set i b
-        writeTVar v (b', a')
-  unset (STMWordArray v) i = do
-    (b, a) <- readTVar v
-    if Bitmap.isSet i b
-      then do
-        let b' = Bitmap.invert i b
-            a' = runST $ do
-              ma' <- newArray (pred size) undefined
-              forM_ [0 .. pred sparseIndex] $ \i -> indexArrayM a i >>= writeArray ma' i
-              forM_ [succ sparseIndex .. pred size] $ \i -> indexArrayM a i >>= writeArray ma' (pred i)
-              unsafeFreezeArray ma'
-            sparseIndex = Bitmap.sparseIndex i b
-            size = Bitmap.size b
-        writeTVar v (b', a')
-      else return ()
-  lookup (STMWordArray v) i = do
-    (b, a) <- readTVar v
-    if Bitmap.isSet i b
-      then return (Just (indexArray a (Bitmap.sparseIndex i b)))
-      else return Nothing
-  getBitmap (STMWordArray v) = readTVar v >>= return . fst
+  newtype WordArray STM e = STMWordArray (TVar (Immutable.WordArray e))
+  singleton i e = fmap STMWordArray (newTVar (Immutable.singleton i e))
+  set (STMWordArray v) i e = readTVar v >>= writeTVar v . Immutable.set i e
+  unset (STMWordArray v) i = readTVar v >>= writeTVar v . Immutable.unset i
+  lookup (STMWordArray v) i = readTVar v >>= return . Immutable.lookup i
+  getBitmap (STMWordArray v) = readTVar v >>= return . Immutable.bitmap
 
 instance WordArrayMonad (ST s) where
   newtype WordArray (ST s) e = STWordArray (Primitive.WordArray s e)
