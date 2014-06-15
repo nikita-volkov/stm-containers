@@ -1,4 +1,4 @@
-module MutableContainers.Transformers (module Exports) where
+module STMContainers.Transformers (module Exports) where
 
 -- mtl
 -------------------------

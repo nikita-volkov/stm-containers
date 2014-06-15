@@ -1,8 +1,8 @@
 {-# OPTIONS_GHC -F -pgmF htfpp #-}
 
 import Test.Framework
-import MutableContainers.Prelude
-import MutableContainers.Coordinates
+import STMContainers.Prelude
+import STMContainers.Coordinates
 import Numeric
 import Data.Char
 import NumericQQ

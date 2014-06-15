@@ -1,15 +1,16 @@
 name:
-  mutable-containers
+  stm-containers
 version:
   0.1.0
 synopsis:
-  Mutable boxed containers
+  Containers for STM
 description:
+  Containers for STM based on Hash Array Mapped Trie.
 category:
 homepage:
-  https://github.com/nikita-volkov/mutable-containers 
+  https://github.com/nikita-volkov/stm-containers 
 bug-reports:
-  https://github.com/nikita-volkov/mutable-containers/issues 
+  https://github.com/nikita-volkov/stm-containers/issues 
 author:
   Nikita Volkov <nikita.y.volkov@mail.ru>
 maintainer:
@@ -30,59 +31,26 @@ source-repository head
   type:
     git
   location:
-    git://github.com/nikita-volkov/mutable-containers.git
+    git://github.com/nikita-volkov/stm-containers.git
 
 
 library
   hs-source-dirs:
     library
   other-modules:
-    MutableContainers.Prelude
-    MutableContainers.Transformers
-    MutableContainers.Coordinates
-    MutableContainers.RefMonad
-    MutableContainers.WordArray.Bitmap
-    MutableContainers.HashTable.Node
-    MutableContainers.HashTable.Node.Leaf
-    MutableContainers.WordArray.Immutable
-    MutableContainers.WordArray.Primitive
+    STMContainers.Prelude
+    STMContainers.Coordinates
+    STMContainers.WordArray.Bitmap
+    STMContainers.WordArray
   exposed-modules:
-    MutableContainers.Array
-    MutableContainers.WordArray
-    MutableContainers.HashTable
+    STMContainers.HashTable
   build-depends:
     -- debugging:
     loch-th == 0.2.*,
     placeholders == 0.1.*,
     -- general:
     hashable <= 1.3,
-    foldl == 1.0.*,
     primitive == 0.5.*,
-    mtl == 2.*,
-    base >= 4.5 && < 5
-  default-extensions:
-    Arrows, BangPatterns, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFunctor, DeriveGeneric, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, ImpredicativeTypes, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeFamilies, TypeOperators, UnboxedTuples
-  default-language:
-    Haskell2010
-
-
-test-suite api-tests
-  type:
-    exitcode-stdio-1.0
-  hs-source-dirs:
-    executables
-  main-is:
-    APITests.hs
-  build-depends:
-    mutable-containers,
-    QuickCheck == 2.7.*,
-    HTF == 0.11.*,
-    -- debugging:
-    loch-th == 0.2.*,
-    placeholders == 0.1.*,
-    -- general:
-    free >= 4.6 && < 5,
-    mtl == 2.1.*,
     base >= 4.5 && < 5
   default-extensions:
     Arrows, BangPatterns, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFunctor, DeriveGeneric, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, ImpredicativeTypes, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeFamilies, TypeOperators, UnboxedTuples
@@ -108,6 +76,33 @@ test-suite coordinates-tests
     placeholders == 0.1.*,
     -- general:
     mtl == 2.*,
+    base >= 4.5 && < 5
+  default-extensions:
+    Arrows, BangPatterns, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFunctor, DeriveGeneric, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, ImpredicativeTypes, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeFamilies, TypeOperators, UnboxedTuples
+  default-language:
+    Haskell2010
+
+
+test-suite word-array-tests
+  type:
+    exitcode-stdio-1.0
+  hs-source-dirs:
+    executables
+    library
+  main-is:
+    WordArrayTests.hs
+  ghc-options:
+    -threaded
+  build-depends:
+    QuickCheck == 2.7.*,
+    HTF == 0.11.*,
+    -- debugging:
+    loch-th == 0.2.*,
+    placeholders == 0.1.*,
+    -- general:
+    free >= 4.6 && < 4.10,
+    mtl == 2.*,
+    primitive == 0.5.*,
     base >= 4.5 && < 5
   default-extensions:
     Arrows, BangPatterns, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFunctor, DeriveGeneric, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, ImpredicativeTypes, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeFamilies, TypeOperators, UnboxedTuples

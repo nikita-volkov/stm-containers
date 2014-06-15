@@ -1,4 +1,4 @@
-module MutableContainers.Prelude
+module STMContainers.Prelude
 ( 
   module Exports,
   bug,
@@ -54,17 +54,13 @@ import Debug.Trace as Exports hiding (traceM)
 -------------------------
 import Development.Placeholders as Exports
 
--- hashable
--------------------------
-import Data.Hashable as Exports (Hashable(..))
-
 -- custom
 -------------------------
 import qualified Debug.Trace.LocationTH
 
 bug = [e| $(Debug.Trace.LocationTH.failure) . (msg <>) |]
   where
-    msg = "A \"mutable-containers\" package bug: " :: String
+    msg = "A \"stm-containers\" package bug: " :: String
 
 bottom = [e| $bug "Bottom evaluated" |]
 

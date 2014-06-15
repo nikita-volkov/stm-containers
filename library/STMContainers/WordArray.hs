@@ -1,14 +1,15 @@
-module MutableContainers.WordArray.Immutable where
+module STMContainers.WordArray where
 
-import MutableContainers.Prelude hiding (lookup, toList)
+import STMContainers.Prelude hiding (lookup, toList)
 import Data.Primitive.Array
 import Data.Primitive.MutVar
 import Control.Monad.Primitive
-import qualified MutableContainers.WordArray.Bitmap as Bitmap
+import qualified STMContainers.WordArray.Bitmap as Bitmap
 
 
 -- |
--- An immutable word array.
+-- An immutable space-efficient sparse array, 
+-- which can store only as many elements as there are bits in the machine word.
 data WordArray e =
   WordArray {-# UNPACK #-} !Bitmap {-# UNPACK #-} !(Array e)
 
@@ -82,3 +83,19 @@ lookup i (WordArray b a) =
 bitmap :: WordArray e -> Bitmap
 bitmap (WordArray b _) = b
 
+-- |
+-- Check, whether there is an element at the index.
+isSet :: Index -> WordArray e -> Bool
+isSet i = Bitmap.isSet i . bitmap
+
+-- |
+-- Get the amount of elements.
+size :: WordArray e -> Int
+size = Bitmap.size . bitmap
+
+-- |
+-- Convert into a list representation.
+toList :: WordArray e -> [Maybe e]
+toList w = do
+  i <- [0 .. pred Bitmap.maxSize] 
+  return $ lookup i w

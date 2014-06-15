@@ -1,6 +1,6 @@
-module MutableContainers.Coordinates where
+module STMContainers.Coordinates where
 
-import MutableContainers.Prelude
+import STMContainers.Prelude
 
 
 type Coordinates = [Int]

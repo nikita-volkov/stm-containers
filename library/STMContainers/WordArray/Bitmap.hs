@@ -1,6 +1,6 @@
-module MutableContainers.WordArray.Bitmap where
+module STMContainers.WordArray.Bitmap where
 
-import MutableContainers.Prelude
+import STMContainers.Prelude
 
 
 type Bitmap = Word
