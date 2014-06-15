@@ -54,6 +54,10 @@ import Debug.Trace as Exports hiding (traceM)
 -------------------------
 import Development.Placeholders as Exports
 
+-- hashable
+-------------------------
+import Data.Hashable as Exports (Hashable(..))
+
 -- custom
 -------------------------
 import qualified Debug.Trace.LocationTH
