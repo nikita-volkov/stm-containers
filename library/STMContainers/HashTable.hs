@@ -3,21 +3,20 @@ module STMContainers.HashTable where
 import STMContainers.Prelude
 import Data.Primitive.Array
 import qualified STMContainers.WordArray as WordArray
+import qualified STMContainers.HashTable.Node as Node
 
 
-type HashTable k v = TVar (Node k v)
+-- |
+-- A hash array mapped trie, specialized for STM.
+type HashTable k v = Node.Node k v
+type IsKey k = (Eq k, Hashable k)
 
-data Node k v =
-  Empty |
-  NodesWordArray {-# UNPACK #-} !(WordArray (HashTable k v)) |
-  NodesFullArray {-# UNPACK #-} !(Array (HashTable k v)) |
-  SingleLeaf {-# UNPACK #-} !Hash !k !v |
-  MultipleLeaves {-# UNPACK #-} !Hash {-# UNPACK #-} !(Array (k, v))
+insert :: (IsKey k) => HashTable k v -> k -> v -> STM ()
+insert t k v = Node.insert (0, t) (hash k, k) v
 
-type WordArray = WordArray.WordArray
+delete :: (IsKey k) => HashTable k v -> k -> STM ()
+delete t k = void $ Node.delete (0, t) (hash k, k)
 
-type Hash = Int
 
-type Key k = (Eq k, Hashable k)
 
-type Depth = Int
+

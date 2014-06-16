@@ -2,8 +2,6 @@ module STMContainers.WordArray where
 
 import STMContainers.Prelude hiding (lookup, toList)
 import Data.Primitive.Array
-import Data.Primitive.MutVar
-import Control.Monad.Primitive
 import qualified STMContainers.WordArray.Bitmap as Bitmap
 
 
@@ -28,6 +26,9 @@ singleton i e =
   let b = Bitmap.set i 0
       a = runST $ newArray 1 e >>= unsafeFreezeArray
       in WordArray b a
+
+fromList :: [(Int, e)] -> WordArray e
+fromList = $notImplemented
 
 -- |
 -- Set an element value at the index.
