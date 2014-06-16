@@ -9,12 +9,12 @@ import qualified STMContainers.SizedArray as SizedArray
 
 
 -- |
--- A node with its level.
+-- A node with its depth level.
 type NodeData k v = (Level, Node k v)
 
 -- |
--- A depth level of this node.
--- A multiple of 'levelStep' value.
+-- A depth level of a node.
+-- Must be a multiple of the 'levelStep' value.
 type Level = Int
 
 -- |
@@ -103,7 +103,7 @@ insert (l, n) (h, k) v =
           e2 <- (,) <$> pure (hashIndex h') <*> newTVar (Leaves h' a')
           writeTVar n $ Nodes $ WordArray.fromList [e1, e2]
 
--- | Delete and report whether the node became empty.
+-- | Delete and report whether the node became empty as the result.
 {-# INLINE delete #-}
 delete :: (IsKey k) => NodeData k v -> KeyData k -> STM Bool
 delete (level, node) (hash, key) = do
@@ -135,7 +135,29 @@ delete (level, node) (hash, key) = do
             0 -> writeTVar node Empty >> return True
             _ -> writeTVar node (Leaves hash' array') >> return False
 
-
+{-# INLINE lookup #-}
+lookup :: (IsKey k) => NodeData k v -> KeyData k -> STM (Maybe v)
+lookup (level, node) (hash, key) = do
+  readTVar node >>= \case
+    Empty -> return Nothing
+    Nodes array ->
+      case levelHashIndex level hash of
+        index -> case WordArray.lookup index array of
+          Nothing -> return Nothing
+          Just node' -> case level + levelStep of
+            level' -> lookup (level', node') (hash, key)
+    Leaf hash' (Association key' value) ->
+      case hash' == hash of
+        True -> case key' == key of
+          True -> return (Just value)
+          False -> return Nothing
+        False -> return Nothing
+    Leaves hash' array ->
+      case hash' == hash of
+        True -> case SizedArray.find (\(Association key' _) -> key' == key) array of
+          Nothing -> return Nothing
+          Just (_, (Association _ value)) -> return (Just value)
+        False -> return Nothing
 
 
 levelHashIndex :: Level -> (Hash -> Int)
