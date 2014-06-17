@@ -45,8 +45,8 @@ type IsKey k = (Eq k, Hashable k)
 -- this function might behave unpredictably,
 -- when improper level is provided.
 {-# INLINE insert #-}
-insert :: (IsKey k) => NodeData k v -> KeyData k -> v -> STM ()
-insert (l, n) (h, k) v =
+insert :: (IsKey k) => KeyData k -> v -> NodeData k v -> STM ()
+insert (h, k) v (l, n) =
   readTVar n >>= \case
     Empty -> writeTVar n (Leaf h (Association k v))
     Nodes a ->
@@ -57,7 +57,7 @@ insert (l, n) (h, k) v =
           n' <- newTVar (Leaf h (Association k v))
           writeTVar n (Nodes (WordArray.set i n' a))
         insertDeeper n' = do
-          insert (l + levelStep, n') (h, k) v
+          insert (h, k) v (l + levelStep, n')
     Leaf h' (Association k' v') ->
       if h == h'
         then if k == k'
@@ -105,8 +105,8 @@ insert (l, n) (h, k) v =
 
 -- | Delete and report whether the node became empty as the result.
 {-# INLINE delete #-}
-delete :: (IsKey k) => NodeData k v -> KeyData k -> STM Bool
-delete (level, node) (hash, key) = do
+delete :: (IsKey k) => KeyData k -> NodeData k v -> STM Bool
+delete (hash, key) (level, node) = do
   readTVar node >>= \case
     Empty -> return True
     Nodes array ->
@@ -115,7 +115,7 @@ delete (level, node) (hash, key) = do
           Nothing -> return False
           Just node' -> case level + levelStep of
             level' -> do
-              delete (level', node') (hash, key) >>= \case
+              delete (hash, key) (level', node') >>= \case
                 False -> return False
                 True -> case WordArray.unset index array of
                   array' -> case WordArray.size array' of
@@ -136,8 +136,8 @@ delete (level, node) (hash, key) = do
             _ -> writeTVar node (Leaves hash' array') >> return False
 
 {-# INLINE lookup #-}
-lookup :: (IsKey k) => NodeData k v -> KeyData k -> STM (Maybe v)
-lookup (level, node) (hash, key) = do
+lookup :: (IsKey k) => KeyData k -> NodeData k v -> STM (Maybe v)
+lookup (hash, key) (level, node) = do
   readTVar node >>= \case
     Empty -> return Nothing
     Nodes array ->
@@ -145,7 +145,7 @@ lookup (level, node) (hash, key) = do
         index -> case WordArray.lookup index array of
           Nothing -> return Nothing
           Just node' -> case level + levelStep of
-            level' -> lookup (level', node') (hash, key)
+            level' -> lookup (hash, key) (level', node')
     Leaf hash' (Association key' value) ->
       case hash' == hash of
         True -> case key' == key of

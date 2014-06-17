@@ -14,14 +14,14 @@ type HashTable k v = Node.Node k v
 -- A constraint for keys.
 type IsKey k = (Eq k, Hashable k)
 
-insert :: (IsKey k) => HashTable k v -> k -> v -> STM ()
-insert t k v = Node.insert (0, t) (hash k, k) v
+insert :: (IsKey k) => k -> v -> HashTable k v -> STM ()
+insert k v t = Node.insert (hash k, k) v (0, t)
 
-delete :: (IsKey k) => HashTable k v -> k -> STM ()
-delete t k = void $ Node.delete (0, t) (hash k, k)
+delete :: (IsKey k) => k -> HashTable k v -> STM ()
+delete k t = void $ Node.delete (hash k, k) (0, t)
 
-lookup :: (IsKey k) => HashTable k v -> k -> STM (Maybe v)
-lookup t k = Node.lookup (0, t) (hash k, k)
+lookup :: (IsKey k) => k -> HashTable k v -> STM (Maybe v)
+lookup k t = Node.lookup (hash k, k) (0, t)
 
 
 
