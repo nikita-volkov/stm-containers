@@ -45,6 +45,7 @@ import Unsafe.Coerce as Exports
 import GHC.Conc as Exports
 import GHC.Generics as Exports (Generic)
 import GHC.IO.Exception as Exports
+import GHC.Exts as Exports (lazy, inline)
 import Data.IORef as Exports
 import Data.STRef as Exports
 import Control.Monad.ST as Exports
