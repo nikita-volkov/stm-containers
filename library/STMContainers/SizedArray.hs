@@ -1,7 +1,8 @@
 module STMContainers.SizedArray where
 
-import STMContainers.Prelude hiding (lookup, toList)
+import STMContainers.Prelude hiding (lookup, toList, foldM)
 import Data.Primitive.Array
+import qualified STMContainers.Prelude as Prelude
 
 -- |
 -- An array, 
@@ -57,3 +58,9 @@ append = $notImplemented
 
 filter :: (a -> Bool) -> SizedArray a -> SizedArray a
 filter = $notImplemented
+
+foldM :: (Monad m) => (a -> b -> m a) -> a -> SizedArray b -> m a
+foldM step acc (SizedArray size array) =
+  Prelude.foldM step' acc [0 .. pred size]
+  where
+    step' acc' i = indexArrayM array i >>= step acc'

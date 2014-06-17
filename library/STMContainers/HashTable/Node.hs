@@ -2,7 +2,7 @@
 -- An internal node-centric API of a hash array mapped trie.
 module STMContainers.HashTable.Node where
 
-import STMContainers.Prelude hiding (insert, lookup, delete)
+import STMContainers.Prelude hiding (insert, lookup, delete, foldM)
 import Data.Primitive.Array
 import qualified STMContainers.WordArray as WordArray
 import qualified STMContainers.SizedArray as SizedArray
@@ -160,3 +160,17 @@ lookup (hash, key) (level, node) = do
           Just (_, (Association _ value)) -> return (Just value)
         False -> return Nothing
 
+{-# INLINE foldM #-}
+foldM :: (a -> Association k v -> STM a) -> a -> NodeData k v -> STM a
+foldM step acc (level, node) = 
+  readTVar node >>= \case
+    Empty -> 
+      return acc
+    Nodes array ->
+      WordArray.foldM step' acc array
+      where
+        step' acc' node' = foldM step acc' (Level.succ level, node')
+    Leaf hash' association ->
+      step acc association
+    Leaves hash' array ->
+      SizedArray.foldM step acc array
