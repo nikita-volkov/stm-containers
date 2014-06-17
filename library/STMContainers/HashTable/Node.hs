@@ -167,7 +167,7 @@ levelHashIndex l = mask . shift
     shift i = unsafeShiftR i l
 
 levelMask :: Int
-levelMask = 2 ^ levelStep - 1
+levelMask = bit levelStep - 1
 
 levelStep :: Int
 levelStep = 5
