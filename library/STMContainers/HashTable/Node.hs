@@ -6,6 +6,7 @@ import STMContainers.Prelude hiding (insert, lookup, delete)
 import Data.Primitive.Array
 import qualified STMContainers.WordArray as WordArray
 import qualified STMContainers.SizedArray as SizedArray
+import qualified STMContainers.Level as Level
 
 
 -- |
@@ -52,12 +53,12 @@ insert (h, k) v (l, n) =
     Nodes a ->
       maybe insertHere insertDeeper $ WordArray.lookup i a
       where
-        i = levelHashIndex l h
+        i = Level.hashIndex l h
         insertHere = do
           n' <- newTVar (Leaf h (Association k v))
           writeTVar n (Nodes (WordArray.set i n' a))
         insertDeeper n' = do
-          insert (h, k) v (l + levelStep, n')
+          insert (h, k) v (Level.succ l, n')
     Leaf h' (Association k' v') ->
       if h == h'
         then if k == k'
@@ -74,7 +75,7 @@ insert (h, k) v (l, n) =
         replaceWithNodes = do
           let 
             -- Note: assuming the level doesn't overflow.
-            hashIndex = levelHashIndex l
+            hashIndex = Level.hashIndex l
             i = hashIndex h
             i' = hashIndex h'
           tv <- newTVar (Leaf h (Association k v))
@@ -98,7 +99,7 @@ insert (h, k) v (l, n) =
               writeTVar n (Leaves h' (SizedArray.append (Association k v) a'))
         fork = do
           -- Note: assuming the level doesn't overflow.
-          let hashIndex = levelHashIndex l
+          let hashIndex = Level.hashIndex l
           e1 <- (,) <$> pure (hashIndex h) <*> newTVar (Leaf h (Association k v))
           e2 <- (,) <$> pure (hashIndex h') <*> newTVar (Leaves h' a')
           writeTVar n $ Nodes $ WordArray.fromList [e1, e2]
@@ -110,10 +111,10 @@ delete (hash, key) (level, node) = do
   readTVar node >>= \case
     Empty -> return True
     Nodes array ->
-      case levelHashIndex level hash of
+      case Level.hashIndex level hash of
         index -> case WordArray.lookup index array of
           Nothing -> return False
-          Just node' -> case level + levelStep of
+          Just node' -> case Level.succ level of
             level' -> do
               delete (hash, key) (level', node') >>= \case
                 False -> return False
@@ -141,10 +142,10 @@ lookup (hash, key) (level, node) = do
   readTVar node >>= \case
     Empty -> return Nothing
     Nodes array ->
-      case levelHashIndex level hash of
+      case Level.hashIndex level hash of
         index -> case WordArray.lookup index array of
           Nothing -> return Nothing
-          Just node' -> case level + levelStep of
+          Just node' -> case Level.succ level of
             level' -> lookup (hash, key) (level', node')
     Leaf hash' (Association key' value) ->
       case hash' == hash of
@@ -159,18 +160,3 @@ lookup (hash, key) (level, node) = do
           Just (_, (Association _ value)) -> return (Just value)
         False -> return Nothing
 
-
-levelHashIndex :: Level -> (Hash -> Int)
-levelHashIndex l = mask . shift
-  where
-    mask = (levelMask .&.)
-    shift i = unsafeShiftR i l
-
-levelMask :: Int
-levelMask = bit levelStep - 1
-
-levelStep :: Int
-levelStep = 5
-
-levelLimit :: Int
-levelLimit = bitSize (undefined :: Int)
