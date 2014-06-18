@@ -133,6 +133,9 @@ isSet i = Indices.elem i . indices
 size :: WordArray e -> Int
 size = Indices.size . indices
 
+null :: WordArray e -> Bool
+null = Indices.null . indices
+
 traverse_ :: Applicative f => (a -> f b) -> WordArray a -> f ()
 traverse_ f =
   inline Prelude.traverse_ f . inline elements

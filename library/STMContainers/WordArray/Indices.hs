@@ -30,6 +30,9 @@ elem = flip testBit
 size :: Indices -> Int
 size = popCount
 
+null :: Indices -> Bool
+null = (== 0)
+
 maxSize :: Int
 maxSize = bitSize (undefined :: Indices)
 
