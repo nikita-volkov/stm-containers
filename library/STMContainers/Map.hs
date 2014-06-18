@@ -6,21 +6,31 @@ import qualified STMContainers.HAMT as HAMT
 
 -- |
 -- A hash table, based on an STM-specialized hash array mapped trie.
-type Map k v = HAMT.Node k v
+type Map k v = HAMT.Node (Association k v)
 
 -- |
 -- A constraint for keys.
-type IsKey k = (Eq k, Hashable k)
+type Key k = (Eq k, Hashable k)
 
-insert :: (IsKey k) => k -> v -> Map k v -> STM ()
-insert k v t = HAMT.insert (hash k, k) v (0, t)
+-- |
+-- A key-value association.
+data Association k v = Association !k !v
 
-delete :: (IsKey k) => k -> Map k v -> STM ()
+instance (Eq k) => HAMT.Element (Association k v) where
+  type Index (Association k v) = k
+  elementIndex (Association k v) = k
+
+insert :: (Key k) => k -> v -> Map k v -> STM ()
+insert k v t = HAMT.insert (hash k, k) (Association k v) (0, t)
+
+delete :: (Key k) => k -> Map k v -> STM ()
 delete k t = void $ HAMT.delete (hash k, k) (0, t)
 
-lookup :: (IsKey k) => k -> Map k v -> STM (Maybe v)
-lookup k t = HAMT.lookup (hash k, k) (0, t)
+lookup :: (Key k) => k -> Map k v -> STM (Maybe v)
+lookup k t = (fmap . fmap) associationValue $ HAMT.lookup (hash k, k) (0, t)
 
+associationValue :: Association k v -> v
+associationValue (Association _ v) = v
 
 
 

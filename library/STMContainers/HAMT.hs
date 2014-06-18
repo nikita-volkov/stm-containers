@@ -10,76 +10,65 @@ import qualified STMContainers.HAMT.Level as Level
 
 -- |
 -- A node with its depth level.
-type NodeData k v = (Level, Node k v)
-
--- |
--- A depth level of a node.
--- Must be a multiple of the 'levelStep' value.
-type Level = Int
+type NodeData e = (Level.Level, Node e)
 
 -- |
 -- An HAMT node.
-type Node k v = TVar (NodeState k v)
+type Node e = TVar (NodeState e)
 
-data NodeState k v =
+data NodeState e =
   Empty |
-  Nodes {-# UNPACK #-} !(WordArray.WordArray (Node k v)) |
-  Leaf {-# UNPACK #-} !Hash {-# UNPACK #-} !(Association k v) |
-  Leaves {-# UNPACK #-} !Hash {-# UNPACK #-} !(SizedArray.SizedArray (Association k v))
-
--- |
--- A key-value association.
-data Association k v = Association !k !v
+  Nodes {-# UNPACK #-} !(WordArray.WordArray (Node e)) |
+  Leaf {-# UNPACK #-} !Hash !e |
+  Leaves {-# UNPACK #-} !Hash {-# UNPACK #-} !(SizedArray.SizedArray e)
 
 type Hash = Int
 
--- |
--- An extended info on the key.
-type KeyData k = (Hash, k)
+class (Eq (Index e)) => Element e where
+  type Index e
+  elementIndex :: e -> Index e
 
-type IsKey k = (Eq k, Hashable k)
+type IndexData e = (Hash, Index e)
 
 -- |
 -- Unsafe.
 -- Due to some optimizations instead of failing
 -- this function might behave unpredictably,
 -- when improper level is provided.
-{-# INLINE insert #-}
-insert :: (IsKey k) => KeyData k -> v -> NodeData k v -> STM ()
-insert (h, k) v (l, n) =
+insert :: (Element e) => IndexData e -> e -> NodeData e -> STM ()
+insert (h, i) e (l, n) =
   readTVar n >>= \case
-    Empty -> writeTVar n (Leaf h (Association k v))
+    Empty -> 
+      writeTVar n (Leaf h e)
     Nodes a ->
-      maybe insertHere insertDeeper $ WordArray.lookup i a
+      maybe insertHere insertDeeper $ WordArray.lookup ai a
       where
-        i = Level.hashIndex l h
+        ai = Level.hashIndex l h
         insertHere = do
-          n' <- newTVar (Leaf h (Association k v))
-          writeTVar n (Nodes (WordArray.set i n' a))
+          n' <- newTVar (Leaf h e)
+          writeTVar n (Nodes (WordArray.set ai n' a))
         insertDeeper n' = do
-          insert (h, k) v (Level.succ l, n')
-    Leaf h' (Association k' v') ->
+          insert (h, i) e (Level.succ l, n')
+    Leaf h' e' ->
       if h == h'
-        then if k == k'
-          then replaceWithLeaf            
+        then if elementIndex e' == i
+          then replaceWithLeaf
           else replaceWithLeaves
         else replaceWithNodes
       where
-        replaceWithLeaf = writeTVar n (Leaf h (Association k v))
-        replaceWithLeaves = do
-          writeTVar n (Leaves h' (SizedArray.fromList [a1, a2]))
-          where
-            a1 = Association k v
-            a2 = Association k' v'
+        replaceWithLeaf = 
+          writeTVar n (Leaf h e)
+        replaceWithLeaves =
+          writeTVar n (Leaves h' (SizedArray.fromList [e, e']))
         replaceWithNodes = do
           let 
             -- Note: assuming the level doesn't overflow.
             hashIndex = Level.hashIndex l
-            i = hashIndex h
-            i' = hashIndex h'
-          tv <- newTVar (Leaf h (Association k v))
-          tv' <- newTVar (Leaf h' (Association k' v'))
-          writeTVar n $ Nodes $ WordArray.fromList [(i, tv), (i', tv')]
+            ai = hashIndex h
+            ai' = hashIndex h'
+          tv <- newTVar (Leaf h e)
+          tv' <- newTVar (Leaf h' e')
+          writeTVar n $ Nodes $ WordArray.fromList [(ai, tv), (ai', tv')]
     Leaves h' a' -> 
       if h == h'
         then joinTheParty
@@ -88,79 +77,79 @@ insert (h, k) v (l, n) =
         joinTheParty =
           maybe addToOld replace $ SizedArray.map' updateAssociation a'
           where
-            updateAssociation (Association k' v') = 
-              if k' == k 
-                then Just (Association k v)
+            updateAssociation e' = 
+              if elementIndex e' == i
+                then Just e
                 else Nothing
             replace = 
               writeTVar n . Leaves h'
             addToOld =
-              writeTVar n (Leaves h' (SizedArray.append (Association k v) a'))
+              writeTVar n (Leaves h' (SizedArray.append e a'))
         fork = do
           -- Note: assuming the level doesn't overflow.
           let hashIndex = Level.hashIndex l
-          e1 <- (,) <$> pure (hashIndex h) <*> newTVar (Leaf h (Association k v))
+          e1 <- (,) <$> pure (hashIndex h) <*> newTVar (Leaf h e)
           e2 <- (,) <$> pure (hashIndex h') <*> newTVar (Leaves h' a')
           writeTVar n $ Nodes $ WordArray.fromList [e1, e2]
 
 -- | Delete and report whether the node became empty as the result.
 {-# INLINE delete #-}
-delete :: (IsKey k) => KeyData k -> NodeData k v -> STM Bool
-delete (hash, key) (level, node) = do
+delete :: (Element e) => IndexData e -> NodeData e -> STM Bool
+delete (hash, index) (level, node) = do
   readTVar node >>= \case
     Empty -> return True
     Nodes array ->
       case Level.hashIndex level hash of
-        index -> case WordArray.lookup index array of
+        nodesIndex -> case WordArray.lookup nodesIndex array of
           Nothing -> return False
           Just node' -> case Level.succ level of
             level' -> do
-              delete (hash, key) (level', node') >>= \case
+              delete (hash, index) (level', node') >>= \case
                 False -> return False
-                True -> case WordArray.unset index array of
+                True -> case WordArray.unset nodesIndex array of
                   array' -> case WordArray.size array' of
                     0 -> writeTVar node Empty >> return True
                     _ -> writeTVar node (Nodes array') >> return False
-    Leaf hash' (Association key' _) ->
+    Leaf hash' element' ->
       case hash' == hash of
         False -> return False
-        True -> case key' == key of
+        True -> case elementIndex element' == index of
           False -> return False
           True -> writeTVar node Empty >> return True
     Leaves hash' array ->
       case hash' == hash of
         False -> return False
-        True -> case SizedArray.filter (\(Association key' _) -> key' /= key) array of
+        True -> case SizedArray.filter ((/= index) . elementIndex) array of
           array' -> case SizedArray.size array' of
             0 -> writeTVar node Empty >> return True
             _ -> writeTVar node (Leaves hash' array') >> return False
 
 {-# INLINE lookup #-}
-lookup :: (IsKey k) => KeyData k -> NodeData k v -> STM (Maybe v)
-lookup (hash, key) (level, node) = do
+lookup :: (Element e) => IndexData e -> NodeData e -> STM (Maybe e)
+lookup (hash, index) (level, node) = do
   readTVar node >>= \case
     Empty -> return Nothing
     Nodes array ->
       case Level.hashIndex level hash of
-        index -> case WordArray.lookup index array of
+        nodesIndex -> case WordArray.lookup nodesIndex array of
           Nothing -> return Nothing
           Just node' -> case Level.succ level of
-            level' -> lookup (hash, key) (level', node')
-    Leaf hash' (Association key' value) ->
+            level' -> lookup (hash, index) (level', node')
+    Leaf hash' element' ->
       case hash' == hash of
-        True -> case key' == key of
-          True -> return (Just value)
+        True -> case elementIndex element' == index of
+          True -> return (Just element')
           False -> return Nothing
         False -> return Nothing
     Leaves hash' array ->
       case hash' == hash of
-        True -> case SizedArray.find (\(Association key' _) -> key' == key) array of
+        True -> case SizedArray.find ((== index) . elementIndex) array of
           Nothing -> return Nothing
-          Just (_, (Association _ value)) -> return (Just value)
+          Just (_, element) -> return (Just element)
         False -> return Nothing
 
 {-# INLINE foldM #-}
-foldM :: (a -> Association k v -> STM a) -> a -> NodeData k v -> STM a
+foldM :: (a -> e -> STM a) -> a -> NodeData e -> STM a
 foldM step acc (level, node) = 
   readTVar node >>= \case
     Empty -> 
