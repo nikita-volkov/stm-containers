@@ -8,9 +8,7 @@ import STMContainers.Prelude hiding (mask)
 -- Must be a multiple of the 'step' value.
 type Level = Int
 
-type Hash = Int
-
-hashIndex :: Level -> (Hash -> Int)
+hashIndex :: Level -> (Int -> Int)
 hashIndex l i = mask .&. unsafeShiftR i l
 
 mask :: Int
