@@ -4,8 +4,8 @@ module STMContainers.HAMT where
 
 import STMContainers.Prelude hiding (insert, lookup, delete, foldM)
 import Data.Primitive.Array
-import qualified STMContainers.HAMT.WordArray as WordArray
-import qualified STMContainers.HAMT.SizedArray as SizedArray
+import qualified STMContainers.WordArray as WordArray
+import qualified STMContainers.SizedArray as SizedArray
 import qualified STMContainers.HAMT.Level as Level
 
 

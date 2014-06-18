@@ -6,7 +6,7 @@ import STMContainers.Prelude
 import STMContainers.Transformers
 import Control.Monad.Trans.Free
 import Control.Monad.Free.TH
-import qualified STMContainers.HAMT.WordArray as WordArray
+import qualified STMContainers.WordArray as WordArray
 import qualified Data.Char as Char
 import qualified WordArrayTests.Update as Update
 

@@ -39,9 +39,9 @@ library
     library
   other-modules:
     STMContainers.Prelude
-    STMContainers.HAMT.WordArray.Indices
-    STMContainers.HAMT.WordArray
-    STMContainers.HAMT.SizedArray
+    STMContainers.WordArray.Indices
+    STMContainers.WordArray
+    STMContainers.SizedArray
     STMContainers.HAMT.Level
     STMContainers.HAMT
   exposed-modules:
