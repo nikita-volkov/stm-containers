@@ -1,9 +1,9 @@
-module STMContainers.WordArray where
+module STMContainers.HAMT.WordArray where
 
 import STMContainers.Prelude hiding (lookup, toList, traverse_)
 import Data.Primitive.Array
 import qualified STMContainers.Prelude as Prelude
-import qualified STMContainers.WordArray.Indices as Indices
+import qualified STMContainers.HAMT.WordArray.Indices as Indices
 
 
 -- |

@@ -1,9 +1,6 @@
-module STMContainers.Level where
+module STMContainers.HAMT.Level where
 
 import STMContainers.Prelude hiding (mask)
-import Data.Primitive.Array
-import qualified STMContainers.Prelude as Prelude
-import qualified STMContainers.WordArray.Indices as Indices
 
 
 -- |

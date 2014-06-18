@@ -1,4 +1,4 @@
-module STMContainers.SizedArray where
+module STMContainers.HAMT.SizedArray where
 
 import STMContainers.Prelude hiding (lookup, toList, foldM)
 import Data.Primitive.Array
