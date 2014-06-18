@@ -35,11 +35,11 @@ maxSize :: Int
 maxSize = bitSize (undefined :: Indices)
 
 toList :: Indices -> [Index]
-toList w = filter (testBit w) allIndexes
+toList w = filter (testBit w) allIndices
 
-{-# NOINLINE allIndexes #-}
-allIndexes :: [Index]
-allIndexes = [0 .. pred maxSize]
+{-# NOINLINE allIndices #-}
+allIndices :: [Index]
+allIndices = [0 .. pred maxSize]
 
 traverse_ :: Applicative f => (Index -> f b) -> Indices -> f ()
 traverse_ f = inline Prelude.traverse_ f . inline toList
