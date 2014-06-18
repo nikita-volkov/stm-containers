@@ -3,6 +3,7 @@ module STMContainers.SizedArray where
 import STMContainers.Prelude hiding (lookup, toList, foldM)
 import Data.Primitive.Array
 import qualified STMContainers.Prelude as Prelude
+import qualified STMContainers.Alter as Alter
 
 -- |
 -- An array, 
@@ -23,6 +24,11 @@ size :: SizedArray a -> Int
 size (SizedArray b _) = b
 
 -- |
+-- Get the amount of elements.
+null :: SizedArray a -> Bool
+null = (== 0) . size
+
+-- |
 -- Convert into a list representation.
 toList :: SizedArray a -> [a]
 toList w = $notImplemented
@@ -38,8 +44,8 @@ find p (SizedArray s a) = loop 0
 
 -- |
 -- Unsafe. Doesn't check the index overflow.
-set :: Int -> a -> SizedArray a -> SizedArray a
-set i e (SizedArray s a) = SizedArray s a'
+insert :: Index -> a -> SizedArray a -> SizedArray a
+insert i e (SizedArray s a) = SizedArray s a'
   where
     a' = 
       runST $ do
@@ -47,6 +53,9 @@ set i e (SizedArray s a) = SizedArray s a'
         forM_ [0 .. pred s] $ \i' -> indexArrayM a i' >>= writeArray ma' i'
         writeArray ma' i e
         unsafeFreezeArray ma'
+
+delete :: Index -> SizedArray a -> SizedArray a
+delete = $notImplemented
 
 -- |
 -- Map and also check, whether anything changed.
