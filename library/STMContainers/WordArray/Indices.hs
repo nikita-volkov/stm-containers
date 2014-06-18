@@ -2,12 +2,11 @@ module STMContainers.WordArray.Indices where
 
 import STMContainers.Prelude hiding (toList, traverse_)
 import qualified STMContainers.Prelude as Prelude
-import qualified BitArray
 
 
 -- |
 -- A compact set of indices.
-type Indices = BitArray.BitArray Int
+type Indices = Int
 
 type Index = Int
 
