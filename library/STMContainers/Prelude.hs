@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 module STMContainers.Prelude
 ( 
   module Exports,
@@ -72,3 +73,16 @@ bottom = [e| $bug "Bottom evaluated" |]
 bool :: a -> a -> Bool -> a
 bool f _ False = f
 bool _ t True  = t
+
+
+#if __GLASGOW_HASKELL__ < 708
+
+instance Traversable ((,) a) where
+  traverse f (x, y) = (,) x <$> f y
+
+instance Foldable ((,) a) where
+  foldMap f (_, y) = f y
+  foldr f z (_, y) = f y z
+
+#endif
+
