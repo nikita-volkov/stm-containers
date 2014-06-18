@@ -4,6 +4,7 @@ import STMContainers.Prelude hiding (lookup, toList, traverse_)
 import Data.Primitive.Array
 import qualified STMContainers.Prelude as Prelude
 import qualified STMContainers.WordArray.Indices as Indices
+import qualified STMContainers.Alter as Alter
 
 
 -- |
@@ -82,6 +83,14 @@ lookup i (WordArray b a) =
     then Just (indexArray a (Indices.position i b))
     else Nothing
 
+-- |
+-- Lookup strictly, using 'indexArrayM'.
+lookupM :: Monad m => Index -> WordArray e -> m (Maybe e)
+lookupM i (WordArray b a) =
+  if Indices.elem i b
+    then liftM Just (indexArrayM a (Indices.position i b))
+    else return Nothing
+
 indices :: WordArray e -> Indices
 indices (WordArray b _) = b
 
@@ -115,3 +124,15 @@ traverse_ f =
 foldM :: Monad m => (a -> b -> m a) -> a -> WordArray b -> m a
 foldM step acc =
   inline Prelude.foldM step acc . inline elements
+
+alterM :: Monad m => Alter.AlterM m a r -> Index -> WordArray a -> m (r, WordArray a)
+alterM f i w = do
+  em <- inline lookupM i w
+  (r, c) <- f em
+  let w' = case c of
+        Alter.Keep -> w
+        Alter.Remove -> case em of
+          Nothing -> w
+          Just _ -> inline unset i w
+        Alter.Replace e' -> inline set i e' w
+  return (r, w')

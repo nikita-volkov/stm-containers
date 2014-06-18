@@ -39,6 +39,7 @@ library
     library
   other-modules:
     STMContainers.Prelude
+    STMContainers.Alter
     STMContainers.WordArray.Indices
     STMContainers.WordArray
     STMContainers.SizedArray
