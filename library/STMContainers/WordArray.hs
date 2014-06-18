@@ -21,6 +21,9 @@ type Indices = Indices.Indices
 -- An index of an element.
 type Index = Int
 
+indices :: WordArray e -> Indices
+indices (WordArray b _) = b
+
 -- |
 -- An array with a single element at the specified index.
 singleton :: Index -> e -> WordArray e
@@ -29,8 +32,37 @@ singleton i e =
       a = runST $ newArray 1 e >>= unsafeFreezeArray
       in WordArray b a
 
-fromList :: [(Int, e)] -> WordArray e
+fromList :: [(Index, e)] -> WordArray e
 fromList = $notImplemented
+
+fromSizedListM :: Monad m => (Int, [m (Index, a)]) -> m (WordArray a)
+fromSizedListM (size, list) = do
+  let indices = unsafePerformIO $ newIORef 0
+      array = unsafePerformIO $ newArray size undefined
+  forM_ (zip list [0..]) $ \(rowM, i) -> do
+    (rowIndex, rowValue) <- rowM
+    return $ unsafePerformIO $ do
+      modifyIORef indices $ Indices.insert rowIndex
+      writeArray array i rowValue
+  let indicesValue = unsafePerformIO $ readIORef indices
+      arrayValue = unsafePerformIO $ unsafeFreezeArray array
+  return (WordArray indicesValue arrayValue)
+  
+toList :: WordArray e -> [(Index, e)]
+toList = $notImplemented
+
+-- |
+-- Convert into a list representation.
+toMaybeList :: WordArray e -> [Maybe e]
+toMaybeList w = do
+  i <- [0 .. pred Indices.maxSize] 
+  return $ lookup i w
+
+elements :: WordArray e -> [e]
+elements (WordArray indices array) =
+  map (\i -> indexArray array (Indices.position i indices)) .
+  inline Indices.toList $
+  indices
 
 -- |
 -- Set an element value at the index.
@@ -91,9 +123,6 @@ lookupM i (WordArray b a) =
     then liftM Just (indexArrayM a (Indices.position i b))
     else return Nothing
 
-indices :: WordArray e -> Indices
-indices (WordArray b _) = b
-
 -- |
 -- Check, whether there is an element at the index.
 isSet :: Index -> WordArray e -> Bool
@@ -103,19 +132,6 @@ isSet i = Indices.elem i . indices
 -- Get the amount of elements.
 size :: WordArray e -> Int
 size = Indices.size . indices
-
--- |
--- Convert into a list representation.
-toList :: WordArray e -> [Maybe e]
-toList w = do
-  i <- [0 .. pred Indices.maxSize] 
-  return $ lookup i w
-
-elements :: WordArray e -> [e]
-elements (WordArray indices array) =
-  map (\i -> indexArray array (Indices.position i indices)) .
-  inline Indices.toList $
-  indices
 
 traverse_ :: Applicative f => (a -> f b) -> WordArray a -> f ()
 traverse_ f =

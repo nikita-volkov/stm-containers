@@ -15,5 +15,5 @@ main = htfMain $ htf_thisModulesTests
 
 prop_differentInterpretersProduceSameResults (update :: Update.Update Char ()) =
   Update.interpretMaybeList update ==
-  fmap WordArray.toList (Update.interpretWordArray update)
+  fmap WordArray.toMaybeList (Update.interpretWordArray update)
 
