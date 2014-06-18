@@ -16,3 +16,4 @@ data Command a =
   Keep |
   Remove |
   Replace a
+  deriving (Functor)
