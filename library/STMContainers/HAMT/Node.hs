@@ -63,7 +63,7 @@ visit f h i l = \case
           fmap commandToNode <$> f Nothing
           where
             commandToNode = \case
-              Visit.Replace e' -> Leaves h (SizedArray.fromList [e, e'])
+              Visit.Replace e' -> Leaves h (SizedArray.pair e e')
               _ -> Leaf h' e
       False ->
         mapM commandToNodeM =<< f Nothing

@@ -15,8 +15,12 @@ data SizedArray a =
 -- An index of an element.
 type Index = Int
 
-fromList :: [a] -> SizedArray a
-fromList = $notImplemented
+pair :: a -> a -> SizedArray a
+pair e e' =
+  runST $ do
+    a <- newArray 2 e
+    writeArray a 1 e'
+    SizedArray 2 <$> unsafeFreezeArray a
 
 -- |
 -- Get the amount of elements.
