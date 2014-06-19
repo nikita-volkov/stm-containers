@@ -43,8 +43,9 @@ library
     STMContainers.WordArray.Indices
     STMContainers.WordArray
     STMContainers.SizedArray
-    STMContainers.HAMT.Level
-    STMContainers.HAMT.Nodes
+    STMContainers.HAMT.Node.Level
+    STMContainers.HAMT.Node.Nodes
+    STMContainers.HAMT.Node
     STMContainers.HAMT
   exposed-modules:
     STMContainers.Map

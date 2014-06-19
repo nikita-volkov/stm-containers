@@ -1,4 +1,4 @@
-module STMContainers.HAMT.Nodes where
+module STMContainers.HAMT.Node.Nodes where
 
 import STMContainers.Prelude
 import qualified STMContainers.WordArray as WordArray
