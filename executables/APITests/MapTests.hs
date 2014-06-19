@@ -37,11 +37,9 @@ stmMapToHashMap = STMMap.foldM f HashMap.empty
 -------------------------
 
 prop_updatesProduceTheSameEffectAsInHashMap (updates :: [Update.Update Word8 Char]) =
-  trace ("---\n" ++ show b ++ "\n" ++ show a) $
-  a == b
+  interpretHashMapUpdate update ===
+  (unsafePerformIO . atomically . (stmMapToHashMap <=< interpretSTMMapUpdate)) update
   where
     update = sequence_ updates
-    a = interpretHashMapUpdate update
-    b = (unsafePerformIO . atomically . (stmMapToHashMap <=< interpretSTMMapUpdate)) update
 
 
