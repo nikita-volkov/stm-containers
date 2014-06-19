@@ -7,7 +7,7 @@ import STMContainers.Transformers
 import Control.Monad.Free
 import qualified APITests.MapTests.Update as Update
 import qualified STMContainers.Map as STMMap
-import qualified STMContainers.Alter as Alter
+import qualified STMContainers.Visit as Visit
 import qualified Data.HashMap.Strict as HashMap
 
 
@@ -17,7 +17,7 @@ interpretSTMMapUpdate update = do
   flip iterM update $ \case
     Update.Insert k v c -> STMMap.insert k v m >> c
     Update.Delete k c   -> STMMap.delete k m >> c
-    Update.Update f k c -> STMMap.alter ((Alter.monadize . Alter.update) f) k m >> c
+    Update.Update f k c -> STMMap.alter ((Visit.monadize . Visit.update) f) k m >> c
   return m
 
 interpretHashMapUpdate :: (Hashable k, Eq k) => Update.Update k v -> HashMap.HashMap k v

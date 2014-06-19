@@ -16,7 +16,7 @@ where
 import STMContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty)
 import qualified STMContainers.HAMT as HAMT
 import qualified STMContainers.HAMT.Node as HAMTNode
-import qualified STMContainers.Alter as Alter
+import qualified STMContainers.Visit as Visit
 
 
 -- |
@@ -50,7 +50,7 @@ insert k v = inline HAMT.insert (Association k v)
 delete :: (Indexable k) => k -> Map k v -> STM ()
 delete = inline HAMT.delete
 
-alter :: (Indexable k) => (Alter.AlterM STM v r) -> k -> Map k v -> STM r
+alter :: (Indexable k) => (Visit.VisitM STM v r) -> k -> Map k v -> STM r
 alter f k = inline HAMT.alter f' k
   where
     f' = (fmap . fmap . fmap) (Association k) . f . fmap associationValue

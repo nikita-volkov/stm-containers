@@ -14,7 +14,7 @@ where
 import STMContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty)
 import qualified STMContainers.HAMT as HAMT
 import qualified STMContainers.HAMT.Node as HAMTNode
-import qualified STMContainers.Alter as Alter
+import qualified STMContainers.Visit as Visit
 
 
 -- |
