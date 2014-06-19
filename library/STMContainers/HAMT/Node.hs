@@ -35,7 +35,7 @@ visit f h i l = \case
         Visit.Replace e -> Leaf h e
         _ -> Empty
   Nodes nodes ->
-    fmap nodesToNode <$> inline Nodes.visitM f' (Level.hashIndex l h) nodes
+    fmap nodesToNode <$> inline Nodes.visit f' (Level.hashIndex l h) nodes
     where
       f' = \case
         Just n -> 

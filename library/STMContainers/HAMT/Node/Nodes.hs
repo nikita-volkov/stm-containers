@@ -11,8 +11,8 @@ type Index = WordArray.Index
 
 type Visit n r = Visit.VisitM STM n r
 
-visitM :: Visit n r -> Index -> Nodes n -> STM (r, Nodes n)
-visitM a i = 
+visit :: Visit n r -> Index -> Nodes n -> STM (r, Nodes n)
+visit a i = 
   inline WordArray.visitM a' i
   where
     a' = \case
