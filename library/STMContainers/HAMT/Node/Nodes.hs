@@ -13,7 +13,7 @@ type Alter n r = Alter.AlterM STM n r
 
 alterM :: Alter n r -> Index -> Nodes n -> STM (r, Nodes n)
 alterM a i = 
-  WordArray.alterM a' i
+  inline WordArray.alterM a' i
   where
     a' = \case
       Just v -> do
@@ -28,11 +28,14 @@ alterM a i =
           Alter.Replace n' -> newTVar n' >>= \v -> return (r, Alter.Replace v)
           _ -> return (r, Alter.Keep)
 
+foldM :: (a -> n -> STM a) -> a -> Nodes n -> STM a
+foldM f = inline WordArray.foldM (\acc v -> readTVar v >>= f acc)
+
 null :: Nodes n -> Bool
-null = WordArray.null
+null = inline WordArray.null
 
 fromSizedList :: (Int, [(Index, n)]) -> STM (Nodes n)
 fromSizedList (size, list) = 
-  WordArray.fromSizedListM (size, list')
+  inline WordArray.fromSizedListM (size, list')
   where
     list' = map (\(i, n) -> fmap (i,) (newTVar n)) list

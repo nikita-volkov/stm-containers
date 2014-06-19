@@ -3,7 +3,6 @@
 module STMContainers.HAMT.Node where
 
 import STMContainers.Prelude hiding (insert, lookup, delete, foldM)
-import qualified STMContainers.WordArray as WordArray
 import qualified STMContainers.SizedArray as SizedArray
 import qualified STMContainers.Alter as Alter
 import qualified STMContainers.HAMT.Node.Level as Level
@@ -123,10 +122,10 @@ foldM step acc level = \case
   Empty -> 
     return acc
   Nodes array ->
-    WordArray.foldM step' acc array
+    inline Nodes.foldM step' acc array
     where
-      step' acc' var' = readTVar var' >>= foldM step acc' (Level.succ level)
+      step' acc' = foldM step acc' (Level.succ level)
   Leaf hash' element ->
     step acc element
   Leaves hash' array ->
-    SizedArray.foldM step acc array
+    inline SizedArray.foldM step acc array
