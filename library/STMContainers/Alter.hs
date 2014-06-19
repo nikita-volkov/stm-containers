@@ -21,19 +21,31 @@ data Command a =
 
 -- |
 -- Convert a pure 'Alter' into a monadic one.
+{-# INLINE monadize #-}
 monadize :: (Monad m) => Alter a r -> AlterM m a r
 monadize = fmap return
 
 
--- * Lifters for standard altering patterns
+-- * Constructors for standard alteration patterns
 -------------------------
 
-liftUpdate :: (a -> a) -> Alter a ()
-liftUpdate f = \case
-  Nothing -> ((), Keep)
-  Just a -> ((), Replace (f a))
+update :: (a -> a) -> Alter a ()
+update f = maybe ((), Keep) (\a -> ((), Replace (f a)))
 
-liftUpdateM :: (Monad m) => (a -> m a) -> AlterM m a ()
-liftUpdateM f = \case
+insert :: a -> Alter a ()
+insert a = const ((), Replace a)
+
+delete :: Alter a ()
+delete = const ((), Remove)
+
+lookup :: Alter a (Maybe a)
+lookup r = (r, Keep)
+
+
+-- * Constructors for monadic alteration patterns
+-------------------------
+
+updateM :: (Monad m) => (a -> m a) -> AlterM m a ()
+updateM f = \case
   Nothing -> return ((), Keep)
   Just a -> f a >>= return . ((), ) . Replace

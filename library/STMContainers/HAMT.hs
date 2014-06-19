@@ -21,13 +21,13 @@ alter f i v = do
     exportCommand (r, c) = ((r, c), c)
 
 insert :: (Element e) => e -> HAMT e -> STM ()
-insert e = inline alter (const $ return ((), Alter.Replace e)) (Node.elementIndex e)
+insert e = inline alter ((Alter.monadize . Alter.insert) e) (Node.elementIndex e)
 
 delete :: (Element e) => Node.ElementIndex e -> HAMT e -> STM ()
-delete = inline alter (const $ return ((), Alter.Remove))
+delete = inline alter (Alter.monadize Alter.delete)
 
 lookup :: (Element e) => Node.ElementIndex e -> HAMT e -> STM (Maybe e)
-lookup = inline alter (\r -> return (r, Alter.Keep))
+lookup = inline alter (Alter.monadize Alter.lookup)
 
 foldM :: (a -> e -> STM a) -> a -> HAMT e -> STM a
 foldM step acc = readTVar >=> inline Node.foldM step acc 0
