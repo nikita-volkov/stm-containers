@@ -70,7 +70,7 @@ alter f h i l = \case
         where
           commandToNodeM = \case
             Visit.Replace e' -> 
-              Nodes <$> Nodes.fromSizedList (2, [(ni, n), (ni', n')])
+              Nodes <$> Nodes.pair ni n ni' n'
               where
                 -- Note: assuming the level doesn't overflow.
                 hashIndex = Level.hashIndex l
@@ -86,7 +86,7 @@ alter f h i l = \case
         where
           commandToNodeM = \case
             Visit.Replace e' -> 
-              Nodes <$> Nodes.fromSizedList (2, [(ni, n), (ni', n')])
+              Nodes <$> Nodes.pair ni n ni' n'
               where
                 -- Note: assuming the level doesn't overflow.
                 hashIndex = Level.hashIndex l

@@ -34,8 +34,6 @@ foldM f = inline WordArray.foldM (\acc v -> readTVar v >>= f acc)
 null :: Nodes n -> Bool
 null = inline WordArray.null
 
-fromSizedList :: (Int, [(Index, n)]) -> STM (Nodes n)
-fromSizedList (size, list) = 
-  inline WordArray.fromSizedListM (size, list')
-  where
-    list' = map (\(i, n) -> fmap (i,) (newTVar n)) list
+pair :: Index -> n -> Index -> n -> STM (Nodes n)
+pair i n i' n' =
+  WordArray.pair <$> pure i <*> newTVar n <*> pure i' <*> newTVar n'

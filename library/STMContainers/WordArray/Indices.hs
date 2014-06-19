@@ -36,6 +36,9 @@ null = (== 0)
 maxSize :: Int
 maxSize = bitSize (undefined :: Indices)
 
+fromList :: [Index] -> Indices
+fromList = foldr (.|.) 0 . map bit
+
 toList :: Indices -> [Index]
 toList w = filter (testBit w) allIndices
 

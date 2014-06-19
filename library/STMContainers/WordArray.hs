@@ -24,6 +24,9 @@ type Index = Int
 indices :: WordArray e -> Indices
 indices (WordArray b _) = b
 
+maxSize :: Int
+maxSize = Indices.maxSize
+
 -- |
 -- An array with a single element at the specified index.
 singleton :: Index -> e -> WordArray e
@@ -32,24 +35,43 @@ singleton i e =
       a = runST $ newArray 1 e >>= unsafeFreezeArray
       in WordArray b a
 
-fromList :: [(Index, e)] -> WordArray e
-fromList = $notImplemented
+pair :: Index -> e -> Index -> e -> WordArray e
+pair i e i' e' =
+  WordArray is a
+  where 
+    is = Indices.fromList [i, i']
+    a = 
+      runST $ if 
+        | i < i' -> do
+          a <- newArray 2 e
+          writeArray a 1 e'
+          unsafeFreezeArray a
+        | i > i' -> do
+          a <- newArray 2 e
+          writeArray a 0 e'
+          unsafeFreezeArray a
+        | i == i' -> do
+          a <- newArray 1 e'
+          unsafeFreezeArray a
 
-fromSizedListM :: Monad m => (Int, [m (Index, a)]) -> m (WordArray a)
-fromSizedListM (size, list) = do
-  let indices = unsafePerformIO $ newIORef 0
-      array = unsafePerformIO $ newArray size undefined
-  forM_ (zip list [0..]) $ \(rowM, i) -> do
-    (rowIndex, rowValue) <- rowM
-    return $ unsafePerformIO $ do
-      modifyIORef indices $ Indices.insert rowIndex
-      writeArray array i rowValue
-  let indicesValue = unsafePerformIO $ readIORef indices
-      arrayValue = unsafePerformIO $ unsafeFreezeArray array
-  return (WordArray indicesValue arrayValue)
+-- |
+-- Unsafe.
+-- Assumes that the list is sorted and contains no duplicate indexes.
+fromList :: [(Index, e)] -> WordArray e
+fromList l = 
+  runST $ do
+    indices <- newSTRef 0
+    array <- newArray (length l) undefined
+    forM_ (zip l [0..]) $ \((i, e), ai) -> do
+      modifySTRef indices $ Indices.insert i
+      writeArray array ai e
+    WordArray <$> readSTRef indices <*> unsafeFreezeArray array
   
 toList :: WordArray e -> [(Index, e)]
-toList = $notImplemented
+toList (WordArray is a) = do
+  i <- Indices.toList is
+  e <- indexArrayM a (Indices.position i is)
+  return (i, e)
 
 -- |
 -- Convert into a list representation.
