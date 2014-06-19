@@ -6,7 +6,7 @@ module STMContainers.Map
   new,
   insert,
   delete,
-  alter,
+  visit,
   lookup,
   foldM,
   toList,
@@ -50,8 +50,8 @@ insert k v = inline HAMT.insert (Association k v)
 delete :: (Indexable k) => k -> Map k v -> STM ()
 delete = inline HAMT.delete
 
-alter :: (Indexable k) => (Visit.VisitM STM v r) -> k -> Map k v -> STM r
-alter f k = inline HAMT.alter f' k
+visit :: (Indexable k) => (Visit.VisitM STM v r) -> k -> Map k v -> STM r
+visit f k = inline HAMT.visit f' k
   where
     f' = (fmap . fmap . fmap) (Association k) . f . fmap associationValue
 

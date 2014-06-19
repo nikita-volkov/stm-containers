@@ -26,8 +26,8 @@ class (Eq (ElementIndex e)) => Element e where
 -- Due to some optimizations instead of failing
 -- this function might behave unpredictably,
 -- when improper level is provided.
-alter :: (Element e) => Visit.VisitM STM e r -> Hash -> ElementIndex e -> Level.Level -> Node e -> STM (r, Node e)
-alter f h i l = \case
+visit :: (Element e) => Visit.VisitM STM e r -> Hash -> ElementIndex e -> Level.Level -> Node e -> STM (r, Node e)
+visit f h i l = \case
   Empty -> 
     fmap commandToNode <$> f Nothing
     where
@@ -39,7 +39,7 @@ alter f h i l = \case
     where
       f' = \case
         Just n -> 
-          fmap nodeToCommand <$> alter f h i (Level.succ l) n
+          fmap nodeToCommand <$> visit f h i (Level.succ l) n
           where
             nodeToCommand = \case
               Empty -> Visit.Remove

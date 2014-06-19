@@ -17,7 +17,7 @@ interpretSTMMapUpdate update = do
   flip iterM update $ \case
     Update.Insert k v c -> STMMap.insert k v m >> c
     Update.Delete k c   -> STMMap.delete k m >> c
-    Update.Adjust f k c -> STMMap.alter ((Visit.monadize . Visit.adjust) f) k m >> c
+    Update.Adjust f k c -> STMMap.visit ((Visit.monadize . Visit.adjust) f) k m >> c
   return m
 
 interpretHashMapUpdate :: (Hashable k, Eq k) => Update.Update k v -> HashMap.HashMap k v
