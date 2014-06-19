@@ -2,14 +2,16 @@ module STMContainers.Set
 (
   Set,
   Indexable,
-  lookup,
+  new,
   insert,
   delete,
+  lookup,
   foldM,
+  toList,
 )
 where
 
-import STMContainers.Prelude hiding (insert, delete, lookup, alter, foldM)
+import STMContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty)
 import qualified STMContainers.HAMT as HAMT
 import qualified STMContainers.HAMT.Node as HAMTNode
 import qualified STMContainers.Alter as Alter
@@ -44,5 +46,8 @@ lookup k = (fmap . fmap) elementValue . inline HAMT.lookup k
 foldM :: (a -> e -> STM a) -> a -> Set e -> STM a
 foldM f = inline HAMT.foldM (\a -> f a . elementValue)
 
+toList :: Set e -> STM [e]
+toList = foldM ((return .) . flip (:)) []
 
-
+new :: STM (Set e)
+new = inline HAMT.new

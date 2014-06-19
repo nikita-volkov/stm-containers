@@ -31,3 +31,6 @@ lookup = inline alter (\r -> return (r, Alter.Keep))
 
 foldM :: (a -> e -> STM a) -> a -> HAMT e -> STM a
 foldM step acc = readTVar >=> inline Node.foldM step acc 0
+
+new :: STM (HAMT e)
+new = newTVar Node.Empty

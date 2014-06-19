@@ -5,15 +5,17 @@ module STMContainers.Map
   Association(..),
   Alter,
   Alter.Command,
-  lookup,
+  new,
   insert,
   delete,
   alter,
+  lookup,
   foldM,
+  toList,
 )
 where
 
-import STMContainers.Prelude hiding (insert, delete, lookup, alter, foldM)
+import STMContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty)
 import qualified STMContainers.HAMT as HAMT
 import qualified STMContainers.HAMT.Node as HAMTNode
 import qualified STMContainers.Alter as Alter
@@ -60,3 +62,8 @@ alter = inline HAMT.alter
 foldM :: (a -> Association k v -> STM a) -> a -> Map k v -> STM a
 foldM = inline HAMT.foldM
 
+toList :: Map k v -> STM [Association k v]
+toList = foldM ((return .) . flip (:)) []
+
+new :: STM (Map k v)
+new = inline HAMT.new
