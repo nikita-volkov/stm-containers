@@ -25,7 +25,12 @@ interpretHashMapUpdate update =
   flip execState HashMap.empty $ flip iterM update $ \case
     Update.Insert k v c -> modify (HashMap.insert k v) >> c
     Update.Delete k c   -> modify (HashMap.delete k) >> c
-    Update.Adjust f k c -> modify (HashMap.insert k (f undefined)) >> c
+    Update.Adjust f k c -> modify (adjust f k) >> c
+  where
+    adjust f k m = 
+      case HashMap.lookup k m of
+        Nothing -> m
+        Just a -> HashMap.insert k (f a) m
 
 stmMapToHashMap :: (Hashable k, Eq k) => STMMap.Map k v -> STM (HashMap.HashMap k v)
 stmMapToHashMap = STMMap.foldM f HashMap.empty
@@ -68,6 +73,16 @@ test_insert = do
       STMMap.insert 'c' 3 m
       STMMap.insert 'b' 2 m
       stmMapToHashMap m
+
+test_insert2 = do
+  assertEqual (HashMap.fromList [(111 :: Int, ()), (207, ())]) =<< do 
+    atomically $ do
+      m <- STMMap.new
+      STMMap.insert 111 () m
+      STMMap.insert 207 () m
+      stmMapToHashMap m
+
+test_insertSameItem = unitTestPending ""
 
 test_adjust = do
   assertEqual (HashMap.fromList [('a', 1), ('b', 3)]) =<< do 

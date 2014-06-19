@@ -49,73 +49,69 @@ visit f h i l = \case
       nodesToNode nodes' = case Nodes.null nodes' of 
         True -> Empty
         False -> Nodes nodes'
-  Leaf h' e ->
+  Leaf h' e' ->
     case h == h' of
-      True -> case elementIndex e == i of
+      True -> case elementIndex e' == i of
         True -> 
-          fmap commandToNode <$> f (Just e)
+          fmap commandToNode <$> f (Just e')
           where
             commandToNode = \case
-              Visit.Keep -> Leaf h e
+              Visit.Keep -> Leaf h' e'
               Visit.Remove -> Empty
-              Visit.Replace e' -> Leaf h e'
+              Visit.Replace e -> Leaf h e
         False ->
           fmap commandToNode <$> f Nothing
           where
             commandToNode = \case
-              Visit.Replace e' -> Leaves h (SizedArray.pair e e')
-              _ -> Leaf h' e
+              Visit.Replace e -> Leaves h (SizedArray.pair e e')
+              _ -> Leaf h' e'
       False ->
         mapM commandToNodeM =<< f Nothing
         where
           commandToNodeM = \case
-            Visit.Replace e' -> 
-              Nodes <$> Nodes.pair ni n ni' n'
-              where
-                -- Note: assuming the level doesn't overflow.
-                hashIndex = Level.hashIndex l
-                ni = hashIndex h
-                ni' = hashIndex h'
-                n = Leaf h e
-                n' = Leaf h' e'
-            _ -> return (Leaf h' e)
-  Leaves h' a ->
+            Visit.Replace e -> pair h (Leaf h e) h' (Leaf h' e') l
+            _ -> return (Leaf h' e')
+  Leaves h' a' ->
     case h == h' of
-      False ->
-        mapM commandToNodeM =<< f Nothing
-        where
-          commandToNodeM = \case
-            Visit.Replace e' -> 
-              Nodes <$> Nodes.pair ni n ni' n'
-              where
-                -- Note: assuming the level doesn't overflow.
-                hashIndex = Level.hashIndex l
-                ni = hashIndex h
-                ni' = hashIndex h'
-                n = Leaf h e'
-                n' = Leaves h' a
-            _ -> return (Leaves h' a)
       True -> 
-        case SizedArray.find ((== i) . elementIndex) a of
-          Just (ai, e) -> fmap commandToNode <$> f (Just e)
+        case SizedArray.find ((== i) . elementIndex) a' of
+          Just (ai', e') -> fmap commandToNode <$> f (Just e')
             where
               commandToNode = \case
                 Visit.Keep -> 
-                  Leaves h' a
+                  Leaves h' a'
                 Visit.Remove ->
-                  case SizedArray.delete ai a of
-                    a' -> case SizedArray.null a' of
+                  case SizedArray.delete ai' a' of
+                    a'' -> case SizedArray.null a'' of
                       True -> Empty
-                      False -> Leaves h' a'
-                Visit.Replace e' -> 
-                  Leaves h' (SizedArray.insert ai e' a)
+                      False -> Leaves h' a''
+                Visit.Replace e -> 
+                  Leaves h' (SizedArray.insert ai' e a')
           Nothing -> fmap commandToNode <$> f Nothing
             where
               commandToNode = \case
-                Visit.Replace e' ->
-                  Leaves h' (SizedArray.append e' a)
+                Visit.Replace e ->
+                  Leaves h' (SizedArray.append e a')
                 _ ->
-                  Leaves h' a
+                  Leaves h' a'
+      False ->
+        mapM commandToNodeM =<< f Nothing
+        where
+          commandToNodeM = \case
+            Visit.Replace e -> pair h (Leaf h e) h' (Leaves h' a') l
+            _ -> return (Leaves h' a')
+
+-- |
+-- Assumes that the hashes aren't equal.
+pair :: Hash -> Node e -> Hash -> Node e -> Level.Level -> STM (Node e)
+pair h1 n1 h2 n2 l =
+  case i1 == i2 of
+    True -> return . Nodes =<< Nodes.singleton i1 =<< pair h1 n1 h2 n2 (Level.succ l)
+    False -> Nodes <$> Nodes.pair i1 n1 i2 n2
+  where
+    hashIndex = Level.hashIndex l
+    i1 = hashIndex h1
+    i2 = hashIndex h2
 
 foldM :: (a -> e -> STM a) -> a -> Level.Level -> Node e -> STM a
 foldM step acc level = \case
@@ -125,7 +121,7 @@ foldM step acc level = \case
     inline Nodes.foldM step' acc array
     where
       step' acc' = foldM step acc' (Level.succ level)
-  Leaf hash' element ->
+  Leaf _ element ->
     step acc element
-  Leaves hash' array ->
+  Leaves _ array ->
     inline SizedArray.foldM step acc array
