@@ -3,8 +3,6 @@ module STMContainers.Map
   Map,
   Indexable,
   Association(..),
-  Alter,
-  Alter.Command,
   new,
   insert,
   delete,
@@ -33,10 +31,6 @@ type Indexable a = (Eq a, Hashable a)
 -- A key-value association.
 data Association k v = Association !k !v
 
--- |
--- A modification function for 'alter'.
-type Alter a r = Maybe a -> STM (r, Alter.Command a)
-
 instance (Eq k) => HAMTNode.Element (Association k v) where
   type ElementIndex (Association k v) = k
   elementIndex (Association k v) = k
@@ -56,8 +50,10 @@ insert k v = inline HAMT.insert (Association k v)
 delete :: (Indexable k) => k -> Map k v -> STM ()
 delete = inline HAMT.delete
 
-alter :: (Indexable k) => (Alter (Association k v) r) -> k -> Map k v -> STM r
-alter = inline HAMT.alter
+alter :: (Indexable k) => (Alter.AlterM STM v r) -> k -> Map k v -> STM r
+alter f k = inline HAMT.alter f' k
+  where
+    f' = (fmap . fmap . fmap) (Association k) . f . fmap associationValue
 
 foldM :: (a -> Association k v -> STM a) -> a -> Map k v -> STM a
 foldM = inline HAMT.foldM

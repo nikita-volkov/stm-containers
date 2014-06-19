@@ -39,7 +39,6 @@ library
     library
   other-modules:
     STMContainers.Prelude
-    STMContainers.Alter
     STMContainers.WordArray.Indices
     STMContainers.WordArray
     STMContainers.SizedArray
@@ -50,6 +49,7 @@ library
   exposed-modules:
     STMContainers.Map
     STMContainers.Set
+    STMContainers.Alter
   build-depends:
     -- debugging:
     loch-th == 0.2.*,
