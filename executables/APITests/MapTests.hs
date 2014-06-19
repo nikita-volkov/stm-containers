@@ -32,9 +32,27 @@ stmMapToHashMap = STMMap.foldM f HashMap.empty
   where
     f m (STMMap.Association k v) = return (HashMap.insert k v m)
 
+stmMapFromList :: (Hashable k, Eq k) => [(k, v)] -> STM (STMMap.Map k v)
+stmMapFromList list = do
+  m <- STMMap.new
+  forM_ list $ \(k, v) -> STMMap.insert k v m
+  return m
+
 
 -- * Tests
 -------------------------
+
+prop_fromListToListIsomorphism =
+  forAll gen prop
+  where
+    gen = do
+      keys <- nub <$> listOf (arbitrary :: Gen Char)
+      mapM (liftA2 (flip (,)) (arbitrary :: Gen Int) . pure) keys
+    prop list =
+      list \\ list' === []
+      where
+        list' = unsafePerformIO $ atomically $ 
+          stmMapFromList list >>= STMMap.toList >>= return . map (\(STMMap.Association k v) -> (k, v))
 
 prop_updatesProduceTheSameEffectAsInHashMap (updates :: [Update.Update Word8 Char]) =
   interpretHashMapUpdate update ===
@@ -42,4 +60,25 @@ prop_updatesProduceTheSameEffectAsInHashMap (updates :: [Update.Update Word8 Cha
   where
     update = sequence_ updates
 
+test_insert = do
+  assertEqual (HashMap.fromList [('a', 1), ('b', 2), ('c', 3)]) =<< do 
+    atomically $ do
+      m <- STMMap.new
+      STMMap.insert 'a' 1 m
+      STMMap.insert 'c' 3 m
+      STMMap.insert 'b' 2 m
+      stmMapToHashMap m
+
+test_adjust = do
+  assertEqual (HashMap.fromList [('a', 1), ('b', 3)]) =<< do 
+    atomically $ do
+      m <- stmMapFromList [('a', 1), ('b', 2)]
+      STMMap.visit (Visit.adjustM (const $ return 3)) 'b' m
+      stmMapToHashMap m
+
+test_visitReachesTheTarget = do
+  assertEqual (Just 2) =<< do 
+    atomically $ do
+      m <- stmMapFromList [('a', 1), ('b', 2)]
+      STMMap.visit (Visit.monadize Visit.lookup) 'b' m
 
