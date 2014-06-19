@@ -5,9 +5,8 @@ import STMContainers.Prelude
 
 -- |
 -- A general modification function for some match.
--- 
 -- By processing a 'Maybe' value it produces some value to emit and 
--- a 'Command' to perform to the match.
+-- a 'Command' to perform on the match.
 -- 
 -- The interpretation of this function is up to the context APIs.
 type Visit a r = Maybe a -> (r, Command a)
