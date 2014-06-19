@@ -11,7 +11,7 @@ type Alter a r = Maybe a -> (r, Command a)
 type AlterM m a r = Maybe a -> m (r, Command a)
 
 -- |
--- What to do to.
+-- An alteration command.
 data Command a =
   Keep |
   Remove |
