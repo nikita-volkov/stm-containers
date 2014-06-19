@@ -49,6 +49,7 @@ library
     STMContainers.HAMT
   exposed-modules:
     STMContainers.Map
+    STMContainers.Set
   build-depends:
     -- debugging:
     loch-th == 0.2.*,
