@@ -10,7 +10,7 @@ import Control.Monad.Free.TH
 data UpdateF k v c =
   Insert k v c |
   Delete k c |
-  Update (v -> v) k c
+  Adjust (v -> v) k c
   deriving (Functor)
 
 instance (Show k, Show v, Show c) => Show (UpdateF k v c) where
@@ -28,8 +28,8 @@ instance (Show k, Show v, Show c) => Show (UpdateF k v c) where
         showsPrecInner k .
         showChar ' ' .
         showsPrecInner c
-      Update f k c ->
-        showString "Update " .
+      Adjust f k c ->
+        showString "Adjust " .
         showString "<v -> v> " .
         showsPrecInner k .
         showChar ' ' .
@@ -45,8 +45,8 @@ instance (Arbitrary k, Arbitrary v) => Arbitrary (Update k v) where
   arbitrary = 
     frequency
       [
-        (1,   delete <$> arbitrary),
-        (10,  insert <$> arbitrary <*> arbitrary),
-        (3,   update <$> (const <$> arbitrary) <*> arbitrary)
+        (1 , delete <$> arbitrary),
+        (10, insert <$> arbitrary <*> arbitrary),
+        (3 , adjust <$> (const <$> arbitrary) <*> arbitrary)
       ]
 
