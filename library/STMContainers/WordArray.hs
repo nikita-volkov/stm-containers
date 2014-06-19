@@ -168,7 +168,7 @@ foldM step acc =
 
 visitM :: Monad m => Visit.VisitM m a r -> Index -> WordArray a -> m (r, WordArray a)
 visitM f i w = do
-  em <- inline lookupM i w
+  let em = inline lookup i w
   (r, c) <- f em
   let w' = case c of
         Visit.Keep -> w
