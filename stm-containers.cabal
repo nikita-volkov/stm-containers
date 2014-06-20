@@ -49,7 +49,7 @@ library
   exposed-modules:
     STMContainers.Map
     STMContainers.Set
-    STMContainers.Visit
+    STMContainers.Focus
   build-depends:
     -- debugging:
     loch-th == 0.2.*,

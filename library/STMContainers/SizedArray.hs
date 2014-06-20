@@ -3,7 +3,7 @@ module STMContainers.SizedArray where
 import STMContainers.Prelude hiding (lookup, toList, foldM)
 import Data.Primitive.Array
 import qualified STMContainers.Prelude as Prelude
-import qualified STMContainers.Visit as Visit
+import qualified STMContainers.Focus as Focus
 
 -- |
 -- An array, 

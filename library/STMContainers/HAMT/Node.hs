@@ -4,7 +4,7 @@ module STMContainers.HAMT.Node where
 
 import STMContainers.Prelude hiding (insert, lookup, delete, foldM)
 import qualified STMContainers.SizedArray as SizedArray
-import qualified STMContainers.Visit as Visit
+import qualified STMContainers.Focus as Focus
 import qualified STMContainers.HAMT.Node.Level as Level
 import qualified STMContainers.HAMT.Node.Nodes as Nodes
 
@@ -26,24 +26,24 @@ class (Eq (ElementIndex e)) => Element e where
 -- Due to some optimizations instead of failing
 -- this function might behave unpredictably,
 -- when improper level is provided.
-visit :: (Element e) => Visit.VisitM STM e r -> Hash -> ElementIndex e -> Level.Level -> Node e -> STM (r, Node e)
-visit f h i l = \case
+focus :: (Element e) => Focus.FocusM STM e r -> Hash -> ElementIndex e -> Level.Level -> Node e -> STM (r, Node e)
+focus f h i l = \case
   Empty -> 
     fmap commandToNode <$> f Nothing
     where
       commandToNode = \case
-        Visit.Replace e -> Leaf h e
+        Focus.Replace e -> Leaf h e
         _ -> Empty
   Nodes nodes ->
-    fmap nodesToNode <$> inline Nodes.visit f' (Level.hashIndex l h) nodes
+    fmap nodesToNode <$> inline Nodes.focus f' (Level.hashIndex l h) nodes
     where
       f' = \case
         Just n -> 
-          fmap nodeToCommand <$> visit f h i (Level.succ l) n
+          fmap nodeToCommand <$> focus f h i (Level.succ l) n
           where
             nodeToCommand = \case
-              Empty -> Visit.Remove
-              n' -> Visit.Replace n'
+              Empty -> Focus.Remove
+              n' -> Focus.Replace n'
         Nothing -> 
           (fmap . fmap) (Leaf h) <$> f Nothing
       nodesToNode nodes' = case Nodes.null nodes' of 
@@ -56,20 +56,20 @@ visit f h i l = \case
           fmap commandToNode <$> f (Just e')
           where
             commandToNode = \case
-              Visit.Keep -> Leaf h' e'
-              Visit.Remove -> Empty
-              Visit.Replace e -> Leaf h e
+              Focus.Keep -> Leaf h' e'
+              Focus.Remove -> Empty
+              Focus.Replace e -> Leaf h e
         False ->
           fmap commandToNode <$> f Nothing
           where
             commandToNode = \case
-              Visit.Replace e -> Leaves h (SizedArray.pair e e')
+              Focus.Replace e -> Leaves h (SizedArray.pair e e')
               _ -> Leaf h' e'
       False ->
         mapM commandToNodeM =<< f Nothing
         where
           commandToNodeM = \case
-            Visit.Replace e -> pair h (Leaf h e) h' (Leaf h' e') l
+            Focus.Replace e -> pair h (Leaf h e) h' (Leaf h' e') l
             _ -> return (Leaf h' e')
   Leaves h' a' ->
     case h == h' of
@@ -78,19 +78,19 @@ visit f h i l = \case
           Just (ai', e') -> fmap commandToNode <$> f (Just e')
             where
               commandToNode = \case
-                Visit.Keep -> 
+                Focus.Keep -> 
                   Leaves h' a'
-                Visit.Remove ->
+                Focus.Remove ->
                   case SizedArray.delete ai' a' of
                     a'' -> case SizedArray.null a'' of
                       True -> Empty
                       False -> Leaves h' a''
-                Visit.Replace e -> 
+                Focus.Replace e -> 
                   Leaves h' (SizedArray.insert ai' e a')
           Nothing -> fmap commandToNode <$> f Nothing
             where
               commandToNode = \case
-                Visit.Replace e ->
+                Focus.Replace e ->
                   Leaves h' (SizedArray.append e a')
                 _ ->
                   Leaves h' a'
@@ -98,7 +98,7 @@ visit f h i l = \case
         mapM commandToNodeM =<< f Nothing
         where
           commandToNodeM = \case
-            Visit.Replace e -> pair h (Leaf h e) h' (Leaves h' a') l
+            Focus.Replace e -> pair h (Leaf h e) h' (Leaves h' a') l
             _ -> return (Leaves h' a')
 
 -- |

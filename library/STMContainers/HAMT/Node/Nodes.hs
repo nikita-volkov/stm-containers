@@ -2,31 +2,31 @@ module STMContainers.HAMT.Node.Nodes where
 
 import STMContainers.Prelude
 import qualified STMContainers.WordArray as WordArray
-import qualified STMContainers.Visit as Visit
+import qualified STMContainers.Focus as Focus
 
 
 type Nodes n = WordArray.WordArray (TVar n)
 
 type Index = WordArray.Index
 
-type Visit n r = Visit.VisitM STM n r
+type Focus n r = Focus.FocusM STM n r
 
-visit :: Visit n r -> Index -> Nodes n -> STM (r, Nodes n)
-visit a i = 
-  inline WordArray.visitM a' i
+focus :: Focus n r -> Index -> Nodes n -> STM (r, Nodes n)
+focus a i = 
+  inline WordArray.focusM a' i
   where
     a' = \case
       Just v -> do
         (r, c) <- a . Just =<< readTVar v
         case c of
-          Visit.Keep -> return (r, Visit.Keep)
-          Visit.Remove -> return (r, Visit.Remove)
-          Visit.Replace n' -> writeTVar v n' >> return (r, Visit.Keep)
+          Focus.Keep -> return (r, Focus.Keep)
+          Focus.Remove -> return (r, Focus.Remove)
+          Focus.Replace n' -> writeTVar v n' >> return (r, Focus.Keep)
       Nothing -> do
         (r, c) <- a Nothing
         case c of
-          Visit.Replace n' -> newTVar n' >>= \v -> return (r, Visit.Replace v)
-          _ -> return (r, Visit.Keep)
+          Focus.Replace n' -> newTVar n' >>= \v -> return (r, Focus.Replace v)
+          _ -> return (r, Focus.Keep)
 
 foldM :: (a -> n -> STM a) -> a -> Nodes n -> STM a
 foldM f = inline WordArray.foldM (\acc v -> readTVar v >>= f acc)

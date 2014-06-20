@@ -4,7 +4,7 @@ import Test.Framework
 import STMContainers.Prelude
 import STMContainers.Transformers
 import qualified STMContainers.WordArray as WordArray
-import qualified STMContainers.Visit as Visit
+import qualified STMContainers.Focus as Focus
 import qualified WordArrayTests.Update as Update
 
 
@@ -26,11 +26,11 @@ prop_fromListIsIsomorphicToToList =
     prop list = 
       list === (WordArray.toList . WordArray.fromList) list
 
-test_visitMLookup = do
-  assertEqual (Just 'a') . fst =<< WordArray.visitM (Visit.monadize Visit.lookup) 3 w
-  assertEqual (Just 'b') . fst =<< WordArray.visitM (Visit.monadize Visit.lookup) 7 w
-  assertEqual Nothing . fst =<< WordArray.visitM (Visit.monadize Visit.lookup) 1 w
-  assertEqual Nothing . fst =<< WordArray.visitM (Visit.monadize Visit.lookup) 11 w
+test_focusMLookup = do
+  assertEqual (Just 'a') . fst =<< WordArray.focusM (Focus.monadize Focus.lookup) 3 w
+  assertEqual (Just 'b') . fst =<< WordArray.focusM (Focus.monadize Focus.lookup) 7 w
+  assertEqual Nothing . fst =<< WordArray.focusM (Focus.monadize Focus.lookup) 1 w
+  assertEqual Nothing . fst =<< WordArray.focusM (Focus.monadize Focus.lookup) 11 w
   where
     w = WordArray.fromList [(3, 'a'), (7, 'b'), (14, 'c')]
 

@@ -6,7 +6,7 @@ module STMContainers.Map
   new,
   insert,
   delete,
-  visit,
+  focus,
   lookup,
   foldM,
   toList,
@@ -16,7 +16,7 @@ where
 import STMContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty)
 import qualified STMContainers.HAMT as HAMT
 import qualified STMContainers.HAMT.Node as HAMTNode
-import qualified STMContainers.Visit as Visit
+import qualified STMContainers.Focus as Focus
 
 
 -- |
@@ -50,8 +50,8 @@ insert k v = inline HAMT.insert (Association k v)
 delete :: (Indexable k) => k -> Map k v -> STM ()
 delete = inline HAMT.delete
 
-visit :: (Indexable k) => (Visit.VisitM STM v r) -> k -> Map k v -> STM r
-visit f k = inline HAMT.visit f' k
+focus :: (Indexable k) => (Focus.FocusM STM v r) -> k -> Map k v -> STM r
+focus f k = inline HAMT.focus f' k
   where
     f' = (fmap . fmap . fmap) (Association k) . f . fmap associationValue
 
