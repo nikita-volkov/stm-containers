@@ -32,11 +32,6 @@ size (SizedArray b _) = b
 null :: SizedArray a -> Bool
 null = (== 0) . size
 
--- |
--- Convert into a list representation.
-toList :: SizedArray a -> [a]
-toList w = $notImplemented
-
 find :: (a -> Bool) -> SizedArray a -> Maybe (Index, a)
 find p (SizedArray s a) = loop 0
   where
@@ -49,28 +44,28 @@ find p (SizedArray s a) = loop 0
 -- |
 -- Unsafe. Doesn't check the index overflow.
 insert :: Index -> a -> SizedArray a -> SizedArray a
-insert i e (SizedArray s a) = SizedArray s a'
-  where
-    a' = 
-      runST $ do
-        ma' <- newArray s undefined
-        forM_ [0 .. pred s] $ \i' -> indexArrayM a i' >>= writeArray ma' i'
-        writeArray ma' i e
-        unsafeFreezeArray ma'
+insert i e (SizedArray s a) = 
+  runST $ do
+    m' <- newArray s undefined
+    forM_ [0 .. pred s] $ \i' -> indexArrayM a i' >>= writeArray m' i'
+    writeArray m' i e
+    SizedArray s <$> unsafeFreezeArray m'
 
 delete :: Index -> SizedArray a -> SizedArray a
-delete = $notImplemented
-
--- |
--- Map and also check, whether anything changed.
-map' :: (a -> Maybe a) -> SizedArray a -> Maybe (SizedArray a)
-map' = $notImplemented
+delete i (SizedArray s a) = 
+  runST $ do
+    m' <- newArray (pred s) undefined
+    forM_ [0 .. pred i] $ \i' -> indexArrayM a i' >>= writeArray m' i'
+    forM_ [succ i .. pred s] $ \i' -> indexArrayM a i' >>= writeArray m' (pred i')
+    SizedArray (pred s) <$> unsafeFreezeArray m'
 
 append :: a -> SizedArray a -> SizedArray a
-append = $notImplemented
-
-filter :: (a -> Bool) -> SizedArray a -> SizedArray a
-filter = $notImplemented
+append e (SizedArray s a) =
+  runST $ do
+    m' <- newArray (succ s) undefined
+    forM_ [0 .. pred s] $ \i -> indexArrayM a i >>= writeArray m' i
+    writeArray m' s e
+    SizedArray (succ s) <$> unsafeFreezeArray m'
 
 foldM :: (Monad m) => (a -> b -> m a) -> a -> SizedArray b -> m a
 foldM step acc (SizedArray size array) =

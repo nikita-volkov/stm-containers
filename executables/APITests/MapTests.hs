@@ -43,6 +43,26 @@ stmMapFromList list = do
   forM_ list $ \(k, v) -> STMMap.insert k v m
   return m
 
+interpretSTMMapUpdateAsHashMap :: (Hashable k, Eq k) => Update.Update k v -> HashMap.HashMap k v
+interpretSTMMapUpdateAsHashMap =
+  unsafePerformIO . atomically . (stmMapToHashMap <=< interpretSTMMapUpdate)
+
+
+-- * Intentional hash collision simulation
+-------------------------
+
+newtype TestKey = TestKey Word8
+  deriving (Eq, Show)
+
+instance Arbitrary TestKey where
+  arbitrary = TestKey <$> choose (0, 63)
+
+instance Hashable TestKey where
+  hashWithSalt salt (TestKey w) =
+    if odd w
+      then hashWithSalt salt (pred w)
+      else hashWithSalt salt w
+
 
 -- * Tests
 -------------------------
@@ -59,11 +79,13 @@ prop_fromListToListIsomorphism =
         list' = unsafePerformIO $ atomically $ 
           stmMapFromList list >>= STMMap.toList >>= return . map (\(STMMap.Association k v) -> (k, v))
 
-prop_updatesProduceTheSameEffectAsInHashMap (updates :: [Update.Update Word8 Char]) =
-  interpretHashMapUpdate update ===
-  (unsafePerformIO . atomically . (stmMapToHashMap <=< interpretSTMMapUpdate)) update
+prop_updatesProduceTheSameEffectAsInHashMap =
+  withQCArgs (\a -> a {maxSuccess = 1000}) prop
   where
-    update = sequence_ updates
+    prop (updates :: [Update.Update TestKey ()]) =
+      interpretHashMapUpdate update === interpretSTMMapUpdateAsHashMap update
+      where
+        update = sequence_ updates
 
 test_insert = do
   assertEqual (HashMap.fromList [('a', 1), ('b', 2), ('c', 3)]) =<< do 
@@ -81,8 +103,6 @@ test_insert2 = do
       STMMap.insert 111 () m
       STMMap.insert 207 () m
       stmMapToHashMap m
-
-test_insertSameItem = unitTestPending ""
 
 test_adjust = do
   assertEqual (HashMap.fromList [('a', 1), ('b', 3)]) =<< do 
