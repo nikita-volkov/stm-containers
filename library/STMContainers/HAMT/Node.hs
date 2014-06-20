@@ -66,7 +66,7 @@ focus f h i l = \case
               Focus.Replace e -> Leaves h (SizedArray.pair e e')
               _ -> Leaf h' e'
       False ->
-        mapM commandToNodeM =<< f Nothing
+        traversePair commandToNodeM =<< f Nothing
         where
           commandToNodeM = \case
             Focus.Replace e -> pair h (Leaf h e) h' (Leaf h' e') l
@@ -95,11 +95,14 @@ focus f h i l = \case
                 _ ->
                   Leaves h' a'
       False ->
-        mapM commandToNodeM =<< f Nothing
+        traversePair commandToNodeM =<< f Nothing
         where
           commandToNodeM = \case
             Focus.Replace e -> pair h (Leaf h e) h' (Leaves h' a') l
             _ -> return (Leaves h' a')
+  where
+    -- | A replacement for the missing 'Traverse' instance of pair in base < 4.7.
+    traversePair f (x, y) = (,) x <$> f y
 
 -- |
 -- Assumes that the hashes aren't equal.
