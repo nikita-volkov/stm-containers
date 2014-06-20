@@ -9,10 +9,11 @@ module STMContainers.Map
   focus,
   lookup,
   foldM,
+  null,
 )
 where
 
-import STMContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty)
+import STMContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
 import qualified STMContainers.HAMT as HAMT
 import qualified STMContainers.HAMT.Node as HAMTNode
 import qualified Focus
@@ -56,3 +57,6 @@ foldM = inline HAMT.foldM
 
 new :: STM (Map k v)
 new = inline HAMT.new
+
+null :: Map k v -> STM Bool
+null = inline HAMT.null

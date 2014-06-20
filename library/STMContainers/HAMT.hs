@@ -34,3 +34,8 @@ foldM step acc = readTVar >=> inline Node.foldM step acc 0
 
 new :: STM (HAMT e)
 new = newTVar Node.Empty
+
+null :: HAMT e -> STM Bool
+null v = readTVar v >>= \case
+  Node.Empty -> return True
+  _ -> return False
