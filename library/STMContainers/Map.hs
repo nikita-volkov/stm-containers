@@ -9,7 +9,6 @@ module STMContainers.Map
   focus,
   lookup,
   foldM,
-  toList,
 )
 where
 
@@ -38,9 +37,6 @@ instance (Eq k) => HAMTNode.Element (Association k v) where
 associationValue :: Association k v -> v
 associationValue (Association _ v) = v
 
-associationToTuple :: Association k v -> (k, v)
-associationToTuple (Association k v) = (k, v)
-
 lookup :: (Indexable k) => k -> Map k v -> STM (Maybe v)
 lookup k = (fmap . fmap) associationValue . inline HAMT.lookup k
 
@@ -57,9 +53,6 @@ focus f k = inline HAMT.focus f' k
 
 foldM :: (a -> Association k v -> STM a) -> a -> Map k v -> STM a
 foldM = inline HAMT.foldM
-
-toList :: Map k v -> STM [Association k v]
-toList = foldM ((return .) . flip (:)) []
 
 new :: STM (Map k v)
 new = inline HAMT.new

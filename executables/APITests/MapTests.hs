@@ -43,6 +43,12 @@ stmMapFromList list = do
   forM_ list $ \(k, v) -> STMMap.insert k v m
   return m
 
+stmMapToList :: STMMap.Map k v -> STM [(k, v)]
+stmMapToList = STMMap.foldM (\l -> return . (:l) . stmMapAssociationToPair) []
+
+stmMapAssociationToPair :: STMMap.Association k v -> (k, v)
+stmMapAssociationToPair (STMMap.Association k v) = (k, v)
+
 interpretSTMMapUpdateAsHashMap :: (Hashable k, Eq k) => Update.Update k v -> HashMap.HashMap k v
 interpretSTMMapUpdateAsHashMap =
   unsafePerformIO . atomically . (stmMapToHashMap <=< interpretSTMMapUpdate)
@@ -76,8 +82,7 @@ prop_fromListToListIsomorphism =
     prop list =
       list \\ list' === []
       where
-        list' = unsafePerformIO $ atomically $ 
-          stmMapFromList list >>= STMMap.toList >>= return . map (\(STMMap.Association k v) -> (k, v))
+        list' = unsafePerformIO $ atomically $ stmMapFromList list >>= stmMapToList
 
 prop_updatesProduceTheSameEffectAsInHashMap =
   withQCArgs (\a -> a {maxSuccess = 1000}) prop

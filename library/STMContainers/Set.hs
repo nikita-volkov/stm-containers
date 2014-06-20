@@ -7,7 +7,6 @@ module STMContainers.Set
   delete,
   lookup,
   foldM,
-  toList,
 )
 where
 
@@ -45,9 +44,6 @@ lookup k = fmap (maybe False (const True)) . inline HAMT.lookup k
 
 foldM :: (a -> e -> STM a) -> a -> Set e -> STM a
 foldM f = inline HAMT.foldM (\a -> f a . elementValue)
-
-toList :: Set e -> STM [e]
-toList = foldM ((return .) . flip (:)) []
 
 new :: STM (Set e)
 new = inline HAMT.new
