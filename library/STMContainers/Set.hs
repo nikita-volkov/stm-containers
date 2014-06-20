@@ -40,8 +40,8 @@ insert e = inline HAMT.insert (Element e)
 delete :: (Indexable e) => e -> Set e -> STM ()
 delete = inline HAMT.delete
 
-lookup :: (Indexable e) => e -> Set e -> STM (Maybe e)
-lookup k = (fmap . fmap) elementValue . inline HAMT.lookup k
+lookup :: (Indexable e) => e -> Set e -> STM Bool
+lookup k = fmap (maybe False (const True)) . inline HAMT.lookup k
 
 foldM :: (a -> e -> STM a) -> a -> Set e -> STM a
 foldM f = inline HAMT.foldM (\a -> f a . elementValue)
