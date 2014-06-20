@@ -7,7 +7,7 @@ import STMContainers.Transformers
 import Control.Monad.Free
 import qualified APITests.MapTests.Update as Update
 import qualified STMContainers.Map as STMMap
-import qualified STMContainers.Focus as Focus
+import qualified Focus
 import qualified Data.HashMap.Strict as HashMap
 
 
@@ -17,7 +17,7 @@ interpretSTMMapUpdate update = do
   flip iterM update $ \case
     Update.Insert k v c -> STMMap.insert k v m >> c
     Update.Delete k c   -> STMMap.delete k m >> c
-    Update.Adjust f k c -> STMMap.focus ((Focus.monadize . Focus.adjust) f) k m >> c
+    Update.Adjust f k c -> STMMap.focus ((Focus.adjustM . fmap return) f) k m >> c
   return m
 
 interpretHashMapUpdate :: (Hashable k, Eq k) => Update.Update k v -> HashMap.HashMap k v
@@ -95,5 +95,5 @@ test_focusReachesTheTarget = do
   assertEqual (Just 2) =<< do 
     atomically $ do
       m <- stmMapFromList [('a', 1), ('b', 2)]
-      STMMap.focus (Focus.monadize Focus.lookup) 'b' m
+      STMMap.focus Focus.lookupM 'b' m
 

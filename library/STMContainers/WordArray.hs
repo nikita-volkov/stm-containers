@@ -4,7 +4,7 @@ import STMContainers.Prelude hiding (lookup, toList, traverse_)
 import Data.Primitive.Array
 import qualified STMContainers.Prelude as Prelude
 import qualified STMContainers.WordArray.Indices as Indices
-import qualified STMContainers.Focus as Focus
+import qualified Focus
 
 
 -- |
@@ -166,7 +166,7 @@ foldM :: Monad m => (a -> b -> m a) -> a -> WordArray b -> m a
 foldM step acc =
   inline Prelude.foldM step acc . inline elements
 
-focusM :: Monad m => Focus.FocusM m a r -> Index -> WordArray a -> m (r, WordArray a)
+focusM :: Monad m => Focus.StrategyM m a r -> Index -> WordArray a -> m (r, WordArray a)
 focusM f i w = do
   let em = inline lookup i w
   (r, c) <- f em

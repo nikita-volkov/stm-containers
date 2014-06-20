@@ -4,7 +4,7 @@ module STMContainers.HAMT.Node where
 
 import STMContainers.Prelude hiding (insert, lookup, delete, foldM)
 import qualified STMContainers.SizedArray as SizedArray
-import qualified STMContainers.Focus as Focus
+import qualified Focus
 import qualified STMContainers.HAMT.Node.Level as Level
 import qualified STMContainers.HAMT.Node.Nodes as Nodes
 
@@ -26,7 +26,7 @@ class (Eq (ElementIndex e)) => Element e where
 -- Due to some optimizations instead of failing
 -- this function might behave unpredictably,
 -- when improper level is provided.
-focus :: (Element e) => Focus.FocusM STM e r -> Hash -> ElementIndex e -> Level.Level -> Node e -> STM (r, Node e)
+focus :: (Element e) => Focus.StrategyM STM e r -> Hash -> ElementIndex e -> Level.Level -> Node e -> STM (r, Node e)
 focus f h i l = \case
   Empty -> 
     fmap commandToNode <$> f Nothing

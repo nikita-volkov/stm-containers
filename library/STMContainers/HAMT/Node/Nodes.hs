@@ -2,14 +2,14 @@ module STMContainers.HAMT.Node.Nodes where
 
 import STMContainers.Prelude
 import qualified STMContainers.WordArray as WordArray
-import qualified STMContainers.Focus as Focus
+import qualified Focus
 
 
 type Nodes n = WordArray.WordArray (TVar n)
 
 type Index = WordArray.Index
 
-type Focus n r = Focus.FocusM STM n r
+type Focus n r = Focus.StrategyM STM n r
 
 focus :: Focus n r -> Index -> Nodes n -> STM (r, Nodes n)
 focus a i = 
