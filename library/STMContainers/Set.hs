@@ -50,10 +50,10 @@ foldM f = inline HAMT.foldM (\a -> f a . elementValue)
 new :: STM (Set e)
 new = inline HAMT.new
 
-focus :: (Indexable e) => Focus.StrategyM STM e r -> e -> Set e -> STM r
-focus f k = inline HAMT.focus f' k
+focus :: (Indexable e) => Focus.StrategyM STM () r -> e -> Set e -> STM r
+focus f e = inline HAMT.focus f' e
   where
-    f' = (fmap . fmap . fmap) Element . f . fmap elementValue
+    f' = (fmap . fmap . fmap) (const (Element e)) . f . fmap (const ())
 
 null :: Set e -> STM Bool
 null = inline HAMT.null
