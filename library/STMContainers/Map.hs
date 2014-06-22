@@ -39,13 +39,13 @@ associationValue :: Association k v -> v
 associationValue (Association _ v) = v
 
 lookup :: (Indexable k) => k -> Map k v -> STM (Maybe v)
-lookup k = (fmap . fmap) associationValue . inline HAMT.lookup k
+lookup k = inline focus Focus.lookupM k
 
 insert :: (Indexable k) => k -> v -> Map k v -> STM ()
-insert k v = inline HAMT.insert (Association k v)
+insert k v = inline focus (Focus.insertM v) k
 
 delete :: (Indexable k) => k -> Map k v -> STM ()
-delete = inline HAMT.delete
+delete = inline HAMT.focus Focus.deleteM
 
 focus :: (Indexable k) => (Focus.StrategyM STM v r) -> k -> Map k v -> STM r
 focus f k = inline HAMT.focus f' k

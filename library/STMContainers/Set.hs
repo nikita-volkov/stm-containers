@@ -36,13 +36,13 @@ elementValue :: Element e -> e
 elementValue (Element e) = e
 
 insert :: (Indexable e) => e -> Set e -> STM ()
-insert e = inline HAMT.insert (Element e)
+insert e = inline HAMT.focus (Focus.insertM (Element e)) e
 
 delete :: (Indexable e) => e -> Set e -> STM ()
-delete = inline HAMT.delete
+delete = inline HAMT.focus Focus.deleteM
 
 lookup :: (Indexable e) => e -> Set e -> STM Bool
-lookup k = fmap (maybe False (const True)) . inline HAMT.lookup k
+lookup e = fmap (maybe False (const True)) . inline HAMT.focus Focus.lookupM e
 
 foldM :: (a -> e -> STM a) -> a -> Set e -> STM a
 foldM f = inline HAMT.foldM (\a -> f a . elementValue)
