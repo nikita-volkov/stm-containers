@@ -21,20 +21,24 @@ type Indices = Indices.Indices
 -- An index of an element.
 type Index = Int
 
+{-# INLINE indices #-}
 indices :: WordArray e -> Indices
 indices (WordArray b _) = b
 
+{-# INLINE maxSize #-}
 maxSize :: Int
 maxSize = Indices.maxSize
 
 -- |
 -- An array with a single element at the specified index.
+{-# INLINE singleton #-}
 singleton :: Index -> e -> WordArray e
 singleton i e = 
   let b = Indices.insert i 0
       a = runST $ newArray 1 e >>= unsafeFreezeArray
       in WordArray b a
 
+{-# INLINE pair #-}
 pair :: Index -> e -> Index -> e -> WordArray e
 pair i e i' e' =
   WordArray is a
@@ -57,6 +61,7 @@ pair i e i' e' =
 -- |
 -- Unsafe.
 -- Assumes that the list is sorted and contains no duplicate indexes.
+{-# INLINE fromList #-}
 fromList :: [(Index, e)] -> WordArray e
 fromList l = 
   runST $ do
@@ -67,6 +72,7 @@ fromList l =
       writeArray array ai e
     WordArray <$> readSTRef indices <*> unsafeFreezeArray array
   
+{-# INLINE toList #-}
 toList :: WordArray e -> [(Index, e)]
 toList (WordArray is a) = do
   i <- Indices.toList is
@@ -75,19 +81,22 @@ toList (WordArray is a) = do
 
 -- |
 -- Convert into a list representation.
+{-# INLINE toMaybeList #-}
 toMaybeList :: WordArray e -> [Maybe e]
 toMaybeList w = do
   i <- [0 .. pred Indices.maxSize] 
   return $ lookup i w
 
+{-# INLINE elements #-}
 elements :: WordArray e -> [e]
 elements (WordArray indices array) =
   map (\i -> indexArray array (Indices.position i indices)) .
-  inline Indices.toList $
+  Indices.toList $
   indices
 
 -- |
 -- Set an element value at the index.
+{-# INLINE set #-}
 set :: Index -> e -> WordArray e -> WordArray e
 set i e (WordArray b a) = 
   let 
@@ -113,6 +122,7 @@ set i e (WordArray b a) =
 
 -- |
 -- Remove an element.
+{-# INLINE unset #-}
 unset :: Index -> WordArray e -> WordArray e
 unset i (WordArray b a) =
   if Indices.elem i b
@@ -131,6 +141,7 @@ unset i (WordArray b a) =
 
 -- |
 -- Lookup an item at the index.
+{-# INLINE lookup #-}
 lookup :: Index -> WordArray e -> Maybe e
 lookup i (WordArray b a) =
   if Indices.elem i b
@@ -139,6 +150,7 @@ lookup i (WordArray b a) =
 
 -- |
 -- Lookup strictly, using 'indexArrayM'.
+{-# INLINE lookupM #-}
 lookupM :: Monad m => Index -> WordArray e -> m (Maybe e)
 lookupM i (WordArray b a) =
   if Indices.elem i b
@@ -147,33 +159,39 @@ lookupM i (WordArray b a) =
 
 -- |
 -- Check, whether there is an element at the index.
+{-# INLINE isSet #-}
 isSet :: Index -> WordArray e -> Bool
 isSet i = Indices.elem i . indices
 
 -- |
 -- Get the amount of elements.
+{-# INLINE size #-}
 size :: WordArray e -> Int
 size = Indices.size . indices
 
+{-# INLINE null #-}
 null :: WordArray e -> Bool
 null = Indices.null . indices
 
+{-# INLINE traverse_ #-}
 traverse_ :: Applicative f => (a -> f b) -> WordArray a -> f ()
 traverse_ f =
-  inline Prelude.traverse_ f . inline elements
+  inline Prelude.traverse_ f . elements
 
+{-# INLINE foldM #-}
 foldM :: Monad m => (a -> b -> m a) -> a -> WordArray b -> m a
 foldM step acc =
-  inline Prelude.foldM step acc . inline elements
+  inline Prelude.foldM step acc . elements
 
+{-# INLINE focusM #-}
 focusM :: Monad m => Focus.StrategyM m a r -> Index -> WordArray a -> m (r, WordArray a)
 focusM f i w = do
-  let em = inline lookup i w
+  let em = lookup i w
   (r, c) <- f em
   let w' = case c of
         Focus.Keep -> w
         Focus.Remove -> case em of
           Nothing -> w
-          Just _ -> inline unset i w
-        Focus.Replace e' -> inline set i e' w
+          Just _ -> unset i w
+        Focus.Replace e' -> set i e' w
   return (r, w')

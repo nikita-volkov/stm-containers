@@ -32,28 +32,36 @@ instance (Eq e) => HAMTNode.Element (Element e) where
   type ElementKey (Element e) = e
   elementKey (Element e) = e
 
+{-# INLINABLE elementValue #-}
 elementValue :: Element e -> e
 elementValue (Element e) = e
 
+{-# INLINABLE insert #-}
 insert :: (Indexable e) => e -> Set e -> STM ()
 insert e = HAMT.insert (Element e)
 
+{-# INLINABLE delete #-}
 delete :: (Indexable e) => e -> Set e -> STM ()
-delete = inline HAMT.focus Focus.deleteM
+delete = HAMT.focus Focus.deleteM
 
+{-# INLINABLE lookup #-}
 lookup :: (Indexable e) => e -> Set e -> STM Bool
-lookup e = fmap (maybe False (const True)) . inline HAMT.focus Focus.lookupM e
+lookup e = fmap (maybe False (const True)) . HAMT.focus Focus.lookupM e
 
+{-# INLINABLE foldM #-}
 foldM :: (a -> e -> STM a) -> a -> Set e -> STM a
-foldM f = inline HAMT.foldM (\a -> f a . elementValue)
+foldM f = HAMT.foldM (\a -> f a . elementValue)
 
+{-# INLINABLE new #-}
 new :: STM (Set e)
-new = inline HAMT.new
+new = HAMT.new
 
+{-# INLINABLE focus #-}
 focus :: (Indexable e) => Focus.StrategyM STM () r -> e -> Set e -> STM r
-focus f e = inline HAMT.focus f' e
+focus f e = HAMT.focus f' e
   where
     f' = (fmap . fmap . fmap) (const (Element e)) . f . fmap (const ())
 
+{-# INLINABLE null #-}
 null :: Set e -> STM Bool
-null = inline HAMT.null
+null = HAMT.null

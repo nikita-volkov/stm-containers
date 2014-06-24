@@ -15,6 +15,7 @@ data SizedArray a =
 -- An index of an element.
 type Index = Int
 
+{-# INLINE pair #-}
 pair :: a -> a -> SizedArray a
 pair e e' =
   runST $ do
@@ -24,14 +25,17 @@ pair e e' =
 
 -- |
 -- Get the amount of elements.
+{-# INLINE size #-}
 size :: SizedArray a -> Int
 size (SizedArray b _) = b
 
 -- |
 -- Get the amount of elements.
+{-# INLINE null #-}
 null :: SizedArray a -> Bool
 null = (== 0) . size
 
+{-# INLINE find #-}
 find :: (a -> Bool) -> SizedArray a -> Maybe (Index, a)
 find p (SizedArray s a) = loop 0
   where
@@ -43,6 +47,7 @@ find p (SizedArray s a) = loop 0
 
 -- |
 -- Unsafe. Doesn't check the index overflow.
+{-# INLINE insert #-}
 insert :: Index -> a -> SizedArray a -> SizedArray a
 insert i e (SizedArray s a) = 
   runST $ do
@@ -51,6 +56,7 @@ insert i e (SizedArray s a) =
     writeArray m' i e
     SizedArray s <$> unsafeFreezeArray m'
 
+{-# INLINE delete #-}
 delete :: Index -> SizedArray a -> SizedArray a
 delete i (SizedArray s a) = 
   runST $ do
@@ -59,6 +65,7 @@ delete i (SizedArray s a) =
     forM_ [succ i .. pred s] $ \i' -> indexArrayM a i' >>= writeArray m' (pred i')
     SizedArray (pred s) <$> unsafeFreezeArray m'
 
+{-# INLINE append #-}
 append :: a -> SizedArray a -> SizedArray a
 append e (SizedArray s a) =
   runST $ do
@@ -67,6 +74,7 @@ append e (SizedArray s a) =
     writeArray m' s e
     SizedArray (succ s) <$> unsafeFreezeArray m'
 
+{-# INLINE foldM #-}
 foldM :: (Monad m) => (a -> b -> m a) -> a -> SizedArray b -> m a
 foldM step acc (SizedArray size array) =
   Prelude.foldM step' acc [0 .. pred size]
