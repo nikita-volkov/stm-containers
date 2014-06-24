@@ -3,10 +3,11 @@
 module STMContainers.HAMT.Node where
 
 import STMContainers.Prelude hiding (insert, lookup, delete, foldM)
+import qualified STMContainers.WordArray as WordArray
 import qualified STMContainers.SizedArray as SizedArray
-import qualified Focus
 import qualified STMContainers.HAMT.Node.Level as Level
 import qualified STMContainers.HAMT.Node.Nodes as Nodes
+import qualified Focus
 
 
 data Node e =
@@ -20,6 +21,36 @@ type Hash = Int
 class (Eq (ElementKey e)) => Element e where
   type ElementKey e
   elementKey :: e -> ElementKey e
+
+insert :: (Element e) => e -> Hash -> ElementKey e -> Level.Level -> Node e -> STM (Node e)
+insert e h k l = \case
+  Empty ->
+    return $ Leaf h e
+  Nodes na -> do
+    case WordArray.lookup i na of
+      Nothing -> do
+        nv <- newTVar (Leaf h e)
+        return $ Nodes $ WordArray.set i nv na
+      Just nv -> do
+        writeTVar nv =<< insert e h k (Level.succ l) =<< readTVar nv
+        return $ Nodes na
+    where
+      i = Level.hashIndex l h
+  Leaf h' e' ->
+    if h == h'
+      then if elementKey e' == k
+        then return (Leaf h e)
+        else return (Leaves h (SizedArray.pair e e'))
+      else pair h (Leaf h e) h' (Leaf h' e') l
+  Leaves h' la -> 
+    case h == h' of
+      True -> 
+        case SizedArray.find ((== k) . elementKey) la of
+          Just (i, _) -> return (Leaves h' (SizedArray.insert i e la))
+          Nothing -> return (Leaves h' (SizedArray.append e la))
+      False ->
+        pair h (Leaf h e) h' (Leaves h' la) l
+
 
 -- |
 -- Unsafe.

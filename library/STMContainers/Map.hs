@@ -42,7 +42,7 @@ lookup :: (Indexable k) => k -> Map k v -> STM (Maybe v)
 lookup k = inline focus Focus.lookupM k
 
 insert :: (Indexable k) => k -> v -> Map k v -> STM ()
-insert k v = inline focus (Focus.insertM v) k
+insert k v = HAMT.insert (Association k v)
 
 delete :: (Indexable k) => k -> Map k v -> STM ()
 delete = inline HAMT.focus Focus.deleteM

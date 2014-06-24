@@ -36,7 +36,7 @@ elementValue :: Element e -> e
 elementValue (Element e) = e
 
 insert :: (Indexable e) => e -> Set e -> STM ()
-insert e = inline HAMT.focus (Focus.insertM (Element e)) e
+insert e = HAMT.insert (Element e)
 
 delete :: (Indexable e) => e -> Set e -> STM ()
 delete = inline HAMT.focus Focus.deleteM

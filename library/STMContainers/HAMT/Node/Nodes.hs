@@ -11,6 +11,14 @@ type Index = WordArray.Index
 
 type Focus n r = Focus.StrategyM STM n r
 
+lookup :: Index -> Nodes n -> STM (Maybe n)
+lookup i w = maybe (return Nothing) (fmap Just . readTVar) $ WordArray.lookup i w
+
+insert :: n -> Index -> Nodes n -> STM (Nodes n)
+insert n i ns = do
+  nv <- newTVar n
+  return $ inline WordArray.set i nv ns
+
 focus :: Focus n r -> Index -> Nodes n -> STM (r, Nodes n)
 focus a i = 
   inline WordArray.focusM a' i
