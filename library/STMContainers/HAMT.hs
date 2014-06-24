@@ -7,12 +7,12 @@ import qualified Focus
 
 type HAMT e = TVar (Node.Node e)
 
-type Element e = (Node.Element e, Hashable (Node.ElementIndex e))
+type Element e = (Node.Element e, Hashable (Node.ElementKey e))
 
-focus :: (Element e) => Focus.StrategyM STM e r -> Node.ElementIndex e -> HAMT e -> STM r
-focus f i v = do
+focus :: (Element e) => Focus.StrategyM STM e r -> Node.ElementKey e -> HAMT e -> STM r
+focus f k v = do
   n <- readTVar v
-  ((r, c), n') <- inline Node.focus (fmap exportCommand . f) (hash i) i 0 n
+  ((r, c), n') <- inline Node.focus (fmap exportCommand . f) (hash k) k 0 n
   case c of
     Focus.Keep -> return ()
     _ -> writeTVar v n'

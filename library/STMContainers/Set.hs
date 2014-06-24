@@ -29,8 +29,8 @@ type Indexable a = (Eq a, Hashable a)
 newtype Element e = Element e
 
 instance (Eq e) => HAMTNode.Element (Element e) where
-  type ElementIndex (Element e) = e
-  elementIndex (Element e) = e
+  type ElementKey (Element e) = e
+  elementKey (Element e) = e
 
 elementValue :: Element e -> e
 elementValue (Element e) = e

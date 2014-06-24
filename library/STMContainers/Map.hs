@@ -32,8 +32,8 @@ type Indexable a = (Eq a, Hashable a)
 data Association k v = Association !k !v
 
 instance (Eq k) => HAMTNode.Element (Association k v) where
-  type ElementIndex (Association k v) = k
-  elementIndex (Association k v) = k
+  type ElementKey (Association k v) = k
+  elementKey (Association k v) = k
 
 associationValue :: Association k v -> v
 associationValue (Association _ v) = v

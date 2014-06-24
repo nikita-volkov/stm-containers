@@ -17,17 +17,17 @@ data Node e =
 
 type Hash = Int
 
-class (Eq (ElementIndex e)) => Element e where
-  type ElementIndex e
-  elementIndex :: e -> ElementIndex e
+class (Eq (ElementKey e)) => Element e where
+  type ElementKey e
+  elementKey :: e -> ElementKey e
 
 -- |
 -- Unsafe.
 -- Due to some optimizations instead of failing
 -- this function might behave unpredictably,
 -- when improper level is provided.
-focus :: (Element e) => Focus.StrategyM STM e r -> Hash -> ElementIndex e -> Level.Level -> Node e -> STM (r, Node e)
-focus f h i l = \case
+focus :: (Element e) => Focus.StrategyM STM e r -> Hash -> ElementKey e -> Level.Level -> Node e -> STM (r, Node e)
+focus f h k l = \case
   Empty -> 
     fmap commandToNode <$> f Nothing
     where
@@ -39,7 +39,7 @@ focus f h i l = \case
     where
       f' = \case
         Just n -> 
-          fmap nodeToCommand <$> focus f h i (Level.succ l) n
+          fmap nodeToCommand <$> focus f h k (Level.succ l) n
           where
             nodeToCommand = \case
               Empty -> Focus.Remove
@@ -51,7 +51,7 @@ focus f h i l = \case
         False -> Nodes nodes'
   Leaf h' e' ->
     case h == h' of
-      True -> case elementIndex e' == i of
+      True -> case elementKey e' == k of
         True -> 
           fmap commandToNode <$> f (Just e')
           where
@@ -74,7 +74,7 @@ focus f h i l = \case
   Leaves h' a' ->
     case h == h' of
       True -> 
-        case SizedArray.find ((== i) . elementIndex) a' of
+        case SizedArray.find ((== k) . elementKey) a' of
           Just (ai', e') -> fmap commandToNode <$> f (Just e')
             where
               commandToNode = \case
