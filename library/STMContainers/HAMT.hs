@@ -10,10 +10,10 @@ type HAMT e = TVar (Node.Node e)
 type Element e = (Node.Element e, Hashable (Node.ElementKey e))
 
 insert :: (Element e) => e -> HAMT e -> STM ()
-insert e h = do
-  n <- readTVar h
-  n' <- Node.insert e (hash (Node.elementKey e)) (Node.elementKey e) 0 n
-  writeTVar h n'
+insert e h =
+  readTVar h >>=
+  Node.insert e (hash (Node.elementKey e)) (Node.elementKey e) 0 >>=
+  maybe (return ()) (writeTVar h)
 
 focus :: (Element e) => Focus.StrategyM STM e r -> Node.ElementKey e -> HAMT e -> STM r
 focus f k v = do
