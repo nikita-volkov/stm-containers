@@ -12,21 +12,21 @@ main =
   [
     bgroup "STM Containers"
     [
-      bench "insert" $
-        atomically $ do
-          t <- STMContainers.new :: STM (STMContainers.Map Int ())
-          forM_ [0..rows] $ \i -> STMContainers.insert i () t
+      bench "focus-based" $ 
+        do
+          t <- atomically $ STMContainers.new :: IO (STMContainers.Map Int ())
+          forM_ [0..rows] $ \i -> atomically $ STMContainers.focus (Focus.insertM ()) i t
       ,
-      bench "focus-insert" $ 
-        atomically $ do
-          t <- STMContainers.new :: STM (STMContainers.Map Int ())
-          forM_ [0..rows] $ \i -> STMContainers.focus (Focus.insertM ()) i t
+      bench "specialized" $
+        do
+          t <- atomically $ STMContainers.new :: IO (STMContainers.Map Int ())
+          forM_ [0..rows] $ \i -> atomically $ STMContainers.insert i () t
     ]
     ,
     bench "Unordered Containers + TVar" $
-      atomically $ do
-        t <- newTVar UnorderedContainers.empty :: STM (TVar (UnorderedContainers.HashMap Int (TVar ())))
-        forM_ [0..rows] $ \i -> do
+      do
+        t <- newTVarIO UnorderedContainers.empty :: IO (TVar (UnorderedContainers.HashMap Int (TVar ())))
+        forM_ [0..rows] $ \i -> atomically $ do
           c <- newTVar ()
           tv <- readTVar t
           writeTVar t $! UnorderedContainers.insert i c tv
@@ -43,4 +43,4 @@ main =
       nf (foldr (\k -> Containers.insert k ()) Containers.empty) [0..rows]
   ]
 
-rows :: Int = 10000
+rows :: Int = 100000
