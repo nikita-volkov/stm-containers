@@ -22,7 +22,7 @@ class (Eq (ElementKey e)) => Element e where
   type ElementKey e
   elementKey :: e -> ElementKey e
 
-{-# INLINABLE insert #-}
+{-# INLINE insert #-}
 insert :: (Element e) => e -> Hash -> ElementKey e -> Level.Level -> Node e -> STM (Maybe (Node e))
 insert e h k l = \case
   Empty ->
@@ -58,7 +58,7 @@ insert e h k l = \case
 -- Due to some optimizations instead of failing
 -- this function might behave unpredictably,
 -- when improper level is provided.
-{-# INLINABLE focus #-}
+{-# INLINE focus #-}
 focus :: (Element e) => Focus.StrategyM STM e r -> Hash -> ElementKey e -> Level.Level -> Node e -> STM (r, Node e)
 focus f h k l = \case
   Empty -> 
@@ -139,7 +139,7 @@ focus f h k l = \case
 
 -- |
 -- Assumes that the hashes aren't equal.
-{-# INLINABLE pair #-}
+{-# INLINE pair #-}
 pair :: Hash -> Node e -> Hash -> Node e -> Level.Level -> STM (Node e)
 pair h1 n1 h2 n2 l =
   case i1 == i2 of
@@ -150,7 +150,7 @@ pair h1 n1 h2 n2 l =
     i1 = hashIndex h1
     i2 = hashIndex h2
 
-{-# INLINABLE foldM #-}
+{-# INLINE foldM #-}
 foldM :: (a -> e -> STM a) -> a -> Level.Level -> Node e -> STM a
 foldM step acc level = \case
   Empty -> 

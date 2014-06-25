@@ -9,18 +9,18 @@ type HAMT e = TVar (Node.Node e)
 
 type Element e = (Node.Element e, Hashable (Node.ElementKey e))
 
-{-# INLINABLE insert #-}
+{-# INLINE insert #-}
 insert :: (Element e) => e -> HAMT e -> STM ()
 insert e h =
   readTVar h >>=
   Node.insert e (hash (Node.elementKey e)) (Node.elementKey e) 0 >>=
   maybe (return ()) (writeTVar h)
 
-{-# INLINABLE focus #-}
+{-# INLINE focus #-}
 focus :: (Element e) => Focus.StrategyM STM e r -> Node.ElementKey e -> HAMT e -> STM r
 focus f k v = do
   n <- readTVar v
-  ((r, c), n') <- inline Node.focus (fmap exportCommand . f) (hash k) k 0 n
+  ((r, c), n') <- Node.focus (fmap exportCommand . f) (hash k) k 0 n
   case c of
     Focus.Keep -> return ()
     _ -> writeTVar v n'
@@ -28,15 +28,15 @@ focus f k v = do
   where
     exportCommand (r, c) = ((r, c), c)
 
-{-# INLINABLE foldM #-}
+{-# INLINE foldM #-}
 foldM :: (a -> e -> STM a) -> a -> HAMT e -> STM a
-foldM step acc = readTVar >=> inline Node.foldM step acc 0
+foldM step acc = readTVar >=> Node.foldM step acc 0
 
-{-# INLINABLE new #-}
+{-# INLINE new #-}
 new :: STM (HAMT e)
 new = newTVar Node.Empty
 
-{-# INLINABLE null #-}
+{-# INLINE null #-}
 null :: HAMT e -> STM Bool
 null v = readTVar v >>= \case
   Node.Empty -> return True
