@@ -1,43 +1,30 @@
 module STMContainers.HAMT where
 
 import STMContainers.Prelude hiding (insert, lookup, delete, foldM)
-import qualified STMContainers.HAMT.Node as Node
+import qualified STMContainers.HAMT.Nodes as Nodes
 import qualified Focus
 
 
-type HAMT e = TVar (Node.Node e)
+type HAMT e = Nodes.Nodes e
 
-type Element e = (Node.Element e, Hashable (Node.ElementKey e))
+type Element e = (Nodes.Element e, Hashable (Nodes.ElementKey e))
 
 {-# INLINE insert #-}
 insert :: (Element e) => e -> HAMT e -> STM ()
-insert e h =
-  readTVar h >>=
-  Node.insert e (hash (Node.elementKey e)) (Node.elementKey e) 0 >>=
-  maybe (return ()) (writeTVar h)
+insert e = Nodes.insert e (hash (Nodes.elementKey e)) (Nodes.elementKey e) 0
 
 {-# INLINE focus #-}
-focus :: (Element e) => Focus.StrategyM STM e r -> Node.ElementKey e -> HAMT e -> STM r
-focus f k v = do
-  n <- readTVar v
-  ((r, c), n') <- Node.focus (fmap exportCommand . f) (hash k) k 0 n
-  case c of
-    Focus.Keep -> return ()
-    _ -> writeTVar v n'
-  return r
-  where
-    exportCommand (r, c) = ((r, c), c)
+focus :: (Element e) => Focus.StrategyM STM e r -> Nodes.ElementKey e -> HAMT e -> STM r
+focus s k = Nodes.focus s (hash k) k 0
 
 {-# INLINE foldM #-}
 foldM :: (a -> e -> STM a) -> a -> HAMT e -> STM a
-foldM step acc = readTVar >=> Node.foldM step acc 0
+foldM step acc = Nodes.foldM step acc 0
 
 {-# INLINE new #-}
 new :: STM (HAMT e)
-new = newTVar Node.Empty
+new = Nodes.new
 
 {-# INLINE null #-}
 null :: HAMT e -> STM Bool
-null v = readTVar v >>= \case
-  Node.Empty -> return True
-  _ -> return False
+null v = $notImplemented

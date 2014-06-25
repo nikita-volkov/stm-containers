@@ -14,7 +14,7 @@ where
 
 import STMContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
 import qualified STMContainers.HAMT as HAMT
-import qualified STMContainers.HAMT.Node as HAMTNode
+import qualified STMContainers.HAMT.Nodes as HAMTNodes
 import qualified Focus
 
 
@@ -28,7 +28,7 @@ type Indexable a = (Eq a, Hashable a)
 
 newtype Element e = Element e
 
-instance (Eq e) => HAMTNode.Element (Element e) where
+instance (Eq e) => HAMTNodes.Element (Element e) where
   type ElementKey (Element e) = e
   elementKey (Element e) = e
 

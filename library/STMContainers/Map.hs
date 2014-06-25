@@ -15,7 +15,7 @@ where
 
 import STMContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
 import qualified STMContainers.HAMT as HAMT
-import qualified STMContainers.HAMT.Node as HAMTNode
+import qualified STMContainers.HAMT.Nodes as HAMTNodes
 import qualified Focus
 
 
@@ -31,40 +31,40 @@ type Indexable a = (Eq a, Hashable a)
 -- A key-value association.
 data Association k v = Association !k !v
 
-instance (Eq k) => HAMTNode.Element (Association k v) where
+instance (Eq k) => HAMTNodes.Element (Association k v) where
   type ElementKey (Association k v) = k
   elementKey (Association k v) = k
 
-{-# INLINABLE associationValue #-}
+{-# INLINE associationValue #-}
 associationValue :: Association k v -> v
 associationValue (Association _ v) = v
 
-{-# INLINABLE lookup #-}
+{-# INLINE lookup #-}
 lookup :: (Indexable k) => k -> Map k v -> STM (Maybe v)
 lookup k = focus Focus.lookupM k
 
-{-# INLINABLE insert #-}
+{-# INLINE insert #-}
 insert :: (Indexable k) => k -> v -> Map k v -> STM ()
 insert k v = HAMT.insert (Association k v)
 
-{-# INLINABLE delete #-}
+{-# INLINE delete #-}
 delete :: (Indexable k) => k -> Map k v -> STM ()
 delete = HAMT.focus Focus.deleteM
 
-{-# INLINABLE focus #-}
+{-# INLINE focus #-}
 focus :: (Indexable k) => (Focus.StrategyM STM v r) -> k -> Map k v -> STM r
 focus f k = HAMT.focus f' k
   where
     f' = (fmap . fmap . fmap) (Association k) . f . fmap associationValue
 
-{-# INLINABLE foldM #-}
+{-# INLINE foldM #-}
 foldM :: (a -> Association k v -> STM a) -> a -> Map k v -> STM a
 foldM = HAMT.foldM
 
-{-# INLINABLE new #-}
+{-# INLINE new #-}
 new :: STM (Map k v)
 new = HAMT.new
 
-{-# INLINABLE null #-}
+{-# INLINE null #-}
 null :: Map k v -> STM Bool
 null = HAMT.null

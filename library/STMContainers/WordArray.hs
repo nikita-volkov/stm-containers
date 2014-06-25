@@ -29,6 +29,11 @@ indices (WordArray b _) = b
 maxSize :: Int
 maxSize = Indices.maxSize
 
+empty :: WordArray e
+empty = WordArray 0 a
+  where
+    a = runST $ newArray 0 undefined >>= unsafeFreezeArray
+
 -- |
 -- An array with a single element at the specified index.
 {-# INLINE singleton #-}
@@ -184,14 +189,14 @@ foldM step acc =
   inline Prelude.foldM step acc . elements
 
 {-# INLINE focusM #-}
-focusM :: Monad m => Focus.StrategyM m a r -> Index -> WordArray a -> m (r, WordArray a)
+focusM :: Monad m => Focus.StrategyM m a r -> Index -> WordArray a -> m (r, Maybe (WordArray a))
 focusM f i w = do
   let em = lookup i w
   (r, c) <- f em
   let w' = case c of
-        Focus.Keep -> w
+        Focus.Keep -> Nothing
         Focus.Remove -> case em of
-          Nothing -> w
-          Just _ -> unset i w
-        Focus.Replace e' -> set i e' w
+          Nothing -> Nothing
+          Just _ -> Just $ unset i w
+        Focus.Replace e' -> Just $ set i e' w
   return (r, w')
