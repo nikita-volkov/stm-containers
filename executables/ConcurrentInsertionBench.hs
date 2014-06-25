@@ -115,9 +115,9 @@ main = do
                 bench "Specialized" $ 
                   scSessionRunner specializedSCInterpreter threadActions
               ],
-            bench "Unordered Containers + TVar" $
+            bench "Unordered Containers" $
               ucSessionRunner threadActions
           ]
   where
-    actionsNum = 30000
-    threadsNums = [1, 3, 6, 12, 24, 48, 96]
+    actionsNum = 100000
+    threadsNums = [1, 2, 4, 8, 16, 32]
