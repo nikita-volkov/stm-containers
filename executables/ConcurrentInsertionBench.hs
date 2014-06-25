@@ -1,47 +1,123 @@
 
 import STMContainers.Prelude
 import Criterion.Main
-import qualified Data.HashMap.Strict as UnorderedContainers
-import qualified STMContainers.Map as STMContainers
+import Control.Monad.Free
+import Control.Monad.Free.TH
+import qualified Data.HashMap.Strict as UC
+import qualified STMContainers.Map as SC
 import qualified Control.Concurrent.Async as Async
+import qualified System.Random.MWC.Monad as MWC
+import qualified Focus
 
 
-main =
-  defaultMain
-  [
-    threadsRowsGroup 1 (max `div` 1),
-    threadsRowsGroup 3 (max `div` 3),
-    threadsRowsGroup 6 (max `div` 6),
-    threadsRowsGroup 12 (max `div` 12),
-    threadsRowsGroup 24 (max `div` 24)
-  ]
+type UCMap k v = TVar (UC.HashMap k (TVar v))
+
+
+-- * Actions 
+-------------------------
+
+data ActionF k v n where
+  Insert :: k -> v -> n -> ActionF k v n
+  deriving (Functor)
+
+type Action k v = Free (ActionF k v)
+
+
+-- * Interpreters
+-------------------------
+
+type Interpreter m = 
+  forall k v r. (Hashable k, Eq k) => m k v -> Action k v r -> STM r
+
+ucInterpreter :: Interpreter UCMap
+ucInterpreter m = 
+  iterM $ \case
+    Insert k v n -> do
+      mv <- readTVar m
+      vt <- newTVar v
+      writeTVar m $! UC.insert k vt mv
+      n
+
+specializedSCInterpreter :: Interpreter SC.Map
+specializedSCInterpreter m =
+  iterM $ \case
+    Insert k v n -> SC.insert k v m >> n
+
+focusSCInterpreter :: Interpreter SC.Map
+focusSCInterpreter m =
+  iterM $ \case
+    Insert k v n -> SC.focus (Focus.insertM v) k m >> n
+
+
+-- * Session and runners
+-------------------------
+
+-- | A list of transactions per thread.
+type Session k v = [[Action k v ()]]
+
+type SessionRunner = 
+  forall k v. (Hashable k, Eq k) => Session k v -> IO ()
+
+scSessionRunner :: Interpreter SC.Map -> SessionRunner
+scSessionRunner interpreter threadActions = do
+  m <- atomically $ SC.new
+  void $ flip Async.mapConcurrently threadActions $ \actions -> do
+    forM_ actions $ atomically . interpreter m
+
+ucSessionRunner :: SessionRunner
+ucSessionRunner threadActions = do
+  m <- newTVarIO UC.empty
+  void $ flip Async.mapConcurrently threadActions $ \actions -> do
+    forM_ actions $ atomically . ucInterpreter m
+
+
+-- * Generators
+-------------------------
+
+type Generator a = MWC.Rand IO a
+
+transactionGenerator :: Generator (Action Float Int ())
+transactionGenerator =
+  Free <$> (Insert <$> k <*> v <*> n)
   where
-    max = 30000
+    k = MWC.uniform
+    v = MWC.uniform
+    n = MWC.uniform >>= bool (return (Pure ())) transactionGenerator
 
-threadsRowsGroup :: Int -> Int -> Benchmark
-threadsRowsGroup threads rows =
-  bgroup 
-  (shows threads . showString "/" . shows rows $ "")
-  [
-    stmContainersBench threads rows,
-    unorderedContainersTVarBench threads rows
-  ]
 
-stmContainersBench :: Int -> Int -> Benchmark
-stmContainersBench threads rows =
-  bench ("STM Containers") $ do
-    t <- atomically $ STMContainers.new :: IO (STMContainers.Map Int ())
-    flip Async.mapConcurrently [0 .. pred threads] $ \ti -> do
-      forM_ [rows * ti .. (pred rows) * ti] $ \ri -> do
-        atomically $ STMContainers.insert ri () t
+-- * Utils
+-------------------------
 
-unorderedContainersTVarBench :: Int -> Int -> Benchmark
-unorderedContainersTVarBench threads rows =
-  bench ("Unordered Containers + TVar") $ do
-    t <- newTVarIO UnorderedContainers.empty :: IO (TVar (UnorderedContainers.HashMap Int (TVar ())))
-    flip Async.mapConcurrently [0 .. pred threads] $ \ti -> do
-      forM_ [rows * ti .. (pred rows) * ti] $ \ri -> 
-        atomically $ do
-          c <- newTVar ()
-          tv <- readTVar t
-          writeTVar t $! UnorderedContainers.insert ri c tv
+slices :: Int -> [a] -> [[a]]
+slices size l =
+  case splitAt size l of
+    ([], _) -> []
+    (a, b) -> a : slices size b
+
+
+-- * Main
+-------------------------
+
+main = do
+  allActions <- MWC.runWithCreate $ replicateM actionsNum transactionGenerator
+  defaultMain $! flip map threadsNums $! \threadsNum ->
+    let
+      sliceSize = actionsNum `div` threadsNum
+      threadActions = slices sliceSize allActions
+      in 
+        bgroup
+          (shows threadsNum . showString "/" . shows sliceSize $ "")
+          [
+            bgroup "STM Containers"
+              [
+                bench "Focus-based" $ 
+                  scSessionRunner focusSCInterpreter threadActions,
+                bench "Specialized" $ 
+                  scSessionRunner specializedSCInterpreter threadActions
+              ],
+            bench "Unordered Containers + TVar" $
+              ucSessionRunner threadActions
+          ]
+  where
+    actionsNum = 30000
+    threadsNums = [1, 3, 6, 12, 24, 48, 96]
