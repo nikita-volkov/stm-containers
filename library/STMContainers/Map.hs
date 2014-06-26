@@ -1,8 +1,7 @@
 module STMContainers.Map
 (
   Map,
-  Indexable,
-  Association(..),
+  Key,
   new,
   insert,
   delete,
@@ -25,36 +24,36 @@ type Map k v = HAMT.HAMT (Association k v)
 
 -- |
 -- A standard constraint for keys.
-type Indexable a = (Eq a, Hashable a)
+type Key a = (Eq a, Hashable a)
 
 -- |
 -- A key-value association.
-data Association k v = Association !k !v
+type Association k v = (k, v)
 
 instance (Eq k) => HAMTNodes.Element (Association k v) where
   type ElementKey (Association k v) = k
-  elementKey (Association k v) = k
+  elementKey (k, v) = k
 
 {-# INLINE associationValue #-}
 associationValue :: Association k v -> v
-associationValue (Association _ v) = v
+associationValue (_, v) = v
 
 -- |
 -- Look up an item.
 {-# INLINE lookup #-}
-lookup :: (Indexable k) => k -> Map k v -> STM (Maybe v)
+lookup :: (Key k) => k -> Map k v -> STM (Maybe v)
 lookup k = focus Focus.lookupM k
 
 -- |
 -- Insert a key and a value.
 {-# INLINE insert #-}
-insert :: (Indexable k) => k -> v -> Map k v -> STM ()
-insert k v = HAMT.insert (Association k v)
+insert :: (Key k) => k -> v -> Map k v -> STM ()
+insert !k !v = HAMT.insert (k, v)
 
 -- |
 -- Delete an item by a key.
 {-# INLINE delete #-}
-delete :: (Indexable k) => k -> Map k v -> STM ()
+delete :: (Key k) => k -> Map k v -> STM ()
 delete = HAMT.focus Focus.deleteM
 
 -- |
@@ -65,15 +64,15 @@ delete = HAMT.focus Focus.deleteM
 -- E.g., you can lookup an item and delete it at the same time,
 -- or update it and return the new value.
 {-# INLINE focus #-}
-focus :: (Indexable k) => Focus.StrategyM STM v r -> k -> Map k v -> STM r
+focus :: (Key k) => Focus.StrategyM STM v r -> k -> Map k v -> STM r
 focus f k = HAMT.focus f' k
   where
-    f' = (fmap . fmap . fmap) (Association k) . f . fmap associationValue
+    f' = (fmap . fmap . fmap) (\v -> k `seq` v `seq` (k, v)) . f . fmap associationValue
 
 -- |
 -- Fold all the items of a map.
 {-# INLINE foldM #-}
-foldM :: (a -> Association k v -> STM a) -> a -> Map k v -> STM a
+foldM :: (a -> (k, v) -> STM a) -> a -> Map k v -> STM a
 foldM = HAMT.foldM
 
 -- |

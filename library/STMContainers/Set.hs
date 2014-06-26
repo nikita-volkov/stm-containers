@@ -1,7 +1,7 @@
 module STMContainers.Set
 (
   Set,
-  Indexable,
+  Element,
   new,
   insert,
   delete,
@@ -19,38 +19,38 @@ import qualified Focus
 
 -- |
 -- A hash set, based on an STM-specialized hash array mapped trie.
-type Set e = HAMT.HAMT (Element e)
+type Set e = HAMT.HAMT (HAMTElement e)
 
 -- |
 -- A standard constraint for elements.
-type Indexable a = (Eq a, Hashable a)
+type Element a = (Eq a, Hashable a)
 
-newtype Element e = Element e
+newtype HAMTElement e = HAMTElement e
 
-instance (Eq e) => HAMTNodes.Element (Element e) where
-  type ElementKey (Element e) = e
-  elementKey (Element e) = e
+instance (Eq e) => HAMTNodes.Element (HAMTElement e) where
+  type ElementKey (HAMTElement e) = e
+  elementKey (HAMTElement e) = e
 
 {-# INLINABLE elementValue #-}
-elementValue :: Element e -> e
-elementValue (Element e) = e
+elementValue :: HAMTElement e -> e
+elementValue (HAMTElement e) = e
 
 -- |
 -- Insert a new element.
 {-# INLINABLE insert #-}
-insert :: (Indexable e) => e -> Set e -> STM ()
-insert e = HAMT.insert (Element e)
+insert :: (Element e) => e -> Set e -> STM ()
+insert e = HAMT.insert (HAMTElement e)
 
 -- |
 -- Delete an element.
 {-# INLINABLE delete #-}
-delete :: (Indexable e) => e -> Set e -> STM ()
+delete :: (Element e) => e -> Set e -> STM ()
 delete = HAMT.focus Focus.deleteM
 
 -- |
 -- Lookup an element.
 {-# INLINABLE lookup #-}
-lookup :: (Indexable e) => e -> Set e -> STM Bool
+lookup :: (Element e) => e -> Set e -> STM Bool
 lookup e = fmap (maybe False (const True)) . HAMT.focus Focus.lookupM e
 
 -- |

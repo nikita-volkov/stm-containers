@@ -35,7 +35,7 @@ interpretHashMapUpdate update =
 stmMapToHashMap :: (Hashable k, Eq k) => STMMap.Map k v -> STM (HashMap.HashMap k v)
 stmMapToHashMap = STMMap.foldM f HashMap.empty
   where
-    f m (STMMap.Association k v) = return (HashMap.insert k v m)
+    f m (k, v) = return (HashMap.insert k v m)
 
 stmMapFromList :: (Hashable k, Eq k) => [(k, v)] -> STM (STMMap.Map k v)
 stmMapFromList list = do
@@ -44,10 +44,7 @@ stmMapFromList list = do
   return m
 
 stmMapToList :: STMMap.Map k v -> STM [(k, v)]
-stmMapToList = STMMap.foldM (\l -> return . (:l) . stmMapAssociationToPair) []
-
-stmMapAssociationToPair :: STMMap.Association k v -> (k, v)
-stmMapAssociationToPair (STMMap.Association k v) = (k, v)
+stmMapToList = STMMap.foldM (\l -> return . (:l)) []
 
 interpretSTMMapUpdateAsHashMap :: (Hashable k, Eq k) => Update.Update k v -> HashMap.HashMap k v
 interpretSTMMapUpdateAsHashMap =
