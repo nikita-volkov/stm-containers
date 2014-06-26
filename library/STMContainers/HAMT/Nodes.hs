@@ -16,13 +16,6 @@ data Node e =
 
 type Hash = Int
 
-data Operation e r =
-  Insert e |
-  Delete |
-  Lookup |
-  Edit (Maybe e -> (r, Maybe e))
-
-
 class (Eq (ElementKey e)) => Element e where
   type ElementKey e
   elementKey :: e -> ElementKey e
