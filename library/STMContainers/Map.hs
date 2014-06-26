@@ -20,7 +20,7 @@ import qualified Focus
 
 -- |
 -- A hash table, based on an STM-specialized hash array mapped trie.
-type Map k v = HAMT.HAMT (Association k v)
+newtype Map k v = Map (HAMT.HAMT (Association k v))
 
 -- |
 -- A standard constraint for keys.
@@ -48,13 +48,13 @@ lookup k = focus Focus.lookupM k
 -- Insert a key and a value.
 {-# INLINE insert #-}
 insert :: (Key k) => v -> k -> Map k v -> STM ()
-insert !v !k = HAMT.insert (k, v)
+insert !v !k (Map h) = HAMT.insert (k, v) h
 
 -- |
 -- Delete an item by a key.
 {-# INLINE delete #-}
 delete :: (Key k) => k -> Map k v -> STM ()
-delete = HAMT.focus Focus.deleteM
+delete k (Map h) = HAMT.focus Focus.deleteM k h
 
 -- |
 -- Focus on an item by a key with a strategy.
@@ -65,7 +65,7 @@ delete = HAMT.focus Focus.deleteM
 -- or update it and return the new value.
 {-# INLINE focus #-}
 focus :: (Key k) => Focus.StrategyM STM v r -> k -> Map k v -> STM r
-focus f k = HAMT.focus f' k
+focus f k (Map h) = HAMT.focus f' k h
   where
     f' = (fmap . fmap . fmap) (\v -> k `seq` v `seq` (k, v)) . f . fmap associationValue
 
@@ -73,16 +73,16 @@ focus f k = HAMT.focus f' k
 -- Fold all the items of a map.
 {-# INLINE foldM #-}
 foldM :: (a -> (k, v) -> STM a) -> a -> Map k v -> STM a
-foldM = HAMT.foldM
+foldM s a (Map h) = HAMT.foldM s a h
 
 -- |
 -- Construct a new map.
 {-# INLINE new #-}
 new :: STM (Map k v)
-new = HAMT.new
+new = Map <$> HAMT.new
 
 -- |
 -- Check, whether the map is empty.
 {-# INLINE null #-}
 null :: Map k v -> STM Bool
-null = HAMT.null
+null (Map h) = HAMT.null h
