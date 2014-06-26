@@ -6,7 +6,6 @@ module STMContainers.Set
   insert,
   delete,
   lookup,
-  focus,
   foldM,
   null,
 )
@@ -55,12 +54,6 @@ foldM f = HAMT.foldM (\a -> f a . elementValue)
 {-# INLINABLE new #-}
 new :: STM (Set e)
 new = HAMT.new
-
-{-# INLINABLE focus #-}
-focus :: (Indexable e) => Focus.StrategyM STM () r -> e -> Set e -> STM r
-focus f e = HAMT.focus f' e
-  where
-    f' = (fmap . fmap . fmap) (const (Element e)) . f . fmap (const ())
 
 {-# INLINABLE null #-}
 null :: Set e -> STM Bool
