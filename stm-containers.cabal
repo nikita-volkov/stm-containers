@@ -8,7 +8,7 @@ description:
   This library is based on an STM-specialized implementation of
   Hash Array Mapped Trie.
   It provides very efficient implementations of @Map@ and @Set@ data structures,
-  which are slightly slower than \"unordered-containers\",
+  which are slightly slower than their counterparts from \"unordered-containers\",
   but scale very well on concurrent access patterns.
 category:
   Data Structures, STM, Concurrency
