@@ -24,7 +24,7 @@ main = do
         bench "specialized" $
           do
             t <- atomically $ STMContainers.new :: IO (STMContainers.Map Text.Text ())
-            forM_ keys $ \k -> atomically $ STMContainers.insert k () t
+            forM_ keys $ \k -> atomically $ STMContainers.insert () k t
       ]
       ,
       bench "Unordered Containers" $

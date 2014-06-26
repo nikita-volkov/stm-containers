@@ -47,8 +47,8 @@ lookup k = focus Focus.lookupM k
 -- |
 -- Insert a key and a value.
 {-# INLINE insert #-}
-insert :: (Key k) => k -> v -> Map k v -> STM ()
-insert !k !v = HAMT.insert (k, v)
+insert :: (Key k) => v -> k -> Map k v -> STM ()
+insert !v !k = HAMT.insert (k, v)
 
 -- |
 -- Delete an item by a key.

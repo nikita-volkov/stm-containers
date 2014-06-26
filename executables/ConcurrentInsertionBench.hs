@@ -41,7 +41,7 @@ ucInterpreter m =
 specializedSCInterpreter :: Interpreter SC.Map
 specializedSCInterpreter m =
   iterM $ \case
-    Insert k v n -> SC.insert k v m >> n
+    Insert k v n -> SC.insert v k m >> n
 
 focusSCInterpreter :: Interpreter SC.Map
 focusSCInterpreter m =

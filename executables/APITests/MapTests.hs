@@ -15,7 +15,7 @@ interpretSTMMapUpdate :: (Hashable k, Eq k) => Update.Update k v -> STM (STMMap.
 interpretSTMMapUpdate update = do
   m <- STMMap.new
   flip iterM update $ \case
-    Update.Insert k v c -> STMMap.insert k v m >> c
+    Update.Insert k v c -> STMMap.insert v k m >> c
     Update.Delete k c   -> STMMap.delete k m >> c
     Update.Adjust f k c -> STMMap.focus ((Focus.adjustM . fmap return) f) k m >> c
   return m
@@ -40,7 +40,7 @@ stmMapToHashMap = STMMap.foldM f HashMap.empty
 stmMapFromList :: (Hashable k, Eq k) => [(k, v)] -> STM (STMMap.Map k v)
 stmMapFromList list = do
   m <- STMMap.new
-  forM_ list $ \(k, v) -> STMMap.insert k v m
+  forM_ list $ \(k, v) -> STMMap.insert v k m
   return m
 
 stmMapToList :: STMMap.Map k v -> STM [(k, v)]
@@ -93,17 +93,17 @@ test_insert = do
   assertEqual (HashMap.fromList [('a', 1), ('b', 2), ('c', 3)]) =<< do 
     atomically $ do
       m <- STMMap.new
-      STMMap.insert 'a' 1 m
-      STMMap.insert 'c' 3 m
-      STMMap.insert 'b' 2 m
+      STMMap.insert 1 'a' m
+      STMMap.insert 3 'c' m
+      STMMap.insert 2 'b' m
       stmMapToHashMap m
 
 test_insert2 = do
   assertEqual (HashMap.fromList [(111 :: Int, ()), (207, ())]) =<< do 
     atomically $ do
       m <- STMMap.new
-      STMMap.insert 111 () m
-      STMMap.insert 207 () m
+      STMMap.insert () 111 m
+      STMMap.insert () 207 m
       stmMapToHashMap m
 
 test_adjust = do
