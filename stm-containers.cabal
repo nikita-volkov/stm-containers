@@ -11,6 +11,7 @@ description:
   which are slightly slower than \"unordered-containers\",
   but scale very well on concurrent access patterns.
 category:
+  Data Structures, STM, Concurrency
 homepage:
   https://github.com/nikita-volkov/stm-containers 
 bug-reports:
