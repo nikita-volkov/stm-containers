@@ -6,46 +6,55 @@ import qualified Data.HashMap.Strict as UnorderedContainers
 import qualified Data.Map as Containers
 import qualified STMContainers.Map as STMContainers
 import qualified Focus
-import qualified System.Random as Random
+import qualified System.Random.MWC.Monad as MWC
+import qualified Data.Char as Char
+import qualified Data.Text as Text
 
-main =
+main = do
+  keys <- MWC.runWithCreate $ replicateM rows keyGenerator
   defaultMain
-  [
-    bgroup "STM Containers"
     [
-      bench "focus-based" $ 
-        do
-          t <- atomically $ STMContainers.new :: IO (STMContainers.Map String ())
-          forM_ [0..rows] $ \i -> atomically $ STMContainers.focus (Focus.insertM ()) (iToK i) t
+      bgroup "STM Containers"
+      [
+        bench "focus-based" $ 
+          do
+            t <- atomically $ STMContainers.new :: IO (STMContainers.Map Text.Text ())
+            forM_ keys $ \k -> atomically $ STMContainers.focus (Focus.insertM ()) k t
+        ,
+        bench "specialized" $
+          do
+            t <- atomically $ STMContainers.new :: IO (STMContainers.Map Text.Text ())
+            forM_ keys $ \k -> atomically $ STMContainers.insert k () t
+      ]
       ,
-      bench "specialized" $
+      bench "Unordered Containers + TVar" $
         do
-          t <- atomically $ STMContainers.new :: IO (STMContainers.Map String ())
-          forM_ [0..rows] $ \i -> atomically $ STMContainers.insert (iToK i) () t
+          t <- newTVarIO UnorderedContainers.empty :: IO (TVar (UnorderedContainers.HashMap Text.Text (TVar ())))
+          forM_ keys $ \k -> atomically $ do
+            c <- newTVar ()
+            tv <- readTVar t
+            writeTVar t $! UnorderedContainers.insert k c tv
+      ,
+      bench "Unordered Containers" $
+        nf (foldr (\k -> UnorderedContainers.insert k ()) UnorderedContainers.empty) keys
+      ,
+      bench "Containers" $
+        nf (foldr (\k -> Containers.insert k ()) Containers.empty) keys
+      ,
+      bench "Hashtables" $ 
+        do
+          t <- Hashtables.new :: IO (Hashtables.BasicHashTable Text.Text ())
+          forM_ keys $ \k -> Hashtables.insert t k ()
     ]
-    ,
-    bench "Unordered Containers + TVar" $
-      do
-        t <- newTVarIO UnorderedContainers.empty :: IO (TVar (UnorderedContainers.HashMap String (TVar ())))
-        forM_ [0..rows] $ \i -> atomically $ do
-          c <- newTVar ()
-          tv <- readTVar t
-          writeTVar t $! UnorderedContainers.insert (iToK i) c tv
-    ,
-    bench "Unordered Containers" $
-      nf (foldr (\i -> UnorderedContainers.insert (iToK i) ()) UnorderedContainers.empty) [0..rows]
-    ,
-    bench "Containers" $
-      nf (foldr (\i -> Containers.insert (iToK i) ()) Containers.empty) [0..rows]
-    ,
-    bench "Hashtables" $ 
-      do
-        t <- Hashtables.new :: IO (Hashtables.BasicHashTable String ())
-        forM_ [0..rows] $ \i -> Hashtables.insert t (iToK i) ()
-  ]
 
 rows :: Int = 100000
 
--- | Produce a pseudo-random key.
-iToK :: Int -> String
-iToK i = case Random.mkStdGen i of g -> take 7 $ Random.randomRs ('a', 'z') g
+keyGenerator :: MWC.Rand IO Text.Text
+keyGenerator = do
+  l <- length
+  s <- replicateM l char
+  return $! Text.pack s
+  where
+    length = MWC.uniformR (7, 20)
+    char = Char.chr <$> MWC.uniformR (Char.ord 'a', Char.ord 'z')
+
