@@ -131,6 +131,7 @@ benchmark insertion-bench
   default-language:
     Haskell2010
   build-depends:
+    random == 1.0.*,
     criterion == 0.8.*,
     -- data:
     stm-containers,
