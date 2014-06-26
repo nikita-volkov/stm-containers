@@ -1,4 +1,4 @@
-module STMContainers.HAMT.Node.Level where
+module STMContainers.HAMT.Level where
 
 import STMContainers.Prelude hiding (mask)
 
