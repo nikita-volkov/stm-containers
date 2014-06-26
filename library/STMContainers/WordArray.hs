@@ -29,6 +29,7 @@ indices (WordArray b _) = b
 maxSize :: Int
 maxSize = Indices.maxSize
 
+{-# INLINE empty #-}
 empty :: WordArray e
 empty = WordArray 0 a
   where
