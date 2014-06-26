@@ -35,26 +35,38 @@ instance (Eq e) => HAMTNodes.Element (Element e) where
 elementValue :: Element e -> e
 elementValue (Element e) = e
 
+-- |
+-- Insert a new element.
 {-# INLINABLE insert #-}
 insert :: (Indexable e) => e -> Set e -> STM ()
 insert e = HAMT.insert (Element e)
 
+-- |
+-- Delete an element.
 {-# INLINABLE delete #-}
 delete :: (Indexable e) => e -> Set e -> STM ()
 delete = HAMT.focus Focus.deleteM
 
+-- |
+-- Lookup an element.
 {-# INLINABLE lookup #-}
 lookup :: (Indexable e) => e -> Set e -> STM Bool
 lookup e = fmap (maybe False (const True)) . HAMT.focus Focus.lookupM e
 
+-- |
+-- Fold all the elements.
 {-# INLINABLE foldM #-}
 foldM :: (a -> e -> STM a) -> a -> Set e -> STM a
 foldM f = HAMT.foldM (\a -> f a . elementValue)
 
+-- |
+-- Construct a new set.
 {-# INLINABLE new #-}
 new :: STM (Set e)
 new = HAMT.new
 
+-- |
+-- Check, whether the set is empty.
 {-# INLINABLE null #-}
 null :: Set e -> STM Bool
 null = HAMT.null
