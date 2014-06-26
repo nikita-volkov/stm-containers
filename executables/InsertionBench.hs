@@ -27,14 +27,6 @@ main = do
             forM_ keys $ \k -> atomically $ STMContainers.insert k () t
       ]
       ,
-      bench "Unordered Containers + TVar" $
-        do
-          t <- newTVarIO UnorderedContainers.empty :: IO (TVar (UnorderedContainers.HashMap Text.Text (TVar ())))
-          forM_ keys $ \k -> atomically $ do
-            c <- newTVar ()
-            tv <- readTVar t
-            writeTVar t $! UnorderedContainers.insert k c tv
-      ,
       bench "Unordered Containers" $
         nf (foldr (\k -> UnorderedContainers.insert k ()) UnorderedContainers.empty) keys
       ,
