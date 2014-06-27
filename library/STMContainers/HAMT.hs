@@ -27,4 +27,4 @@ new = Nodes.new
 
 {-# INLINE null #-}
 null :: HAMT e -> STM Bool
-null v = $notImplemented
+null = Nodes.null

@@ -119,3 +119,14 @@ test_focusReachesTheTarget = do
       m <- stmMapFromList [('a', 1), ('b', 2)]
       STMMap.focus Focus.lookupM 'b' m
 
+test_notNull = do
+  assertEqual False =<< do 
+    atomically $ STMMap.null =<< stmMapFromList [('a', ())]
+
+test_nullAfterDeletingTheLastElement = do
+  assertEqual True =<< do 
+    atomically $ do
+      m <- stmMapFromList [('a', ())]
+      STMMap.delete 'a' m
+      STMMap.null m
+
