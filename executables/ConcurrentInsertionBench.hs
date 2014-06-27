@@ -8,31 +8,33 @@ import qualified STMContainers.Map as SC
 import qualified Control.Concurrent.Async as Async
 import qualified System.Random.MWC.Monad as MWC
 import qualified Focus
+import qualified Data.Char as Char
+import qualified Data.Text as Text
 
 
 type UCMap k v = TVar (UC.HashMap k (TVar v))
 
 
--- * Actions 
+-- * Transactions 
 -------------------------
 
-data ActionF k v n where
-  Insert :: k -> v -> n -> ActionF k v n
+data TransactionF k v n where
+  Insert :: v -> k -> n -> TransactionF k v n
   deriving (Functor)
 
-type Action k v = Free (ActionF k v)
+type Transaction k v = Free (TransactionF k v)
 
 
 -- * Interpreters
 -------------------------
 
 type Interpreter m = 
-  forall k v r. (Hashable k, Eq k) => m k v -> Action k v r -> STM r
+  forall k v r. (Hashable k, Eq k) => m k v -> Transaction k v r -> STM r
 
 ucInterpreter :: Interpreter UCMap
 ucInterpreter m = 
   iterM $ \case
-    Insert k v n -> do
+    Insert v k n -> do
       mv <- readTVar m
       vt <- newTVar v
       writeTVar m $! UC.insert k vt mv
@@ -41,33 +43,33 @@ ucInterpreter m =
 specializedSCInterpreter :: Interpreter SC.Map
 specializedSCInterpreter m =
   iterM $ \case
-    Insert k v n -> SC.insert v k m >> n
+    Insert v k n -> SC.insert v k m >> n
 
 focusSCInterpreter :: Interpreter SC.Map
 focusSCInterpreter m =
   iterM $ \case
-    Insert k v n -> SC.focus (Focus.insertM v) k m >> n
+    Insert v k n -> SC.focus (Focus.insertM v) k m >> n
 
 
 -- * Session and runners
 -------------------------
 
 -- | A list of transactions per thread.
-type Session k v = [[Action k v ()]]
+type Session k v = [[Transaction k v ()]]
 
 type SessionRunner = 
   forall k v. (Hashable k, Eq k) => Session k v -> IO ()
 
 scSessionRunner :: Interpreter SC.Map -> SessionRunner
-scSessionRunner interpreter threadActions = do
+scSessionRunner interpreter threadTransactions = do
   m <- atomically $ SC.new
-  void $ flip Async.mapConcurrently threadActions $ \actions -> do
+  void $ flip Async.mapConcurrently threadTransactions $ \actions -> do
     forM_ actions $ atomically . interpreter m
 
 ucSessionRunner :: SessionRunner
-ucSessionRunner threadActions = do
+ucSessionRunner threadTransactions = do
   m <- newTVarIO UC.empty
-  void $ flip Async.mapConcurrently threadActions $ \actions -> do
+  void $ flip Async.mapConcurrently threadTransactions $ \actions -> do
     forM_ actions $ atomically . ucInterpreter m
 
 
@@ -76,13 +78,19 @@ ucSessionRunner threadActions = do
 
 type Generator a = MWC.Rand IO a
 
-transactionGenerator :: Generator (Action Float Int ())
-transactionGenerator =
-  Free <$> (Insert <$> k <*> v <*> n)
+transactionGenerator :: Generator (Transaction Text.Text () ())
+transactionGenerator = do
+  k <- keyGenerator
+  return $ Free $ Insert () k (Pure ())
+
+keyGenerator :: Generator Text.Text
+keyGenerator = do
+  l <- length
+  s <- replicateM l char
+  return $! Text.pack s
   where
-    k = MWC.uniform
-    v = MWC.uniform
-    n = MWC.uniform >>= bool (return (Pure ())) transactionGenerator
+    length = MWC.uniformR (7, 20)
+    char = Char.chr <$> MWC.uniformR (Char.ord 'a', Char.ord 'z')
 
 
 -- * Utils
@@ -99,11 +107,11 @@ slices size l =
 -------------------------
 
 main = do
-  allActions <- MWC.runWithCreate $ replicateM actionsNum transactionGenerator
+  allTransactions <- MWC.runWithCreate $ replicateM actionsNum transactionGenerator
   defaultMain $! flip map threadsNums $! \threadsNum ->
     let
       sliceSize = actionsNum `div` threadsNum
-      threadActions = slices sliceSize allActions
+      threadTransactions = slices sliceSize allTransactions
       in 
         bgroup
           (shows threadsNum . showString "/" . shows sliceSize $ "")
@@ -111,13 +119,13 @@ main = do
             bgroup "STM Containers"
               [
                 bench "Focus-based" $ 
-                  scSessionRunner focusSCInterpreter threadActions,
+                  scSessionRunner focusSCInterpreter threadTransactions,
                 bench "Specialized" $ 
-                  scSessionRunner specializedSCInterpreter threadActions
+                  scSessionRunner specializedSCInterpreter threadTransactions
               ],
             bench "Unordered Containers" $
-              ucSessionRunner threadActions
+              ucSessionRunner threadTransactions
           ]
   where
     actionsNum = 100000
-    threadsNums = [1, 2, 4, 8, 16, 32]
+    threadsNums = [1, 2, 4, 6, 8, 12, 16, 32]
