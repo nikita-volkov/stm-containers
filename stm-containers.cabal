@@ -151,7 +151,7 @@ benchmark insertion-bench
     loch-th == 0.2.*,
     placeholders == 0.1.*,
     -- general:
-    base >= 4.5 && < 5
+    base >= 4.5 && < 4.8
 
 
 benchmark concurrent-insertion-bench
@@ -183,7 +183,7 @@ benchmark concurrent-insertion-bench
     -- general:
     free >= 4.5 && < 4.10,
     async == 2.0.*,
-    base >= 4.5 && < 5
+    base >= 4.5 && < 4.8
 
 
 benchmark concurrent-transactions-bench
@@ -217,4 +217,4 @@ benchmark concurrent-transactions-bench
     mtl == 2.*,
     free >= 4.5 && < 4.10,
     async == 2.0.*,
-    base >= 4.5 && < 5
+    base >= 4.5 && < 4.8
