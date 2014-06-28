@@ -45,7 +45,7 @@ lookup :: (Key k) => k -> Map k v -> STM (Maybe v)
 lookup k = focus Focus.lookupM k
 
 -- |
--- Insert a key and a value.
+-- Insert a value at a key.
 {-# INLINE insert #-}
 insert :: (Key k) => v -> k -> Map k v -> STM ()
 insert !v !k (Map h) = HAMT.insert (k, v) h
@@ -61,7 +61,7 @@ delete k (Map h) = HAMT.focus Focus.deleteM k h
 -- 
 -- This function allows to perform composite operations in a single access
 -- to a map item.
--- E.g., you can lookup an item and delete it at the same time,
+-- E.g., you can look up an item and delete it at the same time,
 -- or update it and return the new value.
 {-# INLINE focus #-}
 focus :: (Key k) => Focus.StrategyM STM v r -> k -> Map k v -> STM r
