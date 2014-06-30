@@ -192,7 +192,7 @@ main = do
   -- Pregenerate the transactions:
   transactionsGroups <- 
     MWC.runWithCreate $ replicateM (maximum threadsNums) $
-    transactionsGroupGenerator (actionsNum `div` (maximum threadsNums))
+    transactionsGroupGenerator (transactionsNum `div` (maximum threadsNums))
 
   -- Run the benchmark:
   defaultMain $! flip map threadsNums $ \threadsNum -> 
@@ -201,8 +201,8 @@ main = do
         map concat $! 
         slices (length transactionsGroups `div` threadsNum) transactionsGroups
       in
-        bench (shows threadsNum . showString "/" . shows (actionsNum `div` threadsNum) $ "") $
+        bench (shows threadsNum . showString "/" . shows (transactionsNum `div` threadsNum) $ "") $
           scSessionRunner specializedSCInterpreter session
   where
     threadsNums = [1, 2, 4, 6, 8, 12, 16, 32, 40, 52, 64, 80, 128]
-    actionsNum = 200000
+    transactionsNum = 400000
