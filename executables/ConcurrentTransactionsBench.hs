@@ -204,5 +204,5 @@ main = do
         bench (shows threadsNum . showString "/" . shows (actionsNum `div` threadsNum) $ "") $
           scSessionRunner specializedSCInterpreter session
   where
-    threadsNums = [1, 2, 4, 6, 8, 12, 16, 32, 64, 128]
+    threadsNums = [1, 2, 4, 6, 8, 12, 16, 32, 40, 52, 64, 80, 128]
     actionsNum = 200000

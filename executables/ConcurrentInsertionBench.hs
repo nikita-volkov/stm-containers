@@ -128,4 +128,4 @@ main = do
           ]
   where
     actionsNum = 100000
-    threadsNums = [1, 2, 4, 6, 8, 12, 16, 32]
+    threadsNums = [1, 2, 4, 6, 8, 12, 16, 32, 40, 52, 64, 80, 128]
