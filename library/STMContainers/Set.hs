@@ -31,42 +31,42 @@ instance (Eq e) => HAMTNodes.Element (HAMTElement e) where
   type ElementKey (HAMTElement e) = e
   elementKey (HAMTElement e) = e
 
-{-# INLINABLE elementValue #-}
+{-# INLINE elementValue #-}
 elementValue :: HAMTElement e -> e
 elementValue (HAMTElement e) = e
 
 -- |
 -- Insert a new element.
-{-# INLINABLE insert #-}
+{-# INLINE insert #-}
 insert :: (Element e) => e -> Set e -> STM ()
 insert e = HAMT.insert (HAMTElement e) . hamt
 
 -- |
 -- Delete an element.
-{-# INLINABLE delete #-}
+{-# INLINE delete #-}
 delete :: (Element e) => e -> Set e -> STM ()
 delete e = HAMT.focus Focus.deleteM e . hamt
 
 -- |
 -- Lookup an element.
-{-# INLINABLE lookup #-}
+{-# INLINE lookup #-}
 lookup :: (Element e) => e -> Set e -> STM Bool
 lookup e = fmap (maybe False (const True)) . HAMT.focus Focus.lookupM e . hamt
 
 -- |
 -- Fold all the elements.
-{-# INLINABLE foldM #-}
+{-# INLINE foldM #-}
 foldM :: (a -> e -> STM a) -> a -> Set e -> STM a
 foldM f a = HAMT.foldM (\a -> f a . elementValue) a . hamt
 
 -- |
 -- Construct a new set.
-{-# INLINABLE new #-}
+{-# INLINE new #-}
 new :: STM (Set e)
 new = Set <$> HAMT.new
 
 -- |
 -- Check, whether the set is empty.
-{-# INLINABLE null #-}
+{-# INLINE null #-}
 null :: Set e -> STM Bool
 null = HAMT.null . hamt
