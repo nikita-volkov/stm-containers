@@ -6,6 +6,7 @@ module STMContainers.Multimap
   insert,
   delete,
   lookup,
+  focus,
   foldM,
   null,
 )
@@ -70,6 +71,40 @@ delete v k (Multimap m) =
           returnDecision Focus.Keep
       where
         returnDecision c = return ((), c)
+
+-- |
+-- Focus on an item with a strategy by a value and a key.
+-- 
+-- This function allows to perform simultaneous lookup and modification.
+-- 
+-- The strategy is over a unit since we already know,
+-- which value we're focusing on and it doesn't make sense to replace it,
+-- however we still can still decide wether to keep or remove it.
+{-# INLINE focus #-}
+focus :: (Association k v) => Focus.StrategyM STM () r -> v -> k -> Multimap k v -> STM r
+focus = 
+  \s v k (Multimap m) -> Map.focus (liftSetItemStrategy v s) k m
+  where
+    liftSetItemStrategy :: 
+      (Set.Element e) => e -> Focus.StrategyM STM () r -> Focus.StrategyM STM (Set.Set e) r
+    liftSetItemStrategy e s =
+      \case
+        Nothing ->
+          traversePair liftDecision =<< s Nothing
+          where
+            liftDecision =
+              \case
+                Focus.Replace b ->
+                  do
+                    s <- Set.new
+                    Set.insert e s
+                    return (Focus.Replace s)
+                _ ->
+                  return Focus.Keep
+        Just set -> 
+          do
+            r <- Set.focus s e set
+            (r,) . bool Focus.Keep Focus.Remove <$> Set.null set
 
 -- |
 -- Fold all the items.

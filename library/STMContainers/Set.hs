@@ -6,6 +6,7 @@ module STMContainers.Set
   insert,
   delete,
   lookup,
+  focus,
   foldM,
   null,
 )
@@ -52,6 +53,21 @@ delete e = HAMT.focus Focus.deleteM e . hamt
 {-# INLINE lookup #-}
 lookup :: (Element e) => e -> Set e -> STM Bool
 lookup e = fmap (maybe False (const True)) . HAMT.focus Focus.lookupM e . hamt
+
+-- |
+-- Focus on an element with a strategy.
+-- 
+-- This function allows to perform simultaneous lookup and modification.
+-- 
+-- The strategy is over a unit since we already know, 
+-- which element we're focusing on and it doesn't make sense to replace it,
+-- however we still can still decide wether to keep or remove it.
+{-# INLINE focus #-}
+focus :: (Element e) => Focus.StrategyM STM () r -> e -> Set e -> STM r
+focus s e = HAMT.focus elementStrategy e . hamt
+  where
+    elementStrategy = 
+      (fmap . fmap . fmap) (const (HAMTElement e)) . s . fmap (const ())
 
 -- |
 -- Fold all the elements.
