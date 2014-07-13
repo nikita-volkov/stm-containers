@@ -134,9 +134,6 @@ focus s h k l ns = do
                     return (Focus.Replace (Nodes ns'))
                   _ ->
                     return Focus.Keep
-    -- | A replacement for the missing 'Traverse' instance of pair in base < 4.7.
-    traversePair f (x, y) = (,) x <$> f y
-                  
 
 null :: Nodes e -> STM Bool
 null = fmap WordArray.null . readTVar

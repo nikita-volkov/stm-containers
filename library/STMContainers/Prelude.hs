@@ -4,6 +4,7 @@ module STMContainers.Prelude
   bug,
   bottom,
   bool,
+  traversePair,
 )
 where
 
@@ -72,3 +73,7 @@ bottom = [e| $bug "Bottom evaluated" |]
 bool :: a -> a -> Bool -> a
 bool f _ False = f
 bool _ t True  = t
+
+-- | A replacement for the missing 'Traverse' instance of pair in base < 4.7.
+traversePair :: Functor f => (a -> f b) -> (c, a) -> f (c, b)
+traversePair f (x, y) = (,) x <$> f y
