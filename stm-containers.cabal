@@ -59,6 +59,8 @@ library
     hashable < 1.3,
     -- control:
     focus > 0.1.0 && < 0.2,
+    -- preludes:
+    base-prelude == 0.1.*,
     -- debugging:
     loch-th == 0.2.*,
     placeholders == 0.1.*,
@@ -89,6 +91,8 @@ test-suite word-array-tests
     hashable < 1.3,
     -- control:
     focus > 0.1.0 && < 0.2,
+    -- preludes:
+    base-prelude == 0.1.*,
     -- debugging:
     loch-th == 0.2.*,
     placeholders == 0.1.*,
@@ -116,6 +120,7 @@ test-suite api-tests
     loch-th == 0.2.*,
     placeholders == 0.1.*,
     -- general:
+    base-prelude == 0.1.*,
     focus > 0.1.0 && < 0.2,
     unordered-containers == 0.2.*,
     free >= 4.6 && < 4.10,

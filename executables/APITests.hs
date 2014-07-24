@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -F -pgmF htfpp #-}
 
 import Test.Framework
-import STMContainers.Prelude
+import BasePrelude
 
 import {-@ HTF_TESTS @-} APITests.MapTests
 

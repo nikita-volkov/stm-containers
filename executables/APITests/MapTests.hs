@@ -2,7 +2,8 @@
 module APITests.MapTests where
 
 import Test.Framework
-import STMContainers.Prelude
+import BasePrelude
+import Data.Hashable
 import STMContainers.Transformers
 import Control.Monad.Free
 import qualified APITests.MapTests.Update as Update

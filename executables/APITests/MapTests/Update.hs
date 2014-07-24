@@ -1,7 +1,7 @@
 module APITests.MapTests.Update where
 
 import Test.Framework
-import STMContainers.Prelude hiding (insert, delete, update)
+import BasePrelude hiding (insert, delete, update)
 import STMContainers.Transformers
 import Control.Monad.Free
 import Control.Monad.Free.TH
