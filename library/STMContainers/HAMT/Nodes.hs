@@ -1,6 +1,7 @@
 module STMContainers.HAMT.Nodes where
 
 import STMContainers.Prelude hiding (insert, lookup, delete, foldM, null)
+import qualified STMContainers.Prelude as Prelude
 import qualified STMContainers.WordArray as WordArray
 import qualified STMContainers.SizedArray as SizedArray
 import qualified STMContainers.HAMT.Level as Level
@@ -140,7 +141,7 @@ null = fmap WordArray.null . readTVar
 
 foldM :: (a -> e -> STM a) -> a -> Level.Level -> Nodes e -> STM a
 foldM step acc level = 
-  readTVar >=> WordArray.foldM step' acc
+  readTVar >=> Prelude.foldM step' acc . WordArray.elements
   where
     step' acc' = \case
       Nodes ns -> foldM step acc' (Level.succ level) ns

@@ -55,7 +55,3 @@ toList w = filter (testBit w) allIndices
 {-# NOINLINE allIndices #-}
 allIndices :: [Index]
 allIndices = [0 .. pred maxSize]
-
-{-# INLINE traverse_ #-}
-traverse_ :: Applicative f => (Index -> f b) -> Indices -> f ()
-traverse_ f = inline Prelude.traverse_ f . inline toList

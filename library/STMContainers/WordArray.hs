@@ -179,16 +179,6 @@ size = Indices.size . indices
 null :: WordArray e -> Bool
 null = Indices.null . indices
 
-{-# INLINE traverse_ #-}
-traverse_ :: Applicative f => (a -> f b) -> WordArray a -> f ()
-traverse_ f =
-  inline Prelude.traverse_ f . elements
-
-{-# INLINE foldM #-}
-foldM :: Monad m => (a -> b -> m a) -> a -> WordArray b -> m a
-foldM step acc =
-  inline Prelude.foldM step acc . elements
-
 {-# INLINE focusM #-}
 focusM :: Monad m => Focus.StrategyM m a r -> Index -> WordArray a -> m (r, Maybe (WordArray a))
 focusM f i w = do
