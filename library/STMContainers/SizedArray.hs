@@ -11,6 +11,11 @@ import qualified Focus
 data SizedArray a =
   SizedArray {-# UNPACK #-} !Int {-# UNPACK #-} !(Array a)
 
+instance Foldable SizedArray where
+  {-# INLINE foldr #-}
+  foldr step r (SizedArray size array) =
+    foldr step r $ map (indexArray array) [0 .. pred size]
+
 -- |
 -- An index of an element.
 type Index = Int

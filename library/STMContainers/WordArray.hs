@@ -13,6 +13,11 @@ import qualified Focus
 data WordArray e =
   WordArray {-# UNPACK #-} !Indices {-# UNPACK #-} !(Array e)
 
+instance Foldable WordArray where
+  {-# INLINE foldr #-}
+  foldr step r (WordArray indices array) =
+    foldr (step . indexArray array) r $ Indices.positions indices
+
 -- | 
 -- A bitmap of set elements.
 type Indices = Indices.Indices

@@ -34,3 +34,7 @@ test_focusMLookup = do
   where
     w = WordArray.fromList [(3, 'a'), (7, 'b'), (14, 'c')]
 
+test_foldable = do
+  assertEqual "abdc" $ toList w
+  where
+    w = WordArray.fromList [(3, 'a'), (7, 'b'), (8, 'd'), (14, 'c')]

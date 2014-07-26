@@ -141,7 +141,7 @@ null = fmap WordArray.null . readTVar
 
 foldM :: (a -> e -> STM a) -> a -> Level.Level -> Nodes e -> STM a
 foldM step acc level = 
-  readTVar >=> Prelude.foldM step' acc . WordArray.elements
+  readTVar >=> foldlM step' acc
   where
     step' acc' = \case
       Nodes ns -> foldM step acc' (Level.succ level) ns

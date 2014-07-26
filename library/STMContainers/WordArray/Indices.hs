@@ -10,10 +10,12 @@ type Indices = Int
 
 type Index = Int
 
+type Position = Int
+
 -- |
 -- A number of indexes, preceding this one.
 {-# INLINE position #-}
-position :: Index -> Indices -> Int
+position :: Index -> Indices -> Position
 position i b = popCount (b .&. (bit i - 1))
 
 {-# INLINE singleton #-}
@@ -46,12 +48,21 @@ maxSize = bitSize (undefined :: Indices)
 
 {-# INLINE fromList #-}
 fromList :: [Index] -> Indices
-fromList = foldr (.|.) 0 . map bit
+fromList = Prelude.foldr (.|.) 0 . map bit
 
 {-# INLINE toList #-}
 toList :: Indices -> [Index]
 toList w = filter (testBit w) allIndices
 
+{-# INLINE positions #-}
+positions :: Indices -> [Position]
+positions = enumFromTo 0 . pred . size
+
 {-# NOINLINE allIndices #-}
 allIndices :: [Index]
 allIndices = [0 .. pred maxSize]
+
+{-# INLINE foldr #-}
+foldr :: (Index -> r -> r) -> r -> Indices -> r
+foldr s r ix = 
+  Prelude.foldr (\i r' -> if testBit ix i then s i r' else r') r allIndices
