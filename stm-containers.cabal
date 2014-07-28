@@ -51,6 +51,7 @@ library
     STMContainers.HAMT.Nodes
     STMContainers.HAMT
   exposed-modules:
+    STMContainers.Bimap
     STMContainers.Multimap
     STMContainers.Map
     STMContainers.Set
