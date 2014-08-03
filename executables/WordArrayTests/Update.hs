@@ -6,7 +6,6 @@ import STMContainers.Transformers
 import Control.Monad.Free
 import Control.Monad.Free.TH
 import qualified STMContainers.WordArray as WordArray
-import qualified Data.Char as Char
 
 
 data UpdateF e f =
@@ -39,7 +38,7 @@ instance Arbitrary (Update Char ()) where
             1 -> do
               i <- lift $ bit
               modify (>> unset i)
-      char = fmap Char.chr $ choose (Char.ord 'a', Char.ord 'z')
+      char = fmap chr $ choose (ord 'a', ord 'z')
       bit = choose (0, pred wordSize)
 
 interpretWordArray :: Update e () -> Maybe (WordArray.WordArray e)
