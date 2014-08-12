@@ -5,11 +5,15 @@ version:
 synopsis:
   Containers for STM
 description:
-  This library is based on an STM-specialized implementation of
+  This library is based on an STM-specialized implementation of a
   Hash Array Mapped Trie.
-  It provides very efficient implementations of @Map@ and @Set@ data structures,
+  It provides efficient implementations of @Map@, @Set@ 
+  and other data structures,
   which are slightly slower than their counterparts from \"unordered-containers\",
   but scale very well on concurrent access patterns.
+  .
+  For details on performance of the library see
+  <http://nikita-volkov.github.io/stm-containers/ this blog post>.
 category:
   Data Structures, STM, Concurrency
 homepage:
