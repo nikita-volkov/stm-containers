@@ -79,7 +79,7 @@ delete v k (Multimap m) =
 -- 
 -- The strategy is over a unit since we already know,
 -- which value we're focusing on and it doesn't make sense to replace it,
--- however we still can still decide wether to keep or remove it.
+-- however we still can decide wether to keep or remove it.
 {-# INLINE focus #-}
 focus :: (Association k v) => Focus.StrategyM STM () r -> v -> k -> Multimap k v -> STM r
 focus = 

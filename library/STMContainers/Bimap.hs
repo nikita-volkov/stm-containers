@@ -25,7 +25,7 @@ import qualified STMContainers.Map as Map
 -- A bidirectional map.
 -- Essentially a bijection between subsets of its two argument types.
 -- 
--- For one value of a left-hand type there this map contains one value 
+-- For one value of a left-hand type this map contains one value 
 -- of the right-hand type and vice versa.
 data Bimap a b = 
   Bimap {m1 :: !(Map.Map a b), m2 :: !(Map.Map b a)}

@@ -61,7 +61,7 @@ lookup e = fmap (maybe False (const True)) . HAMT.focus Focus.lookupM e . hamt
 -- 
 -- The strategy is over a unit since we already know, 
 -- which element we're focusing on and it doesn't make sense to replace it,
--- however we still can still decide wether to keep or remove it.
+-- however we still can decide wether to keep or remove it.
 {-# INLINE focus #-}
 focus :: (Element e) => Focus.StrategyM STM () r -> e -> Set e -> STM r
 focus s e = HAMT.focus elementStrategy e . hamt
