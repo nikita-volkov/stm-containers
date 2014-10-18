@@ -3,6 +3,7 @@ module STMContainers.Set
   Set,
   Element,
   new,
+  newIO,
   insert,
   delete,
   lookup,
@@ -80,6 +81,15 @@ foldM f a = HAMT.foldM (\a -> f a . elementValue) a . hamt
 {-# INLINE new #-}
 new :: STM (Set e)
 new = Set <$> HAMT.new
+
+-- |
+-- Construct a new set in IO.
+-- 
+-- This is useful for creating it on a top-level using 'unsafePerformIO', 
+-- because using 'atomically' inside 'unsafePerformIO' isn't possible.
+{-# INLINE newIO #-}
+newIO :: IO (Set e)
+newIO = Set <$> HAMT.newIO
 
 -- |
 -- Check, whether the set is empty.

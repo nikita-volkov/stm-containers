@@ -3,6 +3,7 @@ module STMContainers.Multimap
   Multimap,
   Association,
   new,
+  newIO,
   insert,
   delete,
   lookup,
@@ -123,6 +124,15 @@ foldM f a (Multimap m) =
 {-# INLINE new #-}
 new :: STM (Multimap k v)
 new = Multimap <$> Map.new
+
+-- |
+-- Construct a new multimap in IO.
+-- 
+-- This is useful for creating it on a top-level using 'unsafePerformIO', 
+-- because using 'atomically' inside 'unsafePerformIO' isn't possible.
+{-# INLINE newIO #-}
+newIO :: IO (Multimap k v)
+newIO = Multimap <$> Map.newIO
 
 -- |
 -- Check on being empty.

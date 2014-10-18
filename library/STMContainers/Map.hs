@@ -3,6 +3,7 @@ module STMContainers.Map
   Map,
   Key,
   new,
+  newIO,
   insert,
   delete,
   lookup,
@@ -80,6 +81,15 @@ foldM s a (Map h) = HAMT.foldM s a h
 {-# INLINE new #-}
 new :: STM (Map k v)
 new = Map <$> HAMT.new
+
+-- |
+-- Construct a new map in IO.
+-- 
+-- This is useful for creating it on a top-level using 'unsafePerformIO', 
+-- because using 'atomically' inside 'unsafePerformIO' isn't possible.
+{-# INLINE newIO #-}
+newIO :: IO (Map k v)
+newIO = Map <$> HAMT.newIO
 
 -- |
 -- Check, whether the map is empty.

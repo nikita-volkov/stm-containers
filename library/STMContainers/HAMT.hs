@@ -25,6 +25,10 @@ foldM step acc = Nodes.foldM step acc 0
 new :: STM (HAMT e)
 new = Nodes.new
 
+{-# INLINE newIO #-}
+newIO :: IO (HAMT e)
+newIO = Nodes.newIO
+
 {-# INLINE null #-}
 null :: HAMT e -> STM Bool
 null = Nodes.null

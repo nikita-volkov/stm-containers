@@ -25,6 +25,10 @@ class (Eq (ElementKey e)) => Element e where
 new :: STM (Nodes e)
 new = newTVar WordArray.empty
 
+{-# INLINE newIO #-}
+newIO :: IO (Nodes e)
+newIO = newTVarIO WordArray.empty
+
 insert :: (Element e) => e -> Hash -> ElementKey e -> Level.Level -> Nodes e -> STM ()
 insert e h k l ns = do
   a <- readTVar ns

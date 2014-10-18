@@ -3,6 +3,7 @@ module STMContainers.Bimap
   Bimap,
   Association,
   new,
+  newIO,
   insert1,
   insert2,
   delete1,
@@ -39,6 +40,15 @@ type Association a b = (Map.Key a, Map.Key b)
 {-# INLINABLE new #-}
 new :: STM (Bimap a b)
 new = Bimap <$> Map.new <*> Map.new
+
+-- |
+-- Construct a new bimap in IO.
+-- 
+-- This is useful for creating it on a top-level using 'unsafePerformIO', 
+-- because using 'atomically' inside 'unsafePerformIO' isn't possible.
+{-# INLINABLE newIO #-}
+newIO :: IO (Bimap a b)
+newIO = Bimap <$> Map.newIO <*> Map.newIO
 
 -- |
 -- Check on being empty.
