@@ -12,8 +12,8 @@ module STMContainers.Bimap
   lookup2,
   focus1,
   focus2,
-  foldM,
   null,
+  stream,
 )
 where
 
@@ -137,7 +137,10 @@ focus2 :: (Association a b) => Focus.StrategyM STM a r -> b -> Bimap a b -> STM 
 focus2 s b (Bimap m1 m2) = (inline focus1) s b (Bimap m2 m1)
 
 -- |
--- Fold all the associations.
-{-# INLINABLE foldM #-}
-foldM :: (r -> (a, b) -> STM r) -> r -> Bimap a b -> STM r
-foldM s r = Map.foldM s r . m1
+-- Stream associations.
+-- 
+-- Amongst other features this function provides an interface to folding 
+-- via the 'ListT.fold' function.
+{-# INLINE stream #-}
+stream :: Bimap a b -> ListT STM (a, b)
+stream = Map.stream . m1

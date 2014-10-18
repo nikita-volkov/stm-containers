@@ -10,6 +10,7 @@ import qualified APITests.MapTests.Update as Update
 import qualified STMContainers.Map as STMMap
 import qualified Focus
 import qualified Data.HashMap.Strict as HashMap
+import qualified ListT
 
 
 interpretSTMMapUpdate :: (Hashable k, Eq k) => Update.Update k v -> STM (STMMap.Map k v)
@@ -34,7 +35,7 @@ interpretHashMapUpdate update =
         Just a -> HashMap.insert k (f a) m
 
 stmMapToHashMap :: (Hashable k, Eq k) => STMMap.Map k v -> STM (HashMap.HashMap k v)
-stmMapToHashMap = STMMap.foldM f HashMap.empty
+stmMapToHashMap = ListT.fold f HashMap.empty . STMMap.stream
   where
     f m (k, v) = return (HashMap.insert k v m)
 
@@ -45,7 +46,7 @@ stmMapFromList list = do
   return m
 
 stmMapToList :: STMMap.Map k v -> STM [(k, v)]
-stmMapToList = STMMap.foldM (\l -> return . (:l)) []
+stmMapToList = ListT.fold (\l -> return . (:l)) [] . STMMap.stream
 
 interpretSTMMapUpdateAsHashMap :: (Hashable k, Eq k) => Update.Update k v -> HashMap.HashMap k v
 interpretSTMMapUpdateAsHashMap =

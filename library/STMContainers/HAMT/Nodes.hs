@@ -6,6 +6,7 @@ import qualified STMContainers.WordArray as WordArray
 import qualified STMContainers.SizedArray as SizedArray
 import qualified STMContainers.HAMT.Level as Level
 import qualified Focus
+import qualified ListT
 
 
 type Nodes e = TVar (WordArray.WordArray (Node e))
@@ -151,3 +152,10 @@ foldM step acc level =
       Nodes ns -> foldM step acc' (Level.succ level) ns
       Leaf _ e -> step acc' e
       Leaves _ a -> SizedArray.foldM step acc' a
+
+stream :: Level.Level -> Nodes e -> ListT.ListT STM e
+stream l =
+  lift . readTVar >=> ListT.fromFoldable >=> \case
+    Nodes n -> stream (Level.succ l) n
+    Leaf _ e -> return e
+    Leaves _ a -> ListT.fromFoldable a

@@ -8,8 +8,8 @@ module STMContainers.Set
   delete,
   lookup,
   focus,
-  foldM,
   null,
+  stream,
 )
 where
 
@@ -71,12 +71,6 @@ focus s e = HAMT.focus elementStrategy e . hamt
       (fmap . fmap . fmap) (const (HAMTElement e)) . s . fmap (const ())
 
 -- |
--- Fold all the elements.
-{-# INLINE foldM #-}
-foldM :: (a -> e -> STM a) -> a -> Set e -> STM a
-foldM f a = HAMT.foldM (\a -> f a . elementValue) a . hamt
-
--- |
 -- Construct a new set.
 {-# INLINE new #-}
 new :: STM (Set e)
@@ -96,3 +90,12 @@ newIO = Set <$> HAMT.newIO
 {-# INLINE null #-}
 null :: Set e -> STM Bool
 null = HAMT.null . hamt
+
+-- |
+-- Stream elements.
+-- 
+-- Amongst other features this function provides an interface to folding 
+-- via the 'ListT.fold' function.
+{-# INLINE stream #-}
+stream :: Set e -> ListT STM e
+stream = fmap elementValue . HAMT.stream . hamt

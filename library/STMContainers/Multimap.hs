@@ -8,8 +8,9 @@ module STMContainers.Multimap
   delete,
   lookup,
   focus,
-  foldM,
   null,
+  stream,
+  streamByKey,
 )
 where
 
@@ -108,18 +109,6 @@ focus =
             (r,) . bool Focus.Keep Focus.Remove <$> Set.null set
 
 -- |
--- Fold all the items.
-{-# INLINE foldM #-}
-foldM :: (a -> (k, v) -> STM a) -> a -> Multimap k v -> STM a
-foldM f a (Multimap m) = 
-  Map.foldM f' a m
-  where
-    f' a' (k, set) = 
-      Set.foldM f'' a' set
-      where
-        f'' a'' v = f a'' (k, v)
-
--- |
 -- Construct a new multimap.
 {-# INLINE new #-}
 new :: STM (Multimap k v)
@@ -139,3 +128,20 @@ newIO = Multimap <$> Map.newIO
 {-# INLINE null #-}
 null :: Multimap k v -> STM Bool
 null (Multimap m) = Map.null m
+
+-- |
+-- Stream associations.
+-- 
+-- Amongst other features this function provides an interface to folding 
+-- via the 'ListT.fold' function.
+stream :: Multimap k v -> ListT STM (k, v)
+stream (Multimap m) = 
+  Map.stream m >>= \(k, s) -> (k,) <$> Set.stream s
+
+-- |
+-- Stream values by a key.
+streamByKey :: Association k v => k -> Multimap k v -> ListT STM v
+streamByKey k (Multimap m) =
+  lift (Map.lookup k m) >>= maybe mempty Set.stream
+
+

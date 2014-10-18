@@ -8,8 +8,8 @@ module STMContainers.Map
   delete,
   lookup,
   focus,
-  foldM,
   null,
+  stream,
 )
 where
 
@@ -71,12 +71,6 @@ focus f k (Map h) = HAMT.focus f' k h
     f' = (fmap . fmap . fmap) (\v -> k `seq` v `seq` (k, v)) . f . fmap associationValue
 
 -- |
--- Fold all the items of a map.
-{-# INLINE foldM #-}
-foldM :: (a -> (k, v) -> STM a) -> a -> Map k v -> STM a
-foldM s a (Map h) = HAMT.foldM s a h
-
--- |
 -- Construct a new map.
 {-# INLINE new #-}
 new :: STM (Map k v)
@@ -96,3 +90,12 @@ newIO = Map <$> HAMT.newIO
 {-# INLINE null #-}
 null :: Map k v -> STM Bool
 null (Map h) = HAMT.null h
+
+-- |
+-- Stream associations.
+-- 
+-- Amongst other features this function provides an interface to folding 
+-- via the 'ListT.fold' function.
+{-# INLINE stream #-}
+stream :: Map k v -> ListT STM (k, v)
+stream (Map h) = HAMT.stream h
