@@ -1,7 +1,7 @@
 name:
   stm-containers
 version:
-  0.2.1
+  0.2.2
 synopsis:
   Containers for STM
 description:
@@ -86,6 +86,9 @@ test-suite word-array-tests
     library
   main-is:
     WordArrayTests.hs
+  other-modules:
+    WordArrayTests.Update
+    STMContainers.Transformers
   build-depends:
     -- testing:
     free >= 4.6 && < 4.10,
@@ -117,6 +120,10 @@ test-suite api-tests
     executables
   main-is:
     APITests.hs
+  other-modules:
+    APITests.MapTests
+    APITests.MapTests.Update
+    STMContainers.Transformers
   build-depends:
     QuickCheck == 2.7.*,
     HTF == 0.12.*,
@@ -146,6 +153,8 @@ benchmark insertion-bench
     executables
   main-is:
     InsertionBench.hs
+  other-modules:
+    STMContainers.Transformers
   ghc-options:
     -O2 -threaded "-with-rtsopts=-N"
   default-extensions:
@@ -179,6 +188,8 @@ benchmark concurrent-insertion-bench
     executables
   main-is:
     ConcurrentInsertionBench.hs
+  other-modules:
+    STMContainers.Transformers
   ghc-options:
     -O2 -threaded "-with-rtsopts=-N"
   default-extensions:
@@ -212,6 +223,8 @@ benchmark concurrent-transactions-bench
     executables
   main-is:
     ConcurrentTransactionsBench.hs
+  other-modules:
+    STMContainers.Transformers
   ghc-options:
     -O2 -threaded "-with-rtsopts=-N"
   default-extensions:
