@@ -1,5 +1,5 @@
 
-import STMContainers.Prelude
+import BasePrelude
 import Criterion.Main
 import qualified Data.HashTable.IO as Hashtables
 import qualified Data.HashMap.Strict as UnorderedContainers

@@ -3,8 +3,8 @@ module APITests.MapTests where
 
 import Test.Framework
 import BasePrelude
+import MTLPrelude
 import Data.Hashable
-import STMContainers.Transformers
 import Control.Monad.Free
 import qualified APITests.MapTests.Update as Update
 import qualified STMContainers.Map as STMMap

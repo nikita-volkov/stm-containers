@@ -1,5 +1,6 @@
 
-import STMContainers.Prelude
+import BasePrelude
+import Data.Hashable (Hashable)
 import Criterion.Main
 import Control.Monad.Free
 import Control.Monad.Free.TH

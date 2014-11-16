@@ -2,7 +2,7 @@
 
 import Test.Framework
 import STMContainers.Prelude
-import STMContainers.Transformers
+import MTLPrelude
 import qualified STMContainers.WordArray as WordArray
 import qualified Focus
 import qualified WordArrayTests.Update as Update

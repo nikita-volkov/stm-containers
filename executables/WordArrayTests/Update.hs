@@ -2,7 +2,7 @@ module WordArrayTests.Update where
 
 import Test.Framework
 import STMContainers.Prelude
-import STMContainers.Transformers
+import MTLPrelude
 import Control.Monad.Free
 import Control.Monad.Free.TH
 import qualified STMContainers.WordArray as WordArray

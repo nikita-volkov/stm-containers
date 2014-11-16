@@ -1,6 +1,7 @@
 
-import STMContainers.Prelude
-import STMContainers.Transformers
+import BasePrelude
+import MTLPrelude
+import Data.Hashable (Hashable)
 import Criterion.Main
 import Control.Monad.Free
 import Control.Monad.Free.TH
@@ -158,13 +159,13 @@ setElementGenerator set = do
 
 elementGenerator :: [a] -> Generator a
 elementGenerator = \case
-  [] -> $bug "Empty list"
+  [] -> error "Empty list"
   l -> (!!) l <$> MWC.uniformR (0, (pred . length) l)
 
 weightedElementGenerator :: [(Int, a)] -> Generator a
 weightedElementGenerator = \case
   [] -> 
-    $bug "Empty list"
+    error "Empty list"
   l -> 
     (flip pick) l <$> MWC.uniformR (1, total)
     where
