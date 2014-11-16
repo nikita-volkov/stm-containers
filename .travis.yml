@@ -4,7 +4,18 @@ ghc:
   - 7.6
   - 7.8
 
+env:
+  - lower_bound_dependencies=1
+  - 
+
 install:
+  # Set up the Shell to treat the semicolon as &&
+  - set -o pipefail && set -e
+  # Install the lower bound dependencies
+  - if [ $lower_bound_dependencies -eq 1 ];
+    then
+      cabal install "QuickCheck == 2.6.*";
+    fi;
   - cabal install happy # a "haskell-src-exts" implicit dependency workaround
   - cabal install --only-dependencies --enable-tests --enable-benchmarks --force-reinstalls
 

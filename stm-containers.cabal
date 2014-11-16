@@ -1,7 +1,7 @@
 name:
   stm-containers
 version:
-  0.2.2
+  0.2.3
 synopsis:
   Containers for STM
 description:
@@ -93,7 +93,7 @@ test-suite word-array-tests
     -- testing:
     free >= 4.6 && < 4.10,
     mtl == 2.*,
-    QuickCheck == 2.7.*,
+    QuickCheck >= 2.6 && < 2.8,
     HTF == 0.12.*,
     -- data:
     hashable < 1.3,
