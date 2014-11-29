@@ -23,6 +23,7 @@ install:
     if [ $lower_bound_dependencies -eq 1 ];
     then
       cabal install "transformers == 0.2.*";
+      cabal install "list-t == 0.2.*";
       cabal install "QuickCheck == 2.6.*";
     fi;
   # Install the "haskell-src-exts" implicit dependency
