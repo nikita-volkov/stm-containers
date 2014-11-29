@@ -29,7 +29,7 @@ install:
   # Install the "haskell-src-exts" implicit dependency
   - cabal install happy
   # Install the remaining dependencies
-  - cabal install --only-dependencies --enable-tests --enable-benchmarks
+  - cabal install --only-dependencies --enable-tests --enable-benchmarks --force-reinstalls
   # Configure and build
   - cabal configure --enable-tests --enable-benchmarks && cabal build
 
