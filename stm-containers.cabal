@@ -99,7 +99,7 @@ test-suite word-array-tests
     -- control:
     list-t >= 0.2 && < 0.4,
     focus >= 0.1.2 && < 0.2,
-    transformers >= 0.3 && < 0.5,
+    transformers >= 0.2 && < 0.5,
     -- debugging:
     loch-th == 0.2.*,
     placeholders == 0.1.*,
