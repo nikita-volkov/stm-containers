@@ -12,6 +12,7 @@ module STMContainers.Multimap
   focus,
   null,
   stream,
+  streamKeys,
   streamByKey,
 )
 where
@@ -148,6 +149,12 @@ null (Multimap m) = Map.null m
 stream :: Multimap k v -> ListT STM (k, v)
 stream (Multimap m) = 
   Map.stream m >>= \(k, s) -> (k,) <$> Set.stream s
+
+-- |
+-- Stream keys.
+streamKeys :: Multimap k v -> ListT STM k
+streamKeys (Multimap m) =
+  fmap fst $ Map.stream m
 
 -- |
 -- Stream values by a key.
