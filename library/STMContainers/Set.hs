@@ -22,6 +22,7 @@ import qualified Focus
 -- |
 -- A hash set, based on an STM-specialized hash array mapped trie.
 newtype Set e = Set {hamt :: HAMT.HAMT (HAMTElement e)}
+  deriving (Typeable)
 
 -- |
 -- A standard constraint for elements.

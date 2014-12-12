@@ -25,6 +25,7 @@ import qualified STMContainers.Set as Set
 -- 
 -- Basically it's just a wrapper API around @'Map.Map' k ('Set.Set' v)@.
 newtype Multimap k v = Multimap (Map.Map k (Set.Set v))
+  deriving (Typeable)
 
 -- |
 -- A standard constraint for items.

@@ -30,6 +30,7 @@ import qualified STMContainers.Map as Map
 -- of the right-hand type and vice versa.
 data Bimap a b = 
   Bimap {m1 :: !(Map.Map a b), m2 :: !(Map.Map b a)}
+  deriving (Typeable)
 
 -- |
 -- A standard constraint for associations.

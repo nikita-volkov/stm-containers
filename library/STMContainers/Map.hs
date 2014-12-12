@@ -22,6 +22,7 @@ import qualified Focus
 -- |
 -- A hash table, based on an STM-specialized hash array mapped trie.
 newtype Map k v = Map (HAMT.HAMT (Association k v))
+  deriving (Typeable)
 
 -- |
 -- A standard constraint for keys.
