@@ -2,6 +2,7 @@ module STMContainers.Bimap
 (
   Bimap,
   Association,
+  Key,
   new,
   newIO,
   insert1,
@@ -33,8 +34,12 @@ data Bimap a b =
   deriving (Typeable)
 
 -- |
--- A standard constraint for associations.
-type Association a b = (Map.Key a, Map.Key b)
+-- A constraint for associations.
+type Association a b = (Key a, Key b)
+
+-- |
+-- A constraint for keys.
+type Key k = Map.Key k
 
 -- |
 -- Construct a new bimap.

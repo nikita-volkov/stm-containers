@@ -25,7 +25,7 @@ newtype Set e = Set {hamt :: HAMT.HAMT (HAMTElement e)}
   deriving (Typeable)
 
 -- |
--- A standard constraint for elements.
+-- A constraint for elements.
 type Element a = (Eq a, Hashable a)
 
 newtype HAMTElement e = HAMTElement e

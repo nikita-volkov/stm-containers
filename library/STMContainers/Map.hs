@@ -21,23 +21,19 @@ import qualified Focus
 
 -- |
 -- A hash table, based on an STM-specialized hash array mapped trie.
-newtype Map k v = Map (HAMT.HAMT (Association k v))
+newtype Map k v = Map (HAMT.HAMT (k, v))
   deriving (Typeable)
 
 -- |
--- A standard constraint for keys.
+-- A constraint for keys.
 type Key a = (Eq a, Hashable a)
 
--- |
--- A key-value association.
-type Association k v = (k, v)
-
-instance (Eq k) => HAMTNodes.Element (Association k v) where
-  type ElementKey (Association k v) = k
+instance (Eq k) => HAMTNodes.Element (k, v) where
+  type ElementKey (k, v) = k
   elementKey (k, v) = k
 
 {-# INLINE associationValue #-}
-associationValue :: Association k v -> v
+associationValue :: (k, v) -> v
 associationValue (_, v) = v
 
 -- |

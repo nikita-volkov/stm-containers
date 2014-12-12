@@ -2,6 +2,8 @@ module STMContainers.Multimap
 (
   Multimap,
   Association,
+  Key,
+  Value,
   new,
   newIO,
   insert,
@@ -28,8 +30,16 @@ newtype Multimap k v = Multimap (Map.Map k (Set.Set v))
   deriving (Typeable)
 
 -- |
--- A standard constraint for items.
-type Association k v = (Eq k, Hashable k, Eq v, Hashable v)
+-- A constraint for associations.
+type Association k v = (Key k, Value v)
+
+-- |
+-- A constraint for keys.
+type Key k = Map.Key k
+
+-- |
+-- A constraint for values.
+type Value v = Set.Element v
 
 -- |
 -- Look up an item by a value and a key.
