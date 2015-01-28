@@ -8,6 +8,7 @@ module STMContainers.Multimap
   newIO,
   insert,
   delete,
+  deleteByKey,
   lookup,
   focus,
   null,
@@ -85,6 +86,13 @@ delete v k (Multimap m) =
           returnDecision Focus.Keep
       where
         returnDecision c = return ((), c)
+
+-- |
+-- Delete all values associated with a key.
+{-# INLINEABLE deleteByKey #-}
+deleteByKey :: Key k => k -> Multimap k v -> STM ()
+deleteByKey k (Multimap m) = 
+  Map.delete k m
 
 -- |
 -- Focus on an item with a strategy by a value and a key.
