@@ -90,7 +90,7 @@ test-suite word-array-tests
     WordArrayTests.Update
   build-depends:
     -- testing:
-    free >= 4.6 && < 4.10,
+    free >= 4.6 && < 5,
     mtl == 2.*,
     QuickCheck >= 2.6 && < 2.8,
     HTF == 0.12.*,
@@ -135,7 +135,7 @@ test-suite api-tests
     list-t >= 0.2 && < 0.5,
     focus >= 0.1.2 && < 0.2,
     unordered-containers == 0.2.*,
-    free >= 4.6 && < 4.10,
+    free >= 4.6 && < 5,
     mtl == 2.*,
     hashable < 1.3,
     mtl-prelude < 3,
@@ -208,7 +208,7 @@ benchmark concurrent-insertion-bench
     loch-th == 0.2.*,
     placeholders == 0.1.*,
     -- general:
-    free >= 4.5 && < 4.10,
+    free >= 4.5 && < 5,
     async == 2.0.*,
     base-prelude == 0.1.*,
     base
@@ -244,7 +244,7 @@ benchmark concurrent-transactions-bench
     placeholders == 0.1.*,
     -- general:
     mtl == 2.*,
-    free >= 4.5 && < 4.10,
+    free >= 4.5 && < 5,
     async == 2.0.*,
     mtl-prelude < 3,
     base-prelude == 0.1.*,
