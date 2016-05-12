@@ -9,11 +9,13 @@ module STMContainers.Set
   lookup,
   focus,
   null,
+  size,
   stream,
 )
 where
 
 import STMContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
+import qualified ListT as ListT
 import qualified STMContainers.HAMT as HAMT
 import qualified STMContainers.HAMT.Nodes as HAMTNodes
 import qualified Focus
@@ -58,17 +60,17 @@ lookup e = fmap (maybe False (const True)) . HAMT.focus Focus.lookupM e . hamt
 
 -- |
 -- Focus on an element with a strategy.
--- 
+--
 -- This function allows to perform simultaneous lookup and modification.
--- 
--- The strategy is over a unit since we already know, 
+--
+-- The strategy is over a unit since we already know,
 -- which element we're focusing on and it doesn't make sense to replace it,
 -- however we still can decide wether to keep or remove it.
 {-# INLINE focus #-}
 focus :: (Element e) => Focus.StrategyM STM () r -> e -> Set e -> STM r
 focus s e = HAMT.focus elementStrategy e . hamt
   where
-    elementStrategy = 
+    elementStrategy =
       (fmap . fmap . fmap) (const (HAMTElement e)) . s . fmap (const ())
 
 -- |
@@ -79,8 +81,8 @@ new = Set <$> HAMT.new
 
 -- |
 -- Construct a new set in IO.
--- 
--- This is useful for creating it on a top-level using 'unsafePerformIO', 
+--
+-- This is useful for creating it on a top-level using 'unsafePerformIO',
 -- because using 'atomically' inside 'unsafePerformIO' isn't possible.
 {-# INLINE newIO #-}
 newIO :: IO (Set e)
@@ -93,9 +95,19 @@ null :: Set e -> STM Bool
 null = HAMT.null . hamt
 
 -- |
+-- /O(n)/. The number of elements in the set.
+--
+-- @
+-- size xs = ListT.'ListT.fold' (\\x _ -> 'pure' (x+1)) ('stream' xs)
+-- @
+{-# INLINE size #-}
+size :: Set e -> STM Int
+size = ListT.fold (\x _ -> let y = x+1 in y `seq` pure y) 0 . stream
+
+-- |
 -- Stream elements.
--- 
--- Amongst other features this function provides an interface to folding 
+--
+-- Amongst other features this function provides an interface to folding
 -- via the 'ListT.fold' function.
 {-# INLINE stream #-}
 stream :: Set e -> ListT STM e
