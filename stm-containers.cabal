@@ -1,7 +1,7 @@
 name:
   stm-containers
 version:
-  0.2.11
+  0.2.12
 synopsis:
   Containers for STM
 description:
@@ -65,7 +65,7 @@ library
     -- control:
     list-t >= 0.2 && < 0.5,
     focus >= 0.1.2 && < 0.2,
-    transformers >= 0.2 && < 0.6,
+    transformers >= 0.3 && < 0.6,
     -- general:
     primitive >= 0.5 && < 0.7,
     base-prelude < 2

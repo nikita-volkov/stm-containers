@@ -1,8 +1,7 @@
 env:
-  - ghc=7.6.1  cabal=1.18 benchmarks=1 tests=1
   - ghc=7.6.1  cabal=1.18 lower_bound_dependencies=1
-  - ghc=7.8.1  cabal=1.18 benchmarks=1 tests=1
-  - ghc=7.10.1 cabal=1.22 tests=1
+  - ghc=7.8.1  cabal=1.18
+  - ghc=7.10.1 cabal=1.22 benchmarks=1 tests=1
   
 
 install:
@@ -28,7 +27,7 @@ install:
     if [ "$lower_bound_dependencies" = "1" ];
     then
       constraint_options=(
-        "--constraint=transformers==0.2.*"
+        "--constraint=transformers==0.3.*"
         "--constraint=list-t==0.2.*"
       );
     fi;
