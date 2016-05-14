@@ -66,9 +66,6 @@ library
     list-t >= 0.2 && < 0.5,
     focus >= 0.1.2 && < 0.2,
     transformers >= 0.2 && < 0.6,
-    -- debugging:
-    loch-th == 0.2.*,
-    placeholders == 0.1.*,
     -- general:
     primitive >= 0.5 && < 0.7,
     base-prelude < 2
