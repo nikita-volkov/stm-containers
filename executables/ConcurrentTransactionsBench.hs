@@ -202,7 +202,7 @@ main = do
         map concat $! 
         slices (length transactionsGroups `div` threadsNum) transactionsGroups
       in
-        bench (shows threadsNum . showString "/" . shows (transactionsNum `div` threadsNum) $ "") $
+        bench (shows threadsNum . showString "/" . shows (transactionsNum `div` threadsNum) $ "") $ nfIO $
           scSessionRunner specializedSCInterpreter session
   where
     threadsNums = [1, 2, 4, 6, 8, 12, 16, 32, 40, 52, 64, 80, 128]

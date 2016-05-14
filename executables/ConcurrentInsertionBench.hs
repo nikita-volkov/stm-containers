@@ -119,12 +119,12 @@ main = do
           [
             bgroup "STM Containers"
               [
-                bench "Focus-based" $ 
+                bench "Focus-based" $ nfIO $
                   scSessionRunner focusSCInterpreter threadTransactions,
-                bench "Specialized" $ 
+                bench "Specialized" $ nfIO $
                   scSessionRunner specializedSCInterpreter threadTransactions
               ],
-            bench "Unordered Containers" $
+            bench "Unordered Containers" $ nfIO $
               ucSessionRunner threadTransactions
           ]
   where

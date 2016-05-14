@@ -16,12 +16,12 @@ main = do
     [
       bgroup "STM Containers"
       [
-        bench "focus-based" $ 
+        bench "focus-based" $ nfIO $
           do
             t <- atomically $ STMContainers.new :: IO (STMContainers.Map Text.Text ())
             forM_ keys $ \k -> atomically $ STMContainers.focus (Focus.insertM ()) k t
         ,
-        bench "specialized" $
+        bench "specialized" $ nfIO $
           do
             t <- atomically $ STMContainers.new :: IO (STMContainers.Map Text.Text ())
             forM_ keys $ \k -> atomically $ STMContainers.insert () k t
@@ -33,7 +33,7 @@ main = do
       bench "Containers" $
         nf (foldr (\k -> Containers.insert k ()) Containers.empty) keys
       ,
-      bench "Hashtables" $ 
+      bench "Hashtables" $ nfIO $
         do
           t <- Hashtables.new :: IO (Hashtables.BasicHashTable Text.Text ())
           forM_ keys $ \k -> Hashtables.insert t k ()
