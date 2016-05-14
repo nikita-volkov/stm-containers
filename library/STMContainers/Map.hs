@@ -9,6 +9,7 @@ module STMContainers.Map
   lookup,
   focus,
   null,
+  size,
   stream,
 )
 where
@@ -87,6 +88,12 @@ newIO = Map <$> HAMT.newIO
 {-# INLINE null #-}
 null :: Map k v -> STM Bool
 null (Map h) = HAMT.null h
+
+-- |
+-- Get the number of elements.
+{-# INLINE size #-}
+size :: Map k v -> STM Int
+size (Map h) = HAMTNodes.size h
 
 -- |
 -- Stream associations.

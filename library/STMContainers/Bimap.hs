@@ -14,6 +14,7 @@ module STMContainers.Bimap
   focus1,
   focus2,
   null,
+  size,
   stream,
 )
 where
@@ -61,6 +62,12 @@ newIO = Bimap <$> Map.newIO <*> Map.newIO
 {-# INLINABLE null #-}
 null :: Bimap a b -> STM Bool
 null = Map.null . m1
+
+-- |
+-- Get the number of elements.
+{-# INLINE size #-}
+size :: Bimap a b -> STM Int
+size = Map.size . m1
 
 -- |
 -- Look up a right value by a left value.

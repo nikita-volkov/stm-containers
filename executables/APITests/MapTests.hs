@@ -72,6 +72,20 @@ instance Hashable TestKey where
 -- * Tests
 -------------------------
 
+prop_sizeAndList =
+  forAll gen prop
+  where
+    gen = do
+      keys <- nub <$> listOf (arbitrary :: Gen Char)
+      mapM (liftA2 (flip (,)) (arbitrary :: Gen Int) . pure) keys
+    prop list =
+      length list == stmMapLength
+      where
+        stmMapLength =
+          unsafePerformIO $ atomically $ do
+            x <- stmMapFromList list
+            STMMap.size x
+
 prop_fromListToListIsomorphism =
   forAll gen prop
   where

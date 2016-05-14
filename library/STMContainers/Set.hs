@@ -9,6 +9,7 @@ module STMContainers.Set
   lookup,
   focus,
   null,
+  size,
   stream,
 )
 where
@@ -91,6 +92,12 @@ newIO = Set <$> HAMT.newIO
 {-# INLINE null #-}
 null :: Set e -> STM Bool
 null = HAMT.null . hamt
+
+-- |
+-- Get the number of elements.
+{-# INLINE size #-}
+size :: Set e -> STM Int
+size (Set h) = HAMTNodes.size h
 
 -- |
 -- Stream elements.

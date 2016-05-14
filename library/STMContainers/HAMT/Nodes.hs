@@ -159,3 +159,17 @@ stream l =
     Nodes n -> stream (Level.succ l) n
     Leaf _ e -> return e
     Leaves _ a -> ListT.fromFoldable a
+
+size :: Nodes e -> STM Int
+size nodes =
+  readTVar nodes >>= foldlM step 0
+  where
+    step a =
+      fmap (a+) . nodeSize
+      where
+        nodeSize :: Node e -> STM Int
+        nodeSize =
+          \case
+            Nodes nodes -> size nodes
+            Leaf _ _ -> pure 1
+            Leaves _ x -> pure (SizedArray.size x)
