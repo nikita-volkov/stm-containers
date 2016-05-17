@@ -7,7 +7,7 @@ synopsis:
 description:
   This library is based on an STM-specialized implementation of a
   Hash Array Mapped Trie.
-  It provides efficient implementations of @Map@, @Set@ 
+  It provides efficient implementations of @Map@, @Set@
   and other data structures,
   which are slightly slower than their counterparts from \"unordered-containers\",
   but scale very well on concurrent access patterns.
@@ -17,9 +17,9 @@ description:
 category:
   Data Structures, STM, Concurrency
 homepage:
-  https://github.com/nikita-volkov/stm-containers 
+  https://github.com/nikita-volkov/stm-containers
 bug-reports:
-  https://github.com/nikita-volkov/stm-containers/issues 
+  https://github.com/nikita-volkov/stm-containers/issues
 author:
   Nikita Volkov <nikita.y.volkov@mail.ru>
 maintainer:
@@ -143,7 +143,7 @@ test-suite api-tests
 
 
 benchmark insertion-bench
-  type: 
+  type:
     exitcode-stdio-1.0
   hs-source-dirs:
     executables
@@ -164,7 +164,7 @@ benchmark insertion-bench
     list-t >= 0.2 && < 0.5,
     focus >= 0.1.2 && < 0.2,
     hashable < 1.3,
-    hashtables == 1.1.*,
+    hashtables >= 1.1 && < 1.3,
     containers == 0.5.*,
     unordered-containers == 0.2.*,
     stm-containers,
@@ -177,7 +177,7 @@ benchmark insertion-bench
 
 
 benchmark concurrent-insertion-bench
-  type: 
+  type:
     exitcode-stdio-1.0
   hs-source-dirs:
     executables
@@ -205,13 +205,13 @@ benchmark concurrent-insertion-bench
     placeholders == 0.1.*,
     -- general:
     free >= 4.5 && < 5,
-    async == 2.0.*,
+    async >= 2.0 && < 2.2,
     base-prelude,
     base
 
 
 benchmark concurrent-transactions-bench
-  type: 
+  type:
     exitcode-stdio-1.0
   hs-source-dirs:
     executables
@@ -241,7 +241,7 @@ benchmark concurrent-transactions-bench
     -- general:
     mtl == 2.*,
     free >= 4.5 && < 5,
-    async == 2.0.*,
+    async >= 2.0 && < 2.2,
     mtl-prelude < 3,
     base-prelude,
     base
