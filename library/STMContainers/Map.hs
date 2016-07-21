@@ -6,6 +6,7 @@ module STMContainers.Map
   newIO,
   insert,
   delete,
+  deleteAll,
   lookup,
   focus,
   null,
@@ -54,6 +55,12 @@ insert !v !k (Map h) = HAMT.insert (k, v) h
 {-# INLINE delete #-}
 delete :: (Key k) => k -> Map k v -> STM ()
 delete k (Map h) = HAMT.focus Focus.deleteM k h
+
+-- |
+-- Delete all the associations.
+{-# INLINE deleteAll #-}
+deleteAll :: Map k v -> STM ()
+deleteAll (Map h) = HAMT.deleteAll h
 
 -- |
 -- Focus on an item by a key with a strategy.

@@ -9,6 +9,7 @@ module STMContainers.Bimap
   insert2,
   delete1,
   delete2,
+  deleteAll,
   lookup1,
   lookup2,
   focus1,
@@ -112,6 +113,15 @@ delete1 k (Bimap m1 m2) =
 {-# INLINABLE delete2 #-}
 delete2 :: (Association a b) => b -> Bimap a b -> STM ()
 delete2 k (Bimap m1 m2) = (inline delete1) k (Bimap m2 m1)
+
+-- |
+-- Delete all the associations.
+{-# INLINE deleteAll #-}
+deleteAll :: Bimap a b -> STM ()
+deleteAll (Bimap m1 m2) =
+  do
+    Map.deleteAll m1
+    Map.deleteAll m2
 
 -- |
 -- Focus on a right value by a left value with a strategy.

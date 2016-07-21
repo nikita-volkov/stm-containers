@@ -9,6 +9,7 @@ module STMContainers.Multimap
   insert,
   delete,
   deleteByKey,
+  deleteAll,
   lookup,
   lookupByKey,
   focus,
@@ -100,6 +101,12 @@ delete v k (Multimap m) =
 deleteByKey :: Key k => k -> Multimap k v -> STM ()
 deleteByKey k (Multimap m) =
   Map.delete k m
+
+-- |
+-- Delete all the associations.
+{-# INLINE deleteAll #-}
+deleteAll :: Multimap k v -> STM ()
+deleteAll (Multimap h) = Map.deleteAll h
 
 -- |
 -- Focus on an item with a strategy by a value and a key.

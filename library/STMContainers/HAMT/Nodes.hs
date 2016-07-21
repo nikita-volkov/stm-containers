@@ -173,3 +173,7 @@ size nodes =
             Nodes nodes -> size nodes
             Leaf _ _ -> pure 1
             Leaves _ x -> pure (SizedArray.size x)
+
+deleteAll :: Nodes e -> STM ()
+deleteAll tvar = 
+  writeTVar tvar WordArray.empty

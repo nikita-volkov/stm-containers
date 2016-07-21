@@ -36,3 +36,7 @@ null = Nodes.null
 {-# INLINE stream #-}
 stream :: HAMT e -> ListT STM e
 stream = Nodes.stream 0
+
+{-# INLINE deleteAll #-}
+deleteAll :: HAMT e -> STM ()
+deleteAll = Nodes.deleteAll

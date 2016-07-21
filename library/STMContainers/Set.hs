@@ -6,6 +6,7 @@ module STMContainers.Set
   newIO,
   insert,
   delete,
+  deleteAll,
   lookup,
   focus,
   null,
@@ -50,6 +51,12 @@ insert e = HAMT.insert (HAMTElement e) . hamt
 {-# INLINE delete #-}
 delete :: (Element e) => e -> Set e -> STM ()
 delete e = HAMT.focus Focus.deleteM e . hamt
+
+-- |
+-- Delete all the associations.
+{-# INLINE deleteAll #-}
+deleteAll :: Set e -> STM ()
+deleteAll = HAMT.deleteAll . hamt
 
 -- |
 -- Lookup an element.
