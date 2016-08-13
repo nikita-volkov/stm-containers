@@ -6,10 +6,10 @@ import Criterion.Main
 import Control.Monad.Free
 import Control.Monad.Free.TH
 import qualified Data.HashMap.Strict as UC
-import qualified STMContainers.Map as SC
+import qualified STM.Containers.Map as SC
 import qualified Control.Concurrent.Async as Async
 import qualified System.Random.MWC.Monad as MWC
-import qualified Focus
+import qualified Focus.Impure as Focus
 import qualified Data.Char as Char
 import qualified Data.Text as Text
 import qualified Data.Set as Set
@@ -62,9 +62,9 @@ specializedSCInterpreter m =
 focusSCInterpreter :: Interpreter SC.Map
 focusSCInterpreter m =
   iterM $ \case
-    Insert v k c -> SC.focus (Focus.insertM v) k m >> c
-    Delete k c   -> SC.focus Focus.deleteM k m >> c
-    Lookup k c   -> SC.focus Focus.lookupM k m >> c
+    Insert v k c -> SC.focus (Focus.insert v) k m >> c
+    Delete k c   -> SC.focus Focus.delete k m >> c
+    Lookup k c   -> SC.focus Focus.lookup k m >> c
 
 
 -- * Session and runners

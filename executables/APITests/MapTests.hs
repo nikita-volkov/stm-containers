@@ -7,8 +7,8 @@ import MTLPrelude
 import Data.Hashable
 import Control.Monad.Free
 import qualified APITests.MapTests.Update as Update
-import qualified STMContainers.Map as STMMap
-import qualified Focus
+import qualified STM.Containers.Map as STMMap
+import qualified Focus.Impure as Focus
 import qualified Data.HashMap.Strict as HashMap
 import qualified ListT
 
@@ -19,7 +19,7 @@ interpretSTMMapUpdate update = do
   flip iterM update $ \case
     Update.Insert k v c -> STMMap.insert v k m >> c
     Update.Delete k c   -> STMMap.delete k m >> c
-    Update.Adjust f k c -> STMMap.focus ((Focus.adjustM . fmap return) f) k m >> c
+    Update.Adjust f k c -> STMMap.focus ((Focus.adjust . fmap return) f) k m >> c
   return m
 
 interpretHashMapUpdate :: (Hashable k, Eq k) => Update.Update k v -> HashMap.HashMap k v
@@ -105,6 +105,31 @@ prop_updatesProduceTheSameEffectAsInHashMap =
       where
         update = sequence_ updates
 
+test_focusInsert = do
+  assertEqual (HashMap.fromList [('a', 1), ('b', 2)]) =<< do 
+    atomically $ do
+      m <- STMMap.new
+      STMMap.focus (Focus.insert 1) 'a' m
+      STMMap.focus (Focus.insert 2) 'b' m
+      stmMapToHashMap m
+
+test_focusInsertAndDelete = do
+  assertEqual (HashMap.fromList [('b', 2)]) =<< do 
+    atomically $ do
+      m <- STMMap.new
+      STMMap.focus (Focus.insert 1) 'a' m
+      STMMap.focus (Focus.insert 2) 'b' m
+      STMMap.focus (Focus.delete) 'a' m
+      stmMapToHashMap m
+
+test_focusInsertAndDeleteWithCollision = do
+  assertEqual (HashMap.fromList [(TestKey 32, 2)]) =<< do 
+    atomically $ do
+      m <- STMMap.new
+      STMMap.focus (Focus.insert 2) (TestKey 32) m
+      STMMap.focus (Focus.delete) (TestKey 1) m
+      stmMapToHashMap m
+
 test_insert = do
   assertEqual (HashMap.fromList [('a', 1), ('b', 2), ('c', 3)]) =<< do 
     atomically $ do
@@ -126,14 +151,14 @@ test_adjust = do
   assertEqual (HashMap.fromList [('a', 1), ('b', 3)]) =<< do 
     atomically $ do
       m <- stmMapFromList [('a', 1), ('b', 2)]
-      STMMap.focus (Focus.adjustM (const $ return 3)) 'b' m
+      STMMap.focus (Focus.adjust (const $ return 3)) 'b' m
       stmMapToHashMap m
 
 test_focusReachesTheTarget = do
   assertEqual (Just 2) =<< do 
     atomically $ do
       m <- stmMapFromList [('a', 1), ('b', 2)]
-      STMMap.focus Focus.lookupM 'b' m
+      STMMap.focus Focus.lookup 'b' m
 
 test_notNull = do
   assertEqual False =<< do 

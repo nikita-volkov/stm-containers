@@ -4,8 +4,8 @@ import Criterion.Main
 import qualified Data.HashTable.IO as Hashtables
 import qualified Data.HashMap.Strict as UnorderedContainers
 import qualified Data.Map as Containers
-import qualified STMContainers.Map as STMContainers
-import qualified Focus
+import qualified STM.Containers.Map as STM.Containers
+import qualified Focus.Impure as Focus
 import qualified System.Random.MWC.Monad as MWC
 import qualified Data.Char as Char
 import qualified Data.Text as Text
@@ -18,13 +18,13 @@ main = do
       [
         bench "focus-based" $ nfIO $
           do
-            t <- atomically $ STMContainers.new :: IO (STMContainers.Map Text.Text ())
-            forM_ keys $ \k -> atomically $ STMContainers.focus (Focus.insertM ()) k t
+            t <- atomically $ STM.Containers.new :: IO (STM.Containers.Map Text.Text ())
+            forM_ keys $ \k -> atomically $ STM.Containers.focus (Focus.insert ()) k t
         ,
         bench "specialized" $ nfIO $
           do
-            t <- atomically $ STMContainers.new :: IO (STMContainers.Map Text.Text ())
-            forM_ keys $ \k -> atomically $ STMContainers.insert () k t
+            t <- atomically $ STM.Containers.new :: IO (STM.Containers.Map Text.Text ())
+            forM_ keys $ \k -> atomically $ STM.Containers.insert () k t
       ]
       ,
       bench "Unordered Containers" $
