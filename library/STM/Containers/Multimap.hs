@@ -70,11 +70,10 @@ focus unitFocus value key (Multimap map) =
   A.focus setFocus key map
   where
     setFocus =
-      C.Lookup $
       \case
         Nothing ->
           do
-            (output, instruction) <- D.lookupFn unitFocus Nothing
+            (output, instruction) <- unitFocus Nothing
             case instruction of
               C.Set () ->
                 do
@@ -111,7 +110,6 @@ insert value key (Multimap map) =
   A.focus setFocus key map
   where
     setFocus =
-      C.Lookup $
       \case
         Just set ->
           do
@@ -131,7 +129,6 @@ delete value key (Multimap map) =
   A.focus setFocus key map
   where
     setFocus =
-      C.Lookup $
       \case
         Just set ->
           do

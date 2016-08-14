@@ -16,6 +16,7 @@ where
 
 import STM.Containers.Private.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
 import qualified STM.HAMT.Simple as A
+import qualified STM.Containers.Private.Focuses as C
 import qualified Focus.Impure as B
 
 
@@ -70,14 +71,14 @@ focus unitFocus item (Set hamt) =
   A.focus rowFocus item hamt
   where
     rowFocus = 
-      B.mapInput (const ()) (const item) unitFocus
+      C.mapInput (const ()) (const item) unitFocus
 
 -- |
 -- Lookup an element.
 {-# INLINABLE lookup #-}
 lookup :: (Eq item, Hashable item) => item -> Set item -> STM Bool
 lookup =
-  focus (fmap isJust B.lookup)
+  focus (C.mapOutput isJust B.lookup)
 
 -- |
 -- Insert a new element.

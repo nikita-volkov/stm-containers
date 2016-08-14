@@ -76,7 +76,7 @@ size (Bimap map1 _) =
 focus1 :: (Eq key1, Hashable key1, Eq key2, Hashable key2) => B.Focus key2 STM result -> key1 -> Bimap key1 key2 -> STM result
 focus1 valueFocus1 key1 (Bimap map1 map2) =
   do 
-    ((output, instruction), maybeKey2) <- A.focus (C.detalising valueFocus1) key1 map1
+    (output, instruction, maybeKey2) <- A.focus (C.detalising valueFocus1) key1 map1
     case instruction of
       B.Keep -> 
         return ()

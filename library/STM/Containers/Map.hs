@@ -16,6 +16,7 @@ where
 
 import STM.Containers.Private.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
 import qualified STM.HAMT.Simple as A
+import qualified STM.Containers.Private.Focuses as C
 import qualified Focus.Impure as B
 
 
@@ -82,7 +83,7 @@ focus valueFocus key (Map hamt) =
   A.focus rowFocus (Row key undefined) hamt
   where
     rowFocus =
-      B.mapInput (\(Row _ (!value)) -> value) (\(!value) -> Row key value) valueFocus
+      C.mapInput (\(Row _ (!value)) -> value) (\(!value) -> Row key value) valueFocus
 
 -- |
 -- Look up an item.
