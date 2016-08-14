@@ -156,6 +156,7 @@ benchmark concurrent-insertion-bench
     mwc-random == 0.13.*,
     mwc-random-monad == 0.7.*,
     -- data:
+    vector,
     text < 1.3,
     list-t,
     focus,
