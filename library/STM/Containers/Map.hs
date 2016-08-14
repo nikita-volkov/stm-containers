@@ -77,7 +77,7 @@ size (Map hamt) =
 -- to the map's row.
 -- E.g., you can look up a value and delete it at the same time,
 -- or update it and return the new value.
-{-# INLINABLE focus #-}
+{-# INLINE focus #-}
 focus :: (Eq key, Hashable key) => B.Focus value STM result -> key -> Map key value -> STM result
 focus valueFocus key (Map hamt) =
   A.focus rowFocus (Row key undefined) hamt
@@ -94,7 +94,7 @@ lookup key =
 
 -- |
 -- Insert a value at a key.
-{-# INLINABLE insert #-}
+{-# INLINE insert #-}
 insert :: (Eq key, Hashable key) => value -> key -> Map key value -> STM ()
 insert !value key (Map hamt) =
   A.insert (Row key value) hamt
