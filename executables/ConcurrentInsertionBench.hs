@@ -11,6 +11,7 @@ import qualified System.Random.MWC.Monad as MWC
 import qualified Focus
 import qualified Data.Char as Char
 import qualified Data.Text as Text
+import qualified Data.Vector as Vector
 
 
 type UCMap k v = TVar (UC.HashMap k (TVar v))
@@ -108,7 +109,7 @@ slices size l =
 -------------------------
 
 main = do
-  allTransactions <- MWC.runWithCreate $ replicateM actionsNum transactionGenerator
+  allTransactions <- MWC.runWithSeed seed $ replicateM actionsNum transactionGenerator
   defaultMain $! flip map threadsNums $! \threadsNum ->
     let
       sliceSize = actionsNum `div` threadsNum
@@ -128,5 +129,6 @@ main = do
               ucSessionRunner threadTransactions
           ]
   where
+    seed = MWC.toSeed (Vector.fromList [1,2,3,4,5,6,7])
     actionsNum = 100000
     threadsNums = [1, 2, 4, 6, 8, 12, 16, 32, 40, 52, 64, 80, 128]
