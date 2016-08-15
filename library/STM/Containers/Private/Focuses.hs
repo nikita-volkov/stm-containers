@@ -18,6 +18,6 @@ mapInput proj1 proj2 focus =
   fmap (second (fmap proj2)) . focus . fmap proj1
 
 {-# INLINE mapOutput #-}
-mapOutput :: Functor m =>(b1 -> b2) -> Focus a m b1 -> Focus a m b2
+mapOutput :: Functor m => (b1 -> b2) -> Focus a m b1 -> Focus a m b2
 mapOutput proj =
   (fmap . fmap) (first proj)
