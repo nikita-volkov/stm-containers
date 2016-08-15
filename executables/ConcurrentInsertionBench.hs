@@ -21,7 +21,7 @@ type UCMap k v = TVar (UC.HashMap k (TVar v))
 -------------------------
 
 data TransactionF k v n where
-  Insert :: v -> k -> n -> TransactionF k v n
+  Insert :: !v -> !k -> n -> TransactionF k v n
   deriving (Functor)
 
 type Transaction k v = Free (TransactionF k v)

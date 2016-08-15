@@ -83,7 +83,7 @@ focus valueFocus key (Map hamt) =
   A.focus rowFocus (Row key undefined) hamt
   where
     rowFocus =
-      C.mapInput (\(Row _ (!value)) -> value) (\(!value) -> Row key value) valueFocus
+      C.mapInput (\(Row _ value) -> value) (\(!value) -> Row key value) valueFocus
 
 -- |
 -- Look up an item.
