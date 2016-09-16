@@ -68,7 +68,7 @@ size (Set hamt) =
 {-# INLINABLE focus #-}
 focus :: (Eq item, Hashable item) => B.Focus () STM result -> item -> Set item -> STM result
 focus unitFocus item (Set hamt) =
-  A.focus rowFocus item hamt
+  A.focus rowFocus id item hamt
   where
     rowFocus = 
       C.mapInput (const ()) (const item) unitFocus
@@ -85,14 +85,14 @@ lookup =
 {-# INLINABLE insert #-}
 insert :: (Eq item, Hashable item) => item -> Set item -> STM ()
 insert item (Set hamt) =
-  A.insert item hamt
+  A.insert id item hamt
 
 -- |
 -- Delete an element.
 {-# INLINABLE delete #-}
 delete :: (Eq item, Hashable item) => item -> Set item -> STM ()
 delete item (Set hamt) =
-  A.focus B.delete item hamt
+  A.focus B.delete id item hamt
 
 -- |
 -- Delete all the elements.

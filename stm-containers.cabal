@@ -56,7 +56,7 @@ library
     STM.Containers.Multimap
   build-depends:
     -- data:
-    stm-hamt == 1.*,
+    stm-hamt == 0.1.*,
     focus >= 0.8.1 && < 0.9,
     hashable < 2,
     -- control:

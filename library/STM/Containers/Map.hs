@@ -27,7 +27,7 @@ newtype Map key value =
   deriving (Typeable)
 
 data Row key value =
-  Row !key value
+  Row !key !value
 
 instance Eq key => Eq (Row key value) where
   {-# INLINE (==) #-}
@@ -80,10 +80,10 @@ size (Map hamt) =
 {-# INLINE focus #-}
 focus :: (Eq key, Hashable key) => B.Focus value STM result -> key -> Map key value -> STM result
 focus valueFocus key (Map hamt) =
-  A.focus rowFocus (Row key undefined) hamt
+  A.focus rowFocus (\(Row key _) -> key) key hamt
   where
     rowFocus =
-      C.mapInput (\(Row _ value) -> value) (\(!value) -> Row key value) valueFocus
+      C.mapInput (\(Row _ value) -> value) (\value -> Row key value) valueFocus
 
 -- |
 -- Look up an item.
@@ -96,8 +96,8 @@ lookup key =
 -- Insert a value at a key.
 {-# INLINE insert #-}
 insert :: (Eq key, Hashable key) => value -> key -> Map key value -> STM ()
-insert !value key (Map hamt) =
-  A.insert (Row key value) hamt
+insert value key (Map hamt) =
+  A.insert (\(Row key _) -> key) (Row key value) hamt
 
 -- |
 -- Delete an item by a key.
