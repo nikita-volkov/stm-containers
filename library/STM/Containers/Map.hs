@@ -29,16 +29,6 @@ newtype Map key value =
 data Row key value =
   Row !key !value
 
-instance Eq key => Eq (Row key value) where
-  {-# INLINE (==) #-}
-  Row k1 _ == Row k2 _ =
-    k1 == k2
-
-instance Hashable key => Hashable (Row key value) where
-  {-# INLINE hashWithSalt #-}
-  hashWithSalt salt (Row key _) =
-    hashWithSalt salt key
-
 -- |
 -- Construct a new map.
 {-# INLINABLE new #-}
