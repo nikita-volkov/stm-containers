@@ -69,7 +69,7 @@ library
     -- general:
     primitive >= 0.5 && < 0.7,
     base-prelude < 2,
-    base < 4.10
+    base < 5
   default-extensions:
     Arrows, BangPatterns, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFoldable, DeriveFunctor, DeriveGeneric, DeriveTraversable, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeFamilies, TypeOperators, UnboxedTuples
   default-language:
@@ -93,10 +93,10 @@ test-suite word-array-tests
     QuickCheck >= 2.6 && < 3,
     HTF == 0.13.*,
     -- data:
-    hashable < 1.3,
+    hashable,
     -- control:
     list-t,
-    focus >= 0.1.2 && < 0.2,
+    focus,
     transformers,
     -- debugging:
     loch-th == 0.2.*,
@@ -131,7 +131,7 @@ test-suite api-tests
     placeholders == 0.1.*,
     -- general:
     list-t,
-    focus >= 0.1.2 && < 0.2,
+    focus,
     unordered-containers == 0.2.*,
     free >= 4.6 && < 5,
     mtl == 2.*,
@@ -165,8 +165,8 @@ benchmark insertion-bench
     -- data:
     text < 1.3,
     list-t,
-    focus >= 0.1.2 && < 0.2,
-    hashable < 1.3,
+    focus,
+    hashable,
     hashtables >= 1.1 && < 1.3,
     containers == 0.5.*,
     unordered-containers == 0.2.*,
@@ -198,18 +198,18 @@ benchmark concurrent-insertion-bench
     mwc-random-monad == 0.7.*,
     -- data:
     vector,
-    text < 1.3,
+    text < 2,
     list-t,
-    focus >= 0.1.2 && < 0.2,
+    focus,
     unordered-containers == 0.2.*,
-    hashable < 1.3,
+    hashable,
     stm-containers,
     -- debugging:
     loch-th == 0.2.*,
     placeholders == 0.1.*,
     -- general:
     free >= 4.5 && < 5,
-    async >= 2.0 && < 2.2,
+    async >= 2.0 && < 3,
     base-prelude,
     base
 
@@ -233,11 +233,11 @@ benchmark concurrent-transactions-bench
     mwc-random-monad == 0.7.*,
     -- data:
     containers >= 0.5.2 && < 0.6,
-    text < 1.3,
+    text < 2,
     list-t,
-    focus >= 0.1.2 && < 0.2,
+    focus,
     unordered-containers == 0.2.*,
-    hashable < 1.3,
+    hashable,
     stm-containers,
     -- debugging:
     loch-th == 0.2.*,
@@ -245,7 +245,7 @@ benchmark concurrent-transactions-bench
     -- general:
     mtl == 2.*,
     free >= 4.5 && < 5,
-    async >= 2.0 && < 2.2,
+    async >= 2.0 && < 3,
     mtl-prelude < 3,
     base-prelude,
     base
