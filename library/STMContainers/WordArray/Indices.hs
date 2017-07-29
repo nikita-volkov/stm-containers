@@ -44,7 +44,7 @@ null = (== 0)
 
 {-# INLINE maxSize #-}
 maxSize :: Int
-maxSize = bitSize (undefined :: Indices)
+maxSize = finiteBitSize (undefined :: Indices)
 
 {-# INLINE fromList #-}
 fromList :: [Index] -> Indices
