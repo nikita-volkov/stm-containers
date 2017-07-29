@@ -72,5 +72,5 @@ interpretMaybeList (Update u) =
       f
 
 wordSize :: Int
-wordSize = bitSize (undefined :: Word)
+wordSize = finiteBitSize (undefined :: Word)
 
