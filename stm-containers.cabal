@@ -57,6 +57,7 @@ library
   exposed-modules:
     STMContainers.Bimap
     STMContainers.Multimap
+    STMContainers.Multiset
     STMContainers.Map
     STMContainers.Set
   build-depends:
