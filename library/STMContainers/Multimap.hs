@@ -47,10 +47,19 @@ type Value v = Set.Element v
 
 -- |
 -- Look up an item by a value and a key.
+--
+-- /Since: FIXME/
+{-# INLINE member #-}
+member :: (Association k v) => v -> k -> Multimap k v -> STM Bool
+member v k (Multimap m) =
+  maybe (return False) (Set.member v) =<< Map.lookup k m
+
+-- |
+-- Look up an item by a value and a key.
 {-# INLINE lookup #-}
+{-# DEPRECATED lookup "Use 'member' instead" #-}
 lookup :: (Association k v) => v -> k -> Multimap k v -> STM Bool
-lookup v k (Multimap m) =
-  maybe (return False) (Set.lookup v) =<< Map.lookup k m
+lookup = member
 
 -- |
 -- Look up all values by key.

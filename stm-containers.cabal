@@ -35,6 +35,10 @@ build-type:
 cabal-version:
   >=1.10
 
+extra-source-files:
+  .gitignore
+  .travis.yml
+  CHANGELOG.md
 
 source-repository head
   type:

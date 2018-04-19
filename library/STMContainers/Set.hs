@@ -7,6 +7,7 @@ module STMContainers.Set
   insert,
   delete,
   deleteAll,
+  member,
   lookup,
   focus,
   null,
@@ -60,9 +61,18 @@ deleteAll = HAMT.deleteAll . hamt
 
 -- |
 -- Lookup an element.
+--
+-- /Since: FIXME/
+{-# INLINE member #-}
+member :: (Element e) => e -> Set e -> STM Bool
+member e = fmap (maybe False (const True)) . HAMT.focus Focus.lookupM e . hamt
+
+-- |
+-- Lookup an element.
 {-# INLINE lookup #-}
+{-# DEPRECATED lookup "Use 'member' instead" #-}
 lookup :: (Element e) => e -> Set e -> STM Bool
-lookup e = fmap (maybe False (const True)) . HAMT.focus Focus.lookupM e . hamt
+lookup = member
 
 -- |
 -- Focus on an element with a strategy.
