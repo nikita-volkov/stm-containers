@@ -37,6 +37,8 @@ instance (Show k, Show v, Show c) => Show (UpdateF k v c) where
     where
       showsPrecInner = showsPrec (succ 5)
 
+instance Show1 (UpdateF k v)
+
 makeFree ''UpdateF
 
 type Update k v = Free (UpdateF k v) ()
