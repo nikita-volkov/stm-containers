@@ -88,7 +88,7 @@ test-suite word-array-tests
     WordArrayTests.Update
   build-depends:
     -- testing:
-    free >= 4.6 && < 5,
+    free >= 4.6 && < 6,
     mtl == 2.*,
     QuickCheck >= 2.6 && < 3,
     HTF == 0.13.*,
@@ -133,7 +133,7 @@ test-suite api-tests
     list-t,
     focus,
     unordered-containers == 0.2.*,
-    free >= 4.6 && < 5,
+    free >= 4.6 && < 6,
     mtl == 2.*,
     hashable,
     mtl-prelude < 3,
@@ -159,16 +159,16 @@ benchmark insertion-bench
   default-language:
     Haskell2010
   build-depends:
-    mwc-random == 0.13.*,
+    mwc-random == 0.14.*,
     mwc-random-monad == 0.7.*,
-    criterion == 1.1.*,
+    criterion == 1.5.*,
     -- data:
-    text < 1.3,
+    text < 2,
     list-t,
     focus,
     hashable,
     hashtables >= 1.1 && < 1.3,
-    containers == 0.5.*,
+    containers >= 0.5 && < 0.7,
     unordered-containers == 0.2.*,
     stm-containers,
     -- debugging:
@@ -193,8 +193,8 @@ benchmark concurrent-insertion-bench
   default-language:
     Haskell2010
   build-depends:
-    criterion == 1.1.*,
-    mwc-random == 0.13.*,
+    criterion == 1.5.*,
+    mwc-random == 0.14.*,
     mwc-random-monad == 0.7.*,
     -- data:
     vector,
@@ -208,7 +208,7 @@ benchmark concurrent-insertion-bench
     loch-th == 0.2.*,
     placeholders == 0.1.*,
     -- general:
-    free >= 4.5 && < 5,
+    free >= 4.5 && < 6,
     async >= 2.0 && < 3,
     base-prelude,
     base
@@ -228,11 +228,11 @@ benchmark concurrent-transactions-bench
   default-language:
     Haskell2010
   build-depends:
-    criterion == 1.1.*,
-    mwc-random == 0.13.*,
+    criterion == 1.5.*,
+    mwc-random == 0.14.*,
     mwc-random-monad == 0.7.*,
     -- data:
-    containers >= 0.5.2 && < 0.6,
+    containers >= 0.5 && < 0.7,
     text < 2,
     list-t,
     focus,
@@ -244,7 +244,7 @@ benchmark concurrent-transactions-bench
     placeholders == 0.1.*,
     -- general:
     mtl == 2.*,
-    free >= 4.5 && < 5,
+    free >= 4.5 && < 6,
     async >= 2.0 && < 3,
     mtl-prelude < 3,
     base-prelude,
