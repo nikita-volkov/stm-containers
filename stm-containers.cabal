@@ -86,6 +86,9 @@ test-suite word-array-tests
     WordArrayTests.hs
   other-modules:
     WordArrayTests.Update
+    STMContainers.Prelude
+    STMContainers.WordArray
+    STMContainers.WordArray.Indices
   build-depends:
     -- testing:
     free >= 4.6 && < 6,
