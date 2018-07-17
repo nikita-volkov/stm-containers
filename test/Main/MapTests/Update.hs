@@ -1,8 +1,7 @@
-module APITests.MapTests.Update where
+module Main.MapTests.Update where
 
+import Prelude hiding (insert, delete, update)
 import Test.Framework
-import BasePrelude hiding (insert, delete, update)
-import MTLPrelude
 import Control.Monad.Free
 import Control.Monad.Free.TH
 
@@ -36,6 +35,8 @@ instance (Show k, Show v, Show c) => Show (UpdateF k v c) where
         showsPrecInner c
     where
       showsPrecInner = showsPrec (succ 5)
+
+instance Show1 (UpdateF k v)
 
 makeFree ''UpdateF
 

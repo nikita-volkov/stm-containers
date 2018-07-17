@@ -1,4 +1,4 @@
-module STM.Containers.Multimap
+module StmContainers.Multimap
 (
   Multimap,
   new,
@@ -10,18 +10,17 @@ module STM.Containers.Multimap
   insert,
   delete,
   deleteByKey,
-  deleteAll,
-  stream,
-  streamKeys,
-  streamByKey,
+  reset,
+  unfoldM,
+  unfoldMKeys,
+  unfoldMByKey,
 )
 where
 
-import STM.Containers.Private.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
-import qualified STM.Containers.Map as A
-import qualified STM.Containers.Set as B
-import qualified STM.Containers.Private.Focuses as D
-import qualified Focus.Impure as C
+import StmContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
+import qualified StmContainers.Map as A
+import qualified StmContainers.Set as B
+import qualified Focus as C
 
 
 -- |
@@ -66,27 +65,22 @@ null (Multimap map) =
 -- however we still can decide wether to keep or remove it.
 {-# INLINE focus #-}
 focus :: (Eq key, Hashable key, Eq value, Hashable value) => C.Focus () STM result -> value -> key -> Multimap key value -> STM result
-focus unitFocus value key (Multimap map) =
-  A.focus setFocus key map
-  where
-    setFocus =
-      \case
-        Nothing ->
+focus unitFocus@(Focus concealUnit revealUnit) value key (Multimap map) = A.focus setFocus key map where
+  setFocus = C.Focus conceal reveal where
+    conceal = do
+      (output, change) <- concealUnit
+      case change of
+        C.Set () ->
           do
-            (output, instruction) <- unitFocus Nothing
-            case instruction of
-              C.Set () ->
-                do
-                  set <- B.new
-                  B.insert value set
-                  return (output, C.Set set)
-              _ ->
-                return (output, C.Keep)
-        Just set ->
-          do
-            output <- B.focus unitFocus value set
-            instruction <- bool C.Keep C.Remove <$> B.null set
-            return (output, instruction)
+            set <- B.new
+            B.insert value set
+            return (output, C.Set set)
+        _ ->
+          return (output, C.Leave)
+  reveal set = do
+    output <- B.focus unitFocus value set
+    change <- bool C.Leave C.Remove <$> B.null set
+    return (output, change)
 
 -- |
 -- Look up an item by a value and a key.
@@ -106,38 +100,27 @@ lookupByKey key (Multimap m) =
 -- Insert an item.
 {-# INLINABLE insert #-}
 insert :: (Eq key, Hashable key, Eq value, Hashable value) => value -> key -> Multimap key value -> STM ()
-insert value key (Multimap map) =
-  A.focus setFocus key map
-  where
-    setFocus =
-      \case
-        Just set ->
-          do
-            B.insert value set
-            return ((), C.Keep)
-        Nothing ->
-          do
-            set <- B.new
-            B.insert value set
-            return ((), C.Set set)
+insert value key (Multimap map) = A.focus setFocus key map where
+  setFocus = Focus conceal reveal where
+    conceal = do
+      set <- B.new
+      B.insert value set
+      return ((), C.Set set)
+    reveal set = do
+      B.insert value set
+      return ((), C.Leave)
 
 -- |
 -- Delete an item by a value and a key.
 {-# INLINABLE delete #-}
 delete :: (Eq key, Hashable key, Eq value, Hashable value) => value -> key -> Multimap key value -> STM ()
-delete value key (Multimap map) =
-  A.focus setFocus key map
-  where
-    setFocus =
-      \case
-        Just set ->
-          do
-            B.delete value set
-            B.null set >>= returnDecision . bool C.Keep C.Remove
-        Nothing ->
-          returnDecision C.Keep
-      where
-        returnDecision c = return ((), c)
+delete value key (Multimap map) = A.focus setFocus key map where
+  setFocus = Focus conceal reveal where
+    conceal = returnChange C.Leave
+    reveal set = do
+      B.delete value set
+      B.null set >>= returnChange . bool C.Leave C.Remove
+    returnChange c = return ((), c)
 
 -- |
 -- Delete all values associated with the key.
@@ -148,30 +131,27 @@ deleteByKey key (Multimap map) =
 
 -- |
 -- Delete all the associations.
-{-# INLINE deleteAll #-}
-deleteAll :: Multimap key value -> STM ()
-deleteAll (Multimap map) =
-  A.deleteAll map
+{-# INLINE reset #-}
+reset :: Multimap key value -> STM ()
+reset (Multimap map) =
+  A.reset map
 
 -- |
 -- Stream associations.
 --
--- Amongst other features this function provides an interface to folding
--- via the 'ListT.fold' function.
-stream :: Multimap key value -> ListT STM (key, value)
-stream (Multimap m) =
-  A.stream m >>= \(key, s) -> (key,) <$> B.stream s
+-- Amongst other features this function provides an interface to folding.
+unfoldM :: Multimap key value -> UnfoldM STM (key, value)
+unfoldM (Multimap m) =
+  A.unfoldM m >>= \(key, s) -> (key,) <$> B.unfoldM s
 
 -- |
 -- Stream keys.
-streamKeys :: Multimap key value -> ListT STM key
-streamKeys (Multimap m) =
-  fmap fst (A.stream m)
+unfoldMKeys :: Multimap key value -> UnfoldM STM key
+unfoldMKeys (Multimap m) =
+  fmap fst (A.unfoldM m)
 
 -- |
 -- Stream values by a key.
-streamByKey :: (Eq key, Hashable key) => key -> Multimap key value -> ListT STM value
-streamByKey key (Multimap m) =
-  lift (A.lookup key m) >>= maybe mempty B.stream
-
-
+unfoldMByKey :: (Eq key, Hashable key) => key -> Multimap key value -> UnfoldM STM value
+unfoldMByKey key (Multimap m) =
+  lift (A.lookup key m) >>= maybe mempty B.unfoldM

@@ -1,4 +1,4 @@
-module STM.Containers.Set
+module StmContainers.Set
 (
   Set,
   new,
@@ -9,21 +9,20 @@ module STM.Containers.Set
   lookup,
   insert,
   delete,
-  deleteAll,
-  stream,
+  reset,
+  unfoldM,
 )
 where
 
-import STM.Containers.Private.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
-import qualified STM.HAMT.Simple as A
-import qualified STM.Containers.Private.Focuses as C
-import qualified Focus.Impure as B
+import StmContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
+import qualified StmHamt.SizedHamt as A
+import qualified Focus as B
 
 
 -- |
 -- A hash set, based on an STM-specialized hash array mapped trie.
 newtype Set item =
-  Set (A.HAMT item)
+  Set (A.SizedHamt item)
   deriving (Typeable)
 
 -- |
@@ -71,14 +70,14 @@ focus unitFocus item (Set hamt) =
   A.focus rowFocus id item hamt
   where
     rowFocus = 
-      C.mapInput (const ()) (const item) unitFocus
+      B.mappingInput (const item) (const ()) unitFocus
 
 -- |
 -- Lookup an element.
 {-# INLINABLE lookup #-}
 lookup :: (Eq item, Hashable item) => item -> Set item -> STM Bool
 lookup =
-  focus (C.mapOutput isJust B.lookup)
+  focus (fmap isJust B.lookup)
 
 -- |
 -- Insert a new element.
@@ -96,17 +95,16 @@ delete item (Set hamt) =
 
 -- |
 -- Delete all the elements.
-{-# INLINABLE deleteAll #-}
-deleteAll :: Set item -> STM ()
-deleteAll (Set hamt) =
-  A.deleteAll hamt
+{-# INLINABLE reset #-}
+reset :: Set item -> STM ()
+reset (Set hamt) =
+  A.reset hamt
 
 -- |
 -- Stream elements.
 -- 
--- Amongst other features this function provides an interface to folding 
--- via the 'ListT.fold' function.
-{-# INLINABLE stream #-}
-stream :: Set item -> ListT STM item
-stream (Set hamt) =
-  A.stream hamt
+-- Amongst other features this function provides an interface to folding.
+{-# INLINABLE unfoldM #-}
+unfoldM :: Set item -> UnfoldM STM item
+unfoldM (Set hamt) =
+  A.unfoldM hamt

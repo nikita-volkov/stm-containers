@@ -1,4 +1,4 @@
-module STM.Containers.Map
+module StmContainers.Map
 (
   Map,
   new,
@@ -9,25 +9,20 @@ module STM.Containers.Map
   lookup,
   insert,
   delete,
-  deleteAll,
-  stream,
+  reset,
+  unfoldM,
 )
 where
 
-import STM.Containers.Private.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
-import qualified STM.HAMT.Simple as A
-import qualified STM.Containers.Private.Focuses as C
-import qualified Focus.Impure as B
+import StmContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
+import qualified StmHamt.SizedHamt as A
+import qualified Focus as B
 
 
 -- |
 -- Hash-table, based on STM-specialized Hash Array Mapped Trie.
 newtype Map key value =
-  Map (A.HAMT (Row key value))
-  deriving (Typeable)
-
-data Row key value =
-  Row !key !value
+  Map (A.SizedHamt (Product2 key value))
 
 -- |
 -- Construct a new map.
@@ -70,10 +65,10 @@ size (Map hamt) =
 {-# INLINE focus #-}
 focus :: (Eq key, Hashable key) => B.Focus value STM result -> key -> Map key value -> STM result
 focus valueFocus key (Map hamt) =
-  A.focus rowFocus (\(Row key _) -> key) key hamt
+  A.focus rowFocus (\(Product2 key _) -> key) key hamt
   where
     rowFocus =
-      C.mapInput (\(Row _ value) -> value) (\value -> Row key value) valueFocus
+      B.mappingInput (\value -> Product2 key value) (\(Product2 _ value) -> value) valueFocus
 
 -- |
 -- Look up an item.
@@ -87,7 +82,7 @@ lookup key =
 {-# INLINE insert #-}
 insert :: (Eq key, Hashable key) => value -> key -> Map key value -> STM ()
 insert value key (Map hamt) =
-  A.insert (\(Row key _) -> key) (Row key value) hamt
+  A.insert (\(Product2 key _) -> key) (Product2 key value) hamt
 
 -- |
 -- Delete an item by a key.
@@ -98,17 +93,16 @@ delete key =
 
 -- |
 -- Delete all the associations.
-{-# INLINABLE deleteAll #-}
-deleteAll :: Map key value -> STM ()
-deleteAll (Map hamt) =
-  A.deleteAll hamt
+{-# INLINABLE reset #-}
+reset :: Map key value -> STM ()
+reset (Map hamt) =
+  A.reset hamt
 
 -- |
--- Stream associations.
+-- Stream the associations.
 -- 
--- Amongst other features this function provides an interface to folding 
--- via the 'ListT.fold' function.
-{-# INLINABLE stream #-}
-stream :: Map key value -> ListT STM (key, value)
-stream (Map hamt) =
-  fmap (\(Row k v) -> (k, v)) (A.stream hamt)
+-- Amongst other features this function provides an interface to folding.
+{-# INLINABLE unfoldM #-}
+unfoldM :: Map key value -> UnfoldM STM (key, value)
+unfoldM (Map hamt) =
+  fmap (\(Product2 k v) -> (k, v)) (A.unfoldM hamt)
