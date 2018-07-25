@@ -1,7 +1,7 @@
 name:
   stm-containers
 version:
-  0.2.16
+  1
 synopsis:
   Containers for STM
 description:
@@ -35,220 +35,54 @@ build-type:
 cabal-version:
   >=1.10
 
-
 source-repository head
   type:
     git
   location:
     git://github.com/nikita-volkov/stm-containers.git
 
-
 library
   hs-source-dirs:
     library
-  other-modules:
-    STMContainers.Prelude
-    STMContainers.WordArray.Indices
-    STMContainers.WordArray
-    STMContainers.SizedArray
-    STMContainers.HAMT.Level
-    STMContainers.HAMT.Nodes
-    STMContainers.HAMT
+  default-extensions:
+    Arrows, BangPatterns, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFoldable, DeriveFunctor, DeriveGeneric, DeriveTraversable, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, PatternSynonyms, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeFamilies, TypeOperators, UnboxedTuples
+  default-language:
+    Haskell2010
   exposed-modules:
-    STMContainers.Bimap
-    STMContainers.Multimap
-    STMContainers.Map
-    STMContainers.Set
-  build-depends:
-    -- data:
-    hashable < 2,
-    -- control:
-    list-t >= 0.2 && < 2,
-    focus >= 0.1.2 && < 0.2,
-    transformers >= 0.3 && < 0.6,
-    -- general:
-    primitive >= 0.5 && < 0.7,
-    base-prelude < 2,
-    base < 5
-  default-extensions:
-    Arrows, BangPatterns, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFoldable, DeriveFunctor, DeriveGeneric, DeriveTraversable, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeFamilies, TypeOperators, UnboxedTuples
-  default-language:
-    Haskell2010
-
-
-test-suite word-array-tests
-  type:
-    exitcode-stdio-1.0
-  hs-source-dirs:
-    executables
-    library
-  main-is:
-    WordArrayTests.hs
+    StmContainers.Map
+    StmContainers.Set
+    StmContainers.Bimap
+    StmContainers.Multimap
   other-modules:
-    WordArrayTests.Update
-    STMContainers.Prelude
-    STMContainers.WordArray
-    STMContainers.WordArray.Indices
+    StmContainers.Prelude
   build-depends:
-    -- testing:
-    free >= 4.6 && < 6,
-    mtl == 2.*,
-    QuickCheck >= 2.6 && < 3,
-    HTF == 0.13.*,
-    -- data:
-    hashable,
-    -- control:
-    list-t,
-    focus,
-    transformers,
-    -- debugging:
-    loch-th == 0.2.*,
-    placeholders == 0.1.*,
-    -- general:
-    primitive,
-    mtl-prelude < 3,
-    base-prelude,
-    base
-  default-extensions:
-    Arrows, BangPatterns, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFoldable, DeriveFunctor, DeriveGeneric, DeriveTraversable, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeFamilies, TypeOperators, UnboxedTuples
-  default-language:
-    Haskell2010
+    base <5,
+    deferred-folds >=0.6.6 && <0.7,
+    focus >=0.11.3 && <0.12,
+    hashable <2,
+    stm-hamt >=0.3 && <0.4,
+    transformers >=0.5 && <0.6
 
-
-test-suite api-tests
+test-suite test
   type:
     exitcode-stdio-1.0
   hs-source-dirs:
-    executables
+    test
+  default-extensions:
+    Arrows, BangPatterns, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFoldable, DeriveFunctor, DeriveGeneric, DeriveTraversable, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, PatternSynonyms, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeFamilies, TypeOperators, UnboxedTuples
+  default-language:
+    Haskell2010
   main-is:
-    APITests.hs
+    Main.hs
   other-modules:
-    APITests.MapTests
-    APITests.MapTests.Update
+    Main.MapTests
+    Main.MapTests.Update
   build-depends:
-    QuickCheck >= 2.7 && < 3,
-    HTF == 0.13.*,
-    stm-containers,
-    -- debugging:
-    loch-th == 0.2.*,
-    placeholders == 0.1.*,
-    -- general:
-    list-t,
+    deferred-folds,
     focus,
-    unordered-containers == 0.2.*,
-    free >= 4.6 && < 6,
-    mtl == 2.*,
-    hashable,
-    mtl-prelude < 3,
-    base-prelude,
-    base
-  default-extensions:
-    Arrows, BangPatterns, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFoldable, DeriveFunctor, DeriveGeneric, DeriveTraversable, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeFamilies, TypeOperators, UnboxedTuples
-  default-language:
-    Haskell2010
-
-
-benchmark insertion-bench
-  type:
-    exitcode-stdio-1.0
-  hs-source-dirs:
-    executables
-  main-is:
-    InsertionBench.hs
-  ghc-options:
-    -O2 -threaded "-with-rtsopts=-N"
-  default-extensions:
-    Arrows, BangPatterns, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFoldable, DeriveFunctor, DeriveGeneric, DeriveTraversable, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeFamilies, TypeOperators, UnboxedTuples
-  default-language:
-    Haskell2010
-  build-depends:
-    mwc-random == 0.14.*,
-    mwc-random-monad == 0.7.*,
-    criterion == 1.5.*,
-    -- data:
-    text < 2,
-    list-t,
-    focus,
-    hashable,
-    hashtables >= 1.1 && < 1.3,
-    containers >= 0.5 && < 0.7,
-    unordered-containers == 0.2.*,
-    stm-containers,
-    -- debugging:
-    loch-th == 0.2.*,
-    placeholders == 0.1.*,
-    -- general:
-    base-prelude,
-    base
-
-
-benchmark concurrent-insertion-bench
-  type:
-    exitcode-stdio-1.0
-  hs-source-dirs:
-    executables
-  main-is:
-    ConcurrentInsertionBench.hs
-  ghc-options:
-    -O2 -threaded "-with-rtsopts=-N"
-  default-extensions:
-    Arrows, BangPatterns, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFoldable, DeriveFunctor, DeriveGeneric, DeriveTraversable, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeFamilies, TypeOperators, UnboxedTuples
-  default-language:
-    Haskell2010
-  build-depends:
-    criterion == 1.5.*,
-    mwc-random == 0.14.*,
-    mwc-random-monad == 0.7.*,
-    -- data:
-    vector,
-    text < 2,
-    list-t,
-    focus,
-    unordered-containers == 0.2.*,
-    hashable,
-    stm-containers,
-    -- debugging:
-    loch-th == 0.2.*,
-    placeholders == 0.1.*,
-    -- general:
-    free >= 4.5 && < 6,
-    async >= 2.0 && < 3,
-    base-prelude,
-    base
-
-
-benchmark concurrent-transactions-bench
-  type:
-    exitcode-stdio-1.0
-  hs-source-dirs:
-    executables
-  main-is:
-    ConcurrentTransactionsBench.hs
-  ghc-options:
-    -O2 -threaded "-with-rtsopts=-N"
-  default-extensions:
-    Arrows, BangPatterns, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFoldable, DeriveFunctor, DeriveGeneric, DeriveTraversable, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeFamilies, TypeOperators, UnboxedTuples
-  default-language:
-    Haskell2010
-  build-depends:
-    criterion == 1.5.*,
-    mwc-random == 0.14.*,
-    mwc-random-monad == 0.7.*,
-    -- data:
-    containers >= 0.5 && < 0.7,
-    text < 2,
-    list-t,
-    focus,
-    unordered-containers == 0.2.*,
-    hashable,
-    stm-containers,
-    -- debugging:
-    loch-th == 0.2.*,
-    placeholders == 0.1.*,
-    -- general:
-    mtl == 2.*,
-    free >= 4.5 && < 6,
-    async >= 2.0 && < 3,
-    mtl-prelude < 3,
-    base-prelude,
-    base
+    foldl >=1.4 && <2,
+    free >=4.6 && <6,
+    HTF ==0.13.*,
+    QuickCheck >=2.7 && <3,
+    rerebase >=1 && <2,
+    stm-containers

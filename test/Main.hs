@@ -1,9 +1,9 @@
 {-# OPTIONS_GHC -F -pgmF htfpp #-}
 
 import Test.Framework
-import BasePrelude
+import Prelude
 
-import {-@ HTF_TESTS @-} APITests.MapTests
+import {-@ HTF_TESTS @-} Main.MapTests
 
 
 main = htfMain $ htf_thisModulesTests : htf_importedTests

@@ -1,8 +1,7 @@
-module APITests.MapTests.Update where
+module Main.MapTests.Update where
 
+import Prelude hiding (insert, delete, update)
 import Test.Framework
-import BasePrelude hiding (insert, delete, update)
-import MTLPrelude
 import Control.Monad.Free
 import Control.Monad.Free.TH
 
