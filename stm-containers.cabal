@@ -9,10 +9,10 @@ description:
   Hash Array Mapped Trie.
   It provides efficient implementations of @Map@, @Set@
   and other data structures,
-  which are marginally slower than their counterparts from \"unordered-containers\",
-  but scale well on concurrent access patterns.
+  which starting from version @1@ perform even faster than their counterparts from \"unordered-containers\",
+  but also scale well on concurrent access patterns.
   .
-  For details on performance of the library see
+  For details on performance of the library, which are a bit outdated, see
   <http://nikita-volkov.github.io/stm-containers/ this blog post>.
 category:
   Data Structures, STM, Concurrency
