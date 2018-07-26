@@ -9,7 +9,7 @@ description:
   Hash Array Mapped Trie.
   It provides efficient implementations of @Map@, @Set@
   and other data structures,
-  which starting from version @1@ perform even faster than their counterparts from \"unordered-containers\",
+  which starting from version @1@ perform even better than their counterparts from \"unordered-containers\",
   but also scale well on concurrent access patterns.
   .
   For details on performance of the library, which are a bit outdated, see
