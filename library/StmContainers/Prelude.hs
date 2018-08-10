@@ -87,6 +87,10 @@ import Focus as Exports (Focus(..))
 import DeferredFolds.Unfold as Exports (Unfold(..))
 import DeferredFolds.UnfoldM as Exports (UnfoldM(..))
 
+-- list-t
+-------------------------
+import ListT as Exports (ListT(..))
+
 -- | Strict version of 'modifyTVar'.
 {-# INLINE modifyTVar' #-}
 modifyTVar' :: TVar a -> (a -> a) -> STM ()

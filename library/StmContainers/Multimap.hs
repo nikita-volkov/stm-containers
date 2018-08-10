@@ -14,6 +14,9 @@ module StmContainers.Multimap
   unfoldM,
   unfoldMKeys,
   unfoldMByKey,
+  listT,
+  listTKeys,
+  listTByKey,
 )
 where
 
@@ -137,7 +140,7 @@ reset (Multimap map) =
   A.reset map
 
 -- |
--- Stream associations.
+-- Stream associations actively.
 --
 -- Amongst other features this function provides an interface to folding.
 unfoldM :: Multimap key value -> UnfoldM STM (key, value)
@@ -145,13 +148,31 @@ unfoldM (Multimap m) =
   A.unfoldM m >>= \(key, s) -> (key,) <$> B.unfoldM s
 
 -- |
--- Stream keys.
+-- Stream keys actively.
 unfoldMKeys :: Multimap key value -> UnfoldM STM key
 unfoldMKeys (Multimap m) =
   fmap fst (A.unfoldM m)
 
 -- |
--- Stream values by a key.
+-- Stream values by a key actively.
 unfoldMByKey :: (Eq key, Hashable key) => key -> Multimap key value -> UnfoldM STM value
 unfoldMByKey key (Multimap m) =
   lift (A.lookup key m) >>= maybe mempty B.unfoldM
+
+-- |
+-- Stream associations passively.
+listT :: Multimap key value -> ListT STM (key, value)
+listT (Multimap m) =
+  A.listT m >>= \(key, s) -> (key,) <$> B.listT s
+
+-- |
+-- Stream keys passively.
+listTKeys :: Multimap key value -> ListT STM key
+listTKeys (Multimap m) =
+  fmap fst (A.listT m)
+
+-- |
+-- Stream values by a key passively.
+listTByKey :: (Eq key, Hashable key) => key -> Multimap key value -> ListT STM value
+listTByKey key (Multimap m) =
+  lift (A.lookup key m) >>= maybe mempty B.listT

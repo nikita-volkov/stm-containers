@@ -11,6 +11,7 @@ module StmContainers.Set
   delete,
   reset,
   unfoldM,
+  listT,
 )
 where
 
@@ -101,10 +102,17 @@ reset (Set hamt) =
   A.reset hamt
 
 -- |
--- Stream elements.
+-- Stream the elements actively.
 -- 
 -- Amongst other features this function provides an interface to folding.
 {-# INLINABLE unfoldM #-}
 unfoldM :: Set item -> UnfoldM STM item
 unfoldM (Set hamt) =
   A.unfoldM hamt
+
+-- |
+-- Stream the elements passively.
+{-# INLINE listT #-}
+listT :: Set item -> ListT STM item
+listT (Set hamt) =
+  A.listT hamt

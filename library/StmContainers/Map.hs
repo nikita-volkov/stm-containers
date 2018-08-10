@@ -11,6 +11,7 @@ module StmContainers.Map
   delete,
   reset,
   unfoldM,
+  listT,
 )
 where
 
@@ -99,10 +100,17 @@ reset (Map hamt) =
   A.reset hamt
 
 -- |
--- Stream the associations.
+-- Stream the associations actively.
 -- 
 -- Amongst other features this function provides an interface to folding.
 {-# INLINABLE unfoldM #-}
 unfoldM :: Map key value -> UnfoldM STM (key, value)
 unfoldM (Map hamt) =
-  fmap (\(Product2 k v) -> (k, v)) (A.unfoldM hamt)
+  fmap (\ (Product2 k v) -> (k, v)) (A.unfoldM hamt)
+
+-- |
+-- Stream the associations passively.
+{-# INLINE listT #-}
+listT :: Map key value -> ListT STM (key, value)
+listT (Map hamt) =
+  fmap (\ (Product2 k v) -> (k, v)) (A.listT hamt)
