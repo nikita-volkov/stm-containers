@@ -56,7 +56,7 @@ library
   other-modules:
     StmContainers.Prelude
   build-depends:
-    base <5,
+    base >=4.9 && <5,
     deferred-folds >=0.6.6 && <0.7,
     focus >=1 && <1.1,
     hashable <2,
