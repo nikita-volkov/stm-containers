@@ -26,6 +26,8 @@ install:
     cd dist;
     tar xzvf $pkg_name.tar.gz;
     cd $pkg_name;
+  # Install the "haskell-src-exts" implicit dependency
+  - cabal install happy --reorder-goals --force-reinstalls
   # Install the library dependencies
   - cabal install --only-dependencies --reorder-goals --force-reinstalls
       $([ "$tests" = "1" ] && echo "--enable-tests")
