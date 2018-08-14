@@ -55,7 +55,7 @@ interpretStmMapUpdateAsHashMap =
 -------------------------
 
 newtype TestKey = TestKey Word8
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
 
 instance Arbitrary TestKey where
   arbitrary = TestKey <$> choose (0, 63)
@@ -94,9 +94,17 @@ prop_updatesProduceTheSameEffectAsInHashMap =
   withQCArgs (\a -> a {maxSuccess = 1000}) prop
   where
     prop (updates :: [Update.Update TestKey ()]) =
-      interpretHashMapUpdate update === interpretStmMapUpdateAsHashMap update
-      where
+      let
         update = sequence_ updates
+        hashMap = interpretHashMapUpdate update
+        hashMapSize = HashMap.size hashMap
+        hashMapList = sort (HashMap.toList hashMap)
+        (stmMapList, stmMapSize) = unsafePerformIO $ atomically $ do
+          stmMap <- interpretStmMapUpdate update
+          size <- StmMap.size stmMap
+          stmMapList <- stmMapToList stmMap
+          return (sort stmMapList, size)
+        in (hashMapSize, hashMapList) === (stmMapSize, stmMapList)
 
 test_focusInsert = do
   assertEqual (HashMap.fromList [('a', 1), ('b', 2)]) =<< do 
