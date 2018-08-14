@@ -85,7 +85,7 @@ prop_sizeAndList =
             StmMap.size x
 
 prop_fromListToListHashMapIsomorphism =
-  withQCArgs (\a -> a {maxSuccess = 1000}) $ \ (list :: [(Text, Int)]) -> let
+  withQCArgs (\a -> a {maxSuccess = 10000}) $ \ (list :: [(Text, Int)]) -> let
     hashMapList = HashMap.toList (HashMap.fromList list)
     stmMapList = unsafePerformIO $ atomically $ stmMapFromList list >>= stmMapToList
     in sort hashMapList === sort stmMapList
