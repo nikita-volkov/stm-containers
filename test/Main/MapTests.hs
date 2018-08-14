@@ -83,7 +83,7 @@ prop_sizeAndList =
             x <- stmMapFromList list
             StmMap.size x
 
-prop_fromUnfoldMoListIsomorphism =
+prop_fromListToListIsomorphism =
   forAll gen prop
   where
     gen = do
