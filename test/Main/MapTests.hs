@@ -4,6 +4,7 @@ module Main.MapTests where
 import Prelude hiding (choose)
 import Test.Framework
 import Control.Monad.Free
+import Data.Text.Arbitrary ()
 import qualified Main.MapTests.Update as Update
 import qualified StmContainers.Map as StmMap
 import qualified Focus
@@ -83,16 +84,11 @@ prop_sizeAndList =
             x <- stmMapFromList list
             StmMap.size x
 
-prop_fromListToListIsomorphism =
-  forAll gen prop
-  where
-    gen = do
-      keys <- nub <$> listOf (arbitrary :: Gen Char)
-      mapM (liftA2 (flip (,)) (arbitrary :: Gen Int) . pure) keys
-    prop list =
-      list \\ list' === []
-      where
-        list' = unsafePerformIO $ atomically $ stmMapFromList list >>= stmMapToList
+prop_fromListToListHashMapIsomorphism =
+  withQCArgs (\a -> a {maxSuccess = 1000}) $ \ (list :: [(Text, Int)]) -> let
+    hashMapList = HashMap.toList (HashMap.fromList list)
+    stmMapList = unsafePerformIO $ atomically $ stmMapFromList list >>= stmMapToList
+    in sort hashMapList === sort stmMapList
 
 prop_updatesProduceTheSameEffectAsInHashMap =
   withQCArgs (\a -> a {maxSuccess = 1000}) prop
