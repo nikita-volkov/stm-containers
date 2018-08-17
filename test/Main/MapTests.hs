@@ -91,7 +91,7 @@ prop_fromListToListHashMapIsomorphism =
     in sort hashMapList === sort stmMapList
 
 prop_updatesProduceTheSameEffectAsInHashMap =
-  withQCArgs (\a -> a {maxSuccess = 1000}) prop
+  withQCArgs (\a -> a {maxSuccess = 100000}) prop
   where
     prop (updates :: [Update.Update TestKey ()]) =
       let
