@@ -9,7 +9,7 @@ import qualified Main.MapTests.Update as Update
 import qualified StmContainers.Map as StmMap
 import qualified Focus
 import qualified Data.HashMap.Strict as HashMap
-import qualified DeferredFolds.UnfoldM as UnfoldM
+import qualified DeferredFolds.UnfoldlM as UnfoldlM
 import qualified Control.Foldl as Foldl
 
 
@@ -35,7 +35,7 @@ interpretHashMapUpdate update =
         Just a -> HashMap.insert k (f a) m
 
 stmMapToHashMap :: (Hashable k, Eq k) => StmMap.Map k v -> STM (HashMap.HashMap k v)
-stmMapToHashMap = UnfoldM.foldM (Foldl.generalize Foldl.hashMap) . StmMap.unfoldM
+stmMapToHashMap = UnfoldlM.foldM (Foldl.generalize Foldl.hashMap) . StmMap.unfoldlM
 
 stmMapFromList :: (Hashable k, Eq k) => [(k, v)] -> STM (StmMap.Map k v)
 stmMapFromList list = do
@@ -44,7 +44,7 @@ stmMapFromList list = do
   return m
 
 stmMapToList :: StmMap.Map k v -> STM [(k, v)]
-stmMapToList = UnfoldM.foldM (Foldl.generalize Foldl.list) . StmMap.unfoldM
+stmMapToList = UnfoldlM.foldM (Foldl.generalize Foldl.list) . StmMap.unfoldlM
 
 interpretStmMapUpdateAsHashMap :: (Hashable k, Eq k) => Update.Update k v -> HashMap.HashMap k v
 interpretStmMapUpdateAsHashMap =

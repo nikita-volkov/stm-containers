@@ -14,7 +14,7 @@ module StmContainers.Bimap
   deleteLeft,
   deleteRight,
   reset,
-  unfoldM,
+  unfoldlM,
   listT,
 )
 where
@@ -160,10 +160,10 @@ reset (Bimap leftMap rightMap) =
 -- Stream associations actively.
 -- 
 -- Amongst other features this function provides an interface to folding.
-{-# INLINE unfoldM #-}
-unfoldM :: Bimap leftKey rightKey -> UnfoldM STM (leftKey, rightKey)
-unfoldM (Bimap leftMap rightMap) =
-  A.unfoldM leftMap
+{-# INLINE unfoldlM #-}
+unfoldlM :: Bimap leftKey rightKey -> UnfoldlM STM (leftKey, rightKey)
+unfoldlM (Bimap leftMap rightMap) =
+  A.unfoldlM leftMap
 
 -- |
 -- Stream the associations passively.

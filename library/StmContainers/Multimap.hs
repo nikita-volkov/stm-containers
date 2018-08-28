@@ -11,7 +11,7 @@ module StmContainers.Multimap
   delete,
   deleteByKey,
   reset,
-  unfoldM,
+  unfoldlM,
   unfoldMKeys,
   unfoldMByKey,
   listT,
@@ -143,21 +143,21 @@ reset (Multimap map) =
 -- Stream associations actively.
 --
 -- Amongst other features this function provides an interface to folding.
-unfoldM :: Multimap key value -> UnfoldM STM (key, value)
-unfoldM (Multimap m) =
-  A.unfoldM m >>= \(key, s) -> (key,) <$> B.unfoldM s
+unfoldlM :: Multimap key value -> UnfoldlM STM (key, value)
+unfoldlM (Multimap m) =
+  A.unfoldlM m >>= \(key, s) -> (key,) <$> B.unfoldlM s
 
 -- |
 -- Stream keys actively.
-unfoldMKeys :: Multimap key value -> UnfoldM STM key
+unfoldMKeys :: Multimap key value -> UnfoldlM STM key
 unfoldMKeys (Multimap m) =
-  fmap fst (A.unfoldM m)
+  fmap fst (A.unfoldlM m)
 
 -- |
 -- Stream values by a key actively.
-unfoldMByKey :: (Eq key, Hashable key) => key -> Multimap key value -> UnfoldM STM value
+unfoldMByKey :: (Eq key, Hashable key) => key -> Multimap key value -> UnfoldlM STM value
 unfoldMByKey key (Multimap m) =
-  lift (A.lookup key m) >>= maybe mempty B.unfoldM
+  lift (A.lookup key m) >>= maybe mempty B.unfoldlM
 
 -- |
 -- Stream associations passively.

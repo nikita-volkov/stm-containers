@@ -10,20 +10,21 @@ module StmContainers.Map
   insert,
   delete,
   reset,
-  unfoldM,
+  unfoldlM,
   listT,
 )
 where
 
 import StmContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
-import qualified StmHamt.SizedHamt as A
+import qualified StmHamt.Hamt as A
 import qualified Focus as B
+import qualified DeferredFolds.UnfoldlM as C
 
 
 -- |
 -- Hash-table, based on STM-specialized Hash Array Mapped Trie.
 newtype Map key value =
-  Map (A.SizedHamt (Product2 key value))
+  Map (A.Hamt (Product2 key value))
 
 -- |
 -- Construct a new map.
@@ -53,8 +54,8 @@ null (Map hamt) =
 -- Get the number of elements.
 {-# INLINABLE size #-}
 size :: Map key value -> STM Int
-size (Map hamt) =
-  A.size hamt
+size =
+  C.foldlM' (\ x _ -> return (succ x)) 0 . unfoldlM
 
 -- |
 -- Focus on a value by the key.
@@ -83,7 +84,7 @@ lookup key =
 {-# INLINE insert #-}
 insert :: (Eq key, Hashable key) => value -> key -> Map key value -> STM ()
 insert value key (Map hamt) =
-  A.insert (\(Product2 key _) -> key) (Product2 key value) hamt
+  void (A.insert (\(Product2 key _) -> key) (Product2 key value) hamt)
 
 -- |
 -- Delete an item by a key.
@@ -103,10 +104,10 @@ reset (Map hamt) =
 -- Stream the associations actively.
 -- 
 -- Amongst other features this function provides an interface to folding.
-{-# INLINABLE unfoldM #-}
-unfoldM :: Map key value -> UnfoldM STM (key, value)
-unfoldM (Map hamt) =
-  fmap (\ (Product2 k v) -> (k, v)) (A.unfoldM hamt)
+{-# INLINABLE unfoldlM #-}
+unfoldlM :: Map key value -> UnfoldlM STM (key, value)
+unfoldlM (Map hamt) =
+  fmap (\ (Product2 k v) -> (k, v)) (A.unfoldlM hamt)
 
 -- |
 -- Stream the associations passively.
