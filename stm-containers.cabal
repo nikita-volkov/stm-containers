@@ -40,7 +40,7 @@ library
     StmContainers.Prelude
   build-depends:
     base >=4.9 && <5,
-    deferred-folds >=0.7 && <0.9,
+    deferred-folds >=0.9 && <0.10,
     focus >=1 && <1.1,
     hashable <2,
     list-t >=1.0.1 && <1.1,
