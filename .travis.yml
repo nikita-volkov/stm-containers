@@ -1,7 +1,7 @@
 env:
-  - ghc=8.0.2
+  - ghc=8.0.2 benchmarks=1 tests=1
   - ghc=8.2.2
-  - ghc=8.4.2 benchmarks=1 tests=1
+  - ghc=8.4.2
   - ghc=8.6.1
 
 install:
