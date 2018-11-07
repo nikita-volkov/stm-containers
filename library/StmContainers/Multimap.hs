@@ -12,8 +12,8 @@ module StmContainers.Multimap
   deleteByKey,
   reset,
   unfoldlM,
-  unfoldMKeys,
-  unfoldMByKey,
+  unfoldlMKeys,
+  unfoldlMByKey,
   listT,
   listTKeys,
   listTByKey,
@@ -149,14 +149,14 @@ unfoldlM (Multimap m) =
 
 -- |
 -- Stream keys actively.
-unfoldMKeys :: Multimap key value -> UnfoldlM STM key
-unfoldMKeys (Multimap m) =
+unfoldlMKeys :: Multimap key value -> UnfoldlM STM key
+unfoldlMKeys (Multimap m) =
   fmap fst (A.unfoldlM m)
 
 -- |
 -- Stream values by a key actively.
-unfoldMByKey :: (Eq key, Hashable key) => key -> Multimap key value -> UnfoldlM STM value
-unfoldMByKey key (Multimap m) =
+unfoldlMByKey :: (Eq key, Hashable key) => key -> Multimap key value -> UnfoldlM STM value
+unfoldlMByKey key (Multimap m) =
   lift (A.lookup key m) >>= maybe mempty B.unfoldlM
 
 -- |
