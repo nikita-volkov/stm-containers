@@ -54,6 +54,7 @@ test-suite test
   default-language: Haskell2010
   main-is: Main.hs
   other-modules:
+    Main.BimapTests
     Main.MapTests
     Main.MapTests.Update
   build-depends:
