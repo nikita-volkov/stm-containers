@@ -1,5 +1,5 @@
 name: stm-containers
-version: 1.1.0.3
+version: 1.1.0.4
 synopsis: Containers for STM
 description:
   This library is based on an STM-specialized implementation of
