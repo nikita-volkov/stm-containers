@@ -62,6 +62,7 @@ test-suite test
     focus,
     foldl >=1.4 && <2,
     free >=4.6 && <6,
+    list-t,
     HTF ==0.13.*,
     QuickCheck >=2.7 && <3,
     quickcheck-text >=0.1.2.1 && <0.2,

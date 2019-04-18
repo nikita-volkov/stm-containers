@@ -5,6 +5,34 @@ import Prelude
 import Test.Framework
 import StmContainers.Bimap
 import qualified Focus
+import qualified ListT
+
+test_construction = do
+  m <- newIO :: IO (Bimap Int Int)
+  atomically $ insertRight 3 1 m
+  atomically $ insertRight 4 2 m
+  assertEqual [(3, 1), (4, 2)] =<< atomically (ListT.toList (listT m))
+
+test_deleteLeft = do
+  m <- newIO :: IO (Bimap Int Int)
+  atomically $ insertRight 3 1 m
+  atomically $ insertRight 4 2 m
+  atomically $ deleteLeft 4 m
+  assertEqual [(3, 1)] =<< atomically (ListT.toList (listT m))
+
+test_deleteRight = do
+  m <- newIO :: IO (Bimap Int Int)
+  atomically $ insertRight 3 1 m
+  atomically $ insertRight 4 2 m
+  atomically $ deleteRight 2 m
+  assertEqual [(3, 1)] =<< atomically (ListT.toList (listT m))
+
+test_replactingConstruction = do
+  m <- newIO :: IO (Bimap Int Int)
+  atomically $ insertRight 3 1 m
+  atomically $ insertRight 4 2 m
+  atomically $ insertRight 3 2 m
+  assertEqual [(3, 2)] =<< atomically (ListT.toList (listT m))
 
 test_insertOverwrites = do
   m <- newIO :: IO (Bimap Int Int)
