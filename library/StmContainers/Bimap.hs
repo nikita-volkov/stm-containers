@@ -74,18 +74,19 @@ size (Bimap leftMap _) =
 -- or update it and return the new value.
 {-# INLINE focusLeft #-}
 focusLeft :: (Eq leftKey, Hashable leftKey, Eq rightKey, Hashable rightKey) => B.Focus rightKey STM result -> leftKey -> Bimap leftKey rightKey -> STM result
-focusLeft valueFocus1 leftKey (Bimap leftMap rightMap) =
+focusLeft rightFocus leftKey (Bimap leftMap rightMap) =
   do 
-    ((output, change), maybeRightKey) <- A.focus (B.extractingInput (B.extractingChange valueFocus1)) leftKey leftMap
+    ((output, change), maybeRightKey) <- A.focus (B.extractingInput (B.extractingChange rightFocus)) leftKey leftMap
     case change of
       B.Leave -> 
         return ()
       B.Remove -> 
-        forM_ maybeRightKey $ \ rightKey -> A.delete rightKey rightMap
-      B.Set newKey2 ->
+        forM_ maybeRightKey $ \ oldRightKey -> A.delete oldRightKey rightMap
+      B.Set newRightKey ->
         do
           forM_ maybeRightKey $ \ rightKey -> A.delete rightKey rightMap
-          A.insert leftKey newKey2 rightMap
+          maybeReplacedLeftKey <- A.focus (B.lookup <* B.insert leftKey) newRightKey rightMap
+          forM_ maybeReplacedLeftKey $ \ replacedLeftKey -> A.delete replacedLeftKey leftMap
     return output
 
 -- |
@@ -118,19 +119,15 @@ lookupRight rightKey (Bimap _ rightMap) =
 -- Insert the association by the left value.
 {-# INLINE insertLeft #-}
 insertLeft :: (Eq leftKey, Hashable leftKey, Eq rightKey, Hashable rightKey) => rightKey -> leftKey -> Bimap leftKey rightKey -> STM ()
-insertLeft rightKey leftKey (Bimap leftMap rightMap) = 
-  do
-    A.insert rightKey leftKey leftMap
-    A.insert leftKey rightKey rightMap
+insertLeft rightKey =
+  focusLeft (B.insert rightKey)
 
 -- |
 -- Insert the association by the right value.
 {-# INLINE insertRight #-}
 insertRight :: (Eq leftKey, Hashable leftKey, Eq rightKey, Hashable rightKey) => leftKey -> rightKey -> Bimap leftKey rightKey -> STM ()
 insertRight leftKey rightKey (Bimap leftMap rightMap) = 
-  do
-    A.insert leftKey rightKey rightMap
-    A.insert rightKey leftKey leftMap
+  insertLeft leftKey rightKey (Bimap rightMap leftMap)
 
 -- |
 -- Delete the association by the left value.
