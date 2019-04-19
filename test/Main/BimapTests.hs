@@ -41,3 +41,11 @@ test_insertOverwrites = do
   assertEqual Nothing =<< atomically (lookupRight 1 m)
   assertEqual (Just 3) =<< atomically (lookupRight 2 m)
   assertEqual (Just 2) =<< atomically (lookupLeft 3 m)
+  assertEqual Nothing =<< atomically (focusRight Focus.lookup 1 m)
+  assertEqual (Just 3) =<< atomically (focusRight Focus.lookup 2 m)
+  atomically $ focusRight (Focus.insert 3) 4 m
+  assertEqual Nothing =<< atomically (lookupRight 1 m)
+  assertEqual Nothing =<< atomically (lookupRight 2 m)
+  assertEqual (Just 3) =<< atomically (lookupRight 4 m)
+  assertEqual 1 =<< atomically (size m)
+
