@@ -6,8 +6,6 @@ module StmContainers.Prelude
 )
 where
 
--- base
--------------------------
 import Control.Applicative as Exports
 import Control.Arrow as Exports
 import Control.Category as Exports
@@ -69,26 +67,11 @@ import Text.ParserCombinators.ReadPrec as Exports (ReadPrec, readPrec_to_P, read
 import Text.Printf as Exports (printf, hPrintf)
 import Text.Read as Exports (Read(..), readMaybe, readEither)
 import Unsafe.Coerce as Exports
-
--- transformers
--------------------------
 import Control.Monad.Trans.Class as Exports
-
--- hashable
--------------------------
 import Data.Hashable as Exports (Hashable(..))
-
--- focus
--------------------------
 import Focus as Exports (Focus(..))
-
--- deferred-folds
--------------------------
 import DeferredFolds.Unfoldl as Exports (Unfoldl(..))
 import DeferredFolds.UnfoldlM as Exports (UnfoldlM(..))
-
--- list-t
--------------------------
 import ListT as Exports (ListT(..))
 
 -- | Strict version of 'modifyTVar'.
