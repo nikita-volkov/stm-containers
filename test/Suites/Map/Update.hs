@@ -1,9 +1,10 @@
-module Main.MapTests.Update where
+module Suites.Map.Update where
 
 import Prelude hiding (insert, delete, update)
-import Test.Framework
 import Control.Monad.Free
 import Control.Monad.Free.TH
+import Test.Tasty.QuickCheck
+import Test.QuickCheck.Instances ()
 
 
 data UpdateF k v c =

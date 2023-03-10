@@ -1,10 +1,12 @@
-{-# OPTIONS_GHC -F -pgmF htfpp #-}
 
-import Test.Framework
+import Test.Tasty
+import Test.Tasty.HUnit
 import Prelude
+import qualified Suites.Bimap
+import qualified Suites.Map
 
-import {-@ HTF_TESTS @-} Main.MapTests
-import {-@ HTF_TESTS @-} Main.BimapTests
-
-
-main = htfMain $ htf_thisModulesTests : htf_importedTests
+main = defaultMain . testGroup "" $
+  [
+    testGroup "Bimap" Suites.Bimap.tests,
+    testGroup "Map" Suites.Map.tests
+  ]

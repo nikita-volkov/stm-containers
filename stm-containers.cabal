@@ -52,17 +52,18 @@ test-suite test
   default-language: Haskell2010
   main-is: Main.hs
   other-modules:
-    Main.BimapTests
-    Main.MapTests
-    Main.MapTests.Update
+    Suites.Bimap
+    Suites.Map
+    Suites.Map.Update
   build-depends:
     deferred-folds,
     focus,
     foldl >=1.4 && <2,
     free >=4.6 && <6,
     list-t,
-    HTF ==0.15.*,
-    QuickCheck >=2.7 && <3,
-    quickcheck-text >=0.1.2.1 && <0.2,
+    quickcheck-instances >=0.3.29.1 && <0.4,
     rerebase >=1 && <2,
-    stm-containers
+    stm-containers,
+    tasty >=0.12 && <2,
+    tasty-hunit >=0.10.0.3 && <0.11,
+    tasty-quickcheck >=0.10.2 && <0.11
