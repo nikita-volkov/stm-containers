@@ -44,7 +44,6 @@ library
     EmptyDataDecls
     FlexibleContexts
     FlexibleInstances
-    TypeApplications
     FunctionalDependencies
     GADTs
     GeneralizedNewtypeDeriving
@@ -64,6 +63,7 @@ library
     StandaloneDeriving
     TemplateHaskell
     TupleSections
+    TypeApplications
     TypeFamilies
     TypeOperators
     UnboxedTuples
@@ -96,7 +96,6 @@ test-suite test
     ConstraintKinds
     DataKinds
     DefaultSignatures
-    TypeApplications
     DeriveDataTypeable
     DeriveFoldable
     DeriveFunctor
@@ -124,6 +123,7 @@ test-suite test
     StandaloneDeriving
     TemplateHaskell
     TupleSections
+    TypeApplications
     TypeFamilies
     TypeOperators
     UnboxedTuples

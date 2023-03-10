@@ -126,7 +126,7 @@ tests =
           StmMap.insert 2 'b' m
           stmMapToHashMap m,
     testCase "insert2" $ do
-      assertEqual  "" (HashMap.fromList [(111 :: Int, ()), (207, ())]) =<< do
+      assertEqual "" (HashMap.fromList [(111 :: Int, ()), (207, ())]) =<< do
         atomically $ do
           m <- StmMap.new
           StmMap.insert () 111 m
