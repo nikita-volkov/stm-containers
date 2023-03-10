@@ -4,7 +4,7 @@ import Control.Monad.Free
 import Control.Monad.Free.TH
 import Test.QuickCheck.Instances ()
 import Test.Tasty.QuickCheck
-import Prelude hiding (delete, insert, update)
+import Prelude hiding (delete, insert)
 
 data UpdateF k v c
   = Insert k v c
@@ -27,7 +27,7 @@ instance (Show k, Show v, Show c) => Show (UpdateF k v c) where
           . showsPrecInner k
           . showChar ' '
           . showsPrecInner c
-      Adjust f k c ->
+      Adjust _ k c ->
         showString "Adjust "
           . showString "<v -> v> "
           . showsPrecInner k
