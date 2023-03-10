@@ -20,7 +20,7 @@ module StmContainers.Multimap
 )
 where
 
-import StmContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
+import StmContainers.Prelude hiding (insert, delete, lookup, foldM, toList, empty, null)
 import qualified StmContainers.Map as A
 import qualified StmContainers.Set as B
 import qualified Focus as C
@@ -67,8 +67,8 @@ null (Multimap map) =
 -- which value we're focusing on and it doesn't make sense to replace it,
 -- however we still can decide wether to keep or remove it.
 {-# INLINE focus #-}
-focus :: (Eq key, Hashable key, Eq value, Hashable value) => C.Focus () STM result -> value -> key -> Multimap key value -> STM result
-focus unitFocus@(Focus concealUnit revealUnit) value key (Multimap map) = A.focus setFocus key map where
+focus :: (Hashable key, Hashable value) => C.Focus () STM result -> value -> key -> Multimap key value -> STM result
+focus unitFocus@(Focus concealUnit _) value key (Multimap map) = A.focus setFocus key map where
   setFocus = C.Focus conceal reveal where
     conceal = do
       (output, change) <- concealUnit
@@ -88,21 +88,21 @@ focus unitFocus@(Focus concealUnit revealUnit) value key (Multimap map) = A.focu
 -- |
 -- Look up an item by a value and a key.
 {-# INLINE lookup #-}
-lookup :: (Eq key, Hashable key, Eq value, Hashable value) => value -> key -> Multimap key value -> STM Bool
+lookup :: (Hashable key, Hashable value) => value -> key -> Multimap key value -> STM Bool
 lookup value key (Multimap m) =
   maybe (return False) (B.lookup value) =<< A.lookup key m
 
 -- |
 -- Look up all values by key.
 {-# INLINE lookupByKey #-}
-lookupByKey :: (Eq key, Hashable key) => key -> Multimap key value -> STM (Maybe (B.Set value))
+lookupByKey :: (Hashable key) => key -> Multimap key value -> STM (Maybe (B.Set value))
 lookupByKey key (Multimap m) =
   A.lookup key m
 
 -- |
 -- Insert an item.
 {-# INLINABLE insert #-}
-insert :: (Eq key, Hashable key, Eq value, Hashable value) => value -> key -> Multimap key value -> STM ()
+insert :: (Hashable key, Hashable value) => value -> key -> Multimap key value -> STM ()
 insert value key (Multimap map) = A.focus setFocus key map where
   setFocus = Focus conceal reveal where
     conceal = do
@@ -116,7 +116,7 @@ insert value key (Multimap map) = A.focus setFocus key map where
 -- |
 -- Delete an item by a value and a key.
 {-# INLINABLE delete #-}
-delete :: (Eq key, Hashable key, Eq value, Hashable value) => value -> key -> Multimap key value -> STM ()
+delete :: (Hashable key, Hashable value) => value -> key -> Multimap key value -> STM ()
 delete value key (Multimap map) = A.focus setFocus key map where
   setFocus = Focus conceal reveal where
     conceal = returnChange C.Leave
@@ -128,7 +128,7 @@ delete value key (Multimap map) = A.focus setFocus key map where
 -- |
 -- Delete all values associated with the key.
 {-# INLINEABLE deleteByKey #-}
-deleteByKey :: (Eq key, Hashable key) => key -> Multimap key value -> STM ()
+deleteByKey :: (Hashable key) => key -> Multimap key value -> STM ()
 deleteByKey key (Multimap map) =
   A.delete key map
 
@@ -155,7 +155,7 @@ unfoldlMKeys (Multimap m) =
 
 -- |
 -- Stream values by a key actively.
-unfoldlMByKey :: (Eq key, Hashable key) => key -> Multimap key value -> UnfoldlM STM value
+unfoldlMByKey :: (Hashable key) => key -> Multimap key value -> UnfoldlM STM value
 unfoldlMByKey key (Multimap m) =
   lift (A.lookup key m) >>= maybe mempty B.unfoldlM
 
@@ -173,6 +173,6 @@ listTKeys (Multimap m) =
 
 -- |
 -- Stream values by a key passively.
-listTByKey :: (Eq key, Hashable key) => key -> Multimap key value -> ListT STM value
+listTByKey :: (Hashable key) => key -> Multimap key value -> ListT STM value
 listTByKey key (Multimap m) =
   lift (A.lookup key m) >>= maybe mempty B.listT

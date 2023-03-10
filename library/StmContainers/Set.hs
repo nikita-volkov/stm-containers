@@ -15,7 +15,7 @@ module StmContainers.Set
 )
 where
 
-import StmContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
+import StmContainers.Prelude hiding (insert, delete, lookup, foldM, toList, empty, null)
 import qualified StmHamt.SizedHamt as A
 import qualified Focus as B
 
@@ -66,7 +66,7 @@ size (Set hamt) =
 -- which element we're focusing on and it doesn't make sense to replace it,
 -- however we still can decide wether to keep or remove it.
 {-# INLINABLE focus #-}
-focus :: (Eq item, Hashable item) => B.Focus () STM result -> item -> Set item -> STM result
+focus :: (Hashable item) => B.Focus () STM result -> item -> Set item -> STM result
 focus unitFocus item (Set hamt) =
   A.focus rowFocus id item hamt
   where
@@ -76,21 +76,21 @@ focus unitFocus item (Set hamt) =
 -- |
 -- Lookup an element.
 {-# INLINABLE lookup #-}
-lookup :: (Eq item, Hashable item) => item -> Set item -> STM Bool
+lookup :: (Hashable item) => item -> Set item -> STM Bool
 lookup =
   focus (fmap isJust B.lookup)
 
 -- |
 -- Insert a new element.
 {-# INLINABLE insert #-}
-insert :: (Eq item, Hashable item) => item -> Set item -> STM ()
+insert :: (Hashable item) => item -> Set item -> STM ()
 insert item (Set hamt) =
   A.insert id item hamt
 
 -- |
 -- Delete an element.
 {-# INLINABLE delete #-}
-delete :: (Eq item, Hashable item) => item -> Set item -> STM ()
+delete :: (Hashable item) => item -> Set item -> STM ()
 delete item (Set hamt) =
   A.focus B.delete id item hamt
 

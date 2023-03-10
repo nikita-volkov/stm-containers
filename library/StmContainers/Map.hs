@@ -15,7 +15,7 @@ module StmContainers.Map
 )
 where
 
-import StmContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
+import StmContainers.Prelude hiding (insert, delete, lookup, foldM, toList, empty, null)
 import qualified StmHamt.Hamt as A
 import qualified Focus as B
 import qualified DeferredFolds.UnfoldlM as C
@@ -65,7 +65,7 @@ size =
 -- E.g., you can look up a value and delete it at the same time,
 -- or update it and return the new value.
 {-# INLINE focus #-}
-focus :: (Eq key, Hashable key) => B.Focus value STM result -> key -> Map key value -> STM result
+focus :: (Hashable key) => B.Focus value STM result -> key -> Map key value -> STM result
 focus valueFocus key (Map hamt) =
   A.focus rowFocus (\(Product2 key _) -> key) key hamt
   where
@@ -75,21 +75,21 @@ focus valueFocus key (Map hamt) =
 -- |
 -- Look up an item.
 {-# INLINABLE lookup #-}
-lookup :: (Eq key, Hashable key) => key -> Map key value -> STM (Maybe value)
+lookup :: (Hashable key) => key -> Map key value -> STM (Maybe value)
 lookup key =
   focus B.lookup key
 
 -- |
 -- Insert a value at a key.
 {-# INLINE insert #-}
-insert :: (Eq key, Hashable key) => value -> key -> Map key value -> STM ()
+insert :: (Hashable key) => value -> key -> Map key value -> STM ()
 insert value key (Map hamt) =
   void (A.insert (\(Product2 key _) -> key) (Product2 key value) hamt)
 
 -- |
 -- Delete an item by a key.
 {-# INLINABLE delete #-}
-delete :: (Eq key, Hashable key) => key -> Map key value -> STM ()
+delete :: (Hashable key) => key -> Map key value -> STM ()
 delete key =
   focus B.delete key
 

@@ -19,7 +19,7 @@ module StmContainers.Bimap
 )
 where
 
-import StmContainers.Prelude hiding (insert, delete, lookup, alter, foldM, toList, empty, null)
+import StmContainers.Prelude hiding (insert, delete, lookup, foldM, toList, empty, null)
 import qualified StmContainers.Map as A
 import qualified Focus as B
 
@@ -73,7 +73,7 @@ size (Bimap leftMap _) =
 -- E.g., you can look up an item and delete it at the same time,
 -- or update it and return the new value.
 {-# INLINE focusLeft #-}
-focusLeft :: (Eq leftKey, Hashable leftKey, Eq rightKey, Hashable rightKey) => B.Focus rightKey STM result -> leftKey -> Bimap leftKey rightKey -> STM result
+focusLeft :: (Hashable leftKey, Hashable rightKey) => B.Focus rightKey STM result -> leftKey -> Bimap leftKey rightKey -> STM result
 focusLeft rightFocus leftKey (Bimap leftMap rightMap) =
   do 
     ((output, change), maybeRightKey) <- A.focus (B.extractingInput (B.extractingChange rightFocus)) leftKey leftMap
@@ -97,42 +97,42 @@ focusLeft rightFocus leftKey (Bimap leftMap rightMap) =
 -- E.g., you can look up an item and delete it at the same time,
 -- or update it and return the new value.
 {-# INLINE focusRight #-}
-focusRight :: (Eq leftKey, Hashable leftKey, Eq rightKey, Hashable rightKey) => B.Focus leftKey STM result -> rightKey -> Bimap leftKey rightKey -> STM result
+focusRight :: (Hashable leftKey, Hashable rightKey) => B.Focus leftKey STM result -> rightKey -> Bimap leftKey rightKey -> STM result
 focusRight valueFocus2 rightKey (Bimap leftMap rightMap) =
   focusLeft valueFocus2 rightKey (Bimap rightMap leftMap)
 
 -- |
 -- Look up a right value by the left value.
 {-# INLINE lookupLeft #-}
-lookupLeft :: (Eq leftKey, Hashable leftKey, Eq rightKey, Hashable rightKey) => leftKey -> Bimap leftKey rightKey -> STM (Maybe rightKey)
+lookupLeft :: (Hashable leftKey) => leftKey -> Bimap leftKey rightKey -> STM (Maybe rightKey)
 lookupLeft leftKey (Bimap leftMap _) =
   A.lookup leftKey leftMap
 
 -- |
 -- Look up a left value by the right value.
 {-# INLINE lookupRight #-}
-lookupRight :: (Eq leftKey, Hashable leftKey, Eq rightKey, Hashable rightKey) => rightKey -> Bimap leftKey rightKey -> STM (Maybe leftKey)
+lookupRight :: (Hashable rightKey) => rightKey -> Bimap leftKey rightKey -> STM (Maybe leftKey)
 lookupRight rightKey (Bimap _ rightMap) =
   A.lookup rightKey rightMap
 
 -- |
 -- Insert the association by the left value.
 {-# INLINE insertLeft #-}
-insertLeft :: (Eq leftKey, Hashable leftKey, Eq rightKey, Hashable rightKey) => rightKey -> leftKey -> Bimap leftKey rightKey -> STM ()
+insertLeft :: (Hashable leftKey, Hashable rightKey) => rightKey -> leftKey -> Bimap leftKey rightKey -> STM ()
 insertLeft rightKey =
   focusLeft (B.insert rightKey)
 
 -- |
 -- Insert the association by the right value.
 {-# INLINE insertRight #-}
-insertRight :: (Eq leftKey, Hashable leftKey, Eq rightKey, Hashable rightKey) => leftKey -> rightKey -> Bimap leftKey rightKey -> STM ()
+insertRight :: (Hashable leftKey, Hashable rightKey) => leftKey -> rightKey -> Bimap leftKey rightKey -> STM ()
 insertRight leftKey rightKey (Bimap leftMap rightMap) = 
   insertLeft leftKey rightKey (Bimap rightMap leftMap)
 
 -- |
 -- Delete the association by the left value.
 {-# INLINE deleteLeft #-}
-deleteLeft :: (Eq leftKey, Hashable leftKey, Eq rightKey, Hashable rightKey) => leftKey -> Bimap leftKey rightKey -> STM ()
+deleteLeft :: (Hashable leftKey, Hashable rightKey) => leftKey -> Bimap leftKey rightKey -> STM ()
 deleteLeft leftKey (Bimap leftMap rightMap) =
   A.focus B.lookupAndDelete leftKey leftMap >>= 
   mapM_ (\ rightKey -> A.delete rightKey rightMap)
@@ -140,7 +140,7 @@ deleteLeft leftKey (Bimap leftMap rightMap) =
 -- |
 -- Delete the association by the right value.
 {-# INLINE deleteRight #-}
-deleteRight :: (Eq leftKey, Hashable leftKey, Eq rightKey, Hashable rightKey) => rightKey -> Bimap leftKey rightKey -> STM ()
+deleteRight :: (Hashable leftKey, Hashable rightKey) => rightKey -> Bimap leftKey rightKey -> STM ()
 deleteRight rightKey (Bimap leftMap rightMap) =
   deleteLeft rightKey (Bimap rightMap leftMap)
 
@@ -159,7 +159,7 @@ reset (Bimap leftMap rightMap) =
 -- Amongst other features this function provides an interface to folding.
 {-# INLINE unfoldlM #-}
 unfoldlM :: Bimap leftKey rightKey -> UnfoldlM STM (leftKey, rightKey)
-unfoldlM (Bimap leftMap rightMap) =
+unfoldlM (Bimap leftMap _) =
   A.unfoldlM leftMap
 
 -- |
