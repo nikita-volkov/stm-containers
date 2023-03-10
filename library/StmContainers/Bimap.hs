@@ -1,37 +1,35 @@
 module StmContainers.Bimap
-(
-  Bimap,
-  new,
-  newIO,
-  null,
-  size,
-  focusLeft,
-  focusRight,
-  lookupLeft,
-  lookupRight,
-  insertLeft,
-  insertRight,
-  deleteLeft,
-  deleteRight,
-  reset,
-  unfoldlM,
-  listT,
-)
+  ( Bimap,
+    new,
+    newIO,
+    null,
+    size,
+    focusLeft,
+    focusRight,
+    lookupLeft,
+    lookupRight,
+    insertLeft,
+    insertRight,
+    deleteLeft,
+    deleteRight,
+    reset,
+    unfoldlM,
+    listT,
+  )
 where
 
-import StmContainers.Prelude hiding (insert, delete, lookup, foldM, toList, empty, null)
-import qualified StmContainers.Map as A
 import qualified Focus as B
-
+import qualified StmContainers.Map as A
+import StmContainers.Prelude hiding (delete, empty, foldM, insert, lookup, null, toList)
 
 -- |
 -- Bidirectional map.
 -- Essentially, a bijection between subsets of its two argument types.
--- 
--- For one value of the left-hand type this map contains one value 
+--
+-- For one value of the left-hand type this map contains one value
 -- of the right-hand type and vice versa.
-data Bimap leftKey rightKey = 
-  Bimap !(A.Map leftKey rightKey) !(A.Map rightKey leftKey)
+data Bimap leftKey rightKey
+  = Bimap !(A.Map leftKey rightKey) !(A.Map rightKey leftKey)
   deriving (Typeable)
 
 -- |
@@ -43,8 +41,8 @@ new =
 
 -- |
 -- Construct a new bimap in IO.
--- 
--- This is useful for creating it on a top-level using 'unsafePerformIO', 
+--
+-- This is useful for creating it on a top-level using 'unsafePerformIO',
 -- because using 'atomically' inside 'unsafePerformIO' isn't possible.
 {-# INLINE newIO #-}
 newIO :: IO (Bimap leftKey rightKey)
@@ -67,7 +65,7 @@ size (Bimap leftMap _) =
 
 -- |
 -- Focus on a right value by the left value.
--- 
+--
 -- This function allows to perform composite operations in a single access
 -- to a map item.
 -- E.g., you can look up an item and delete it at the same time,
@@ -75,23 +73,23 @@ size (Bimap leftMap _) =
 {-# INLINE focusLeft #-}
 focusLeft :: (Hashable leftKey, Hashable rightKey) => B.Focus rightKey STM result -> leftKey -> Bimap leftKey rightKey -> STM result
 focusLeft rightFocus leftKey (Bimap leftMap rightMap) =
-  do 
+  do
     ((output, change), maybeRightKey) <- A.focus (B.extractingInput (B.extractingChange rightFocus)) leftKey leftMap
     case change of
-      B.Leave -> 
+      B.Leave ->
         return ()
-      B.Remove -> 
-        forM_ maybeRightKey $ \ oldRightKey -> A.delete oldRightKey rightMap
+      B.Remove ->
+        forM_ maybeRightKey $ \oldRightKey -> A.delete oldRightKey rightMap
       B.Set newRightKey ->
         do
-          forM_ maybeRightKey $ \ rightKey -> A.delete rightKey rightMap
+          forM_ maybeRightKey $ \rightKey -> A.delete rightKey rightMap
           maybeReplacedLeftKey <- A.focus (B.lookup <* B.insert leftKey) newRightKey rightMap
-          forM_ maybeReplacedLeftKey $ \ replacedLeftKey -> A.delete replacedLeftKey leftMap
+          forM_ maybeReplacedLeftKey $ \replacedLeftKey -> A.delete replacedLeftKey leftMap
     return output
 
 -- |
 -- Focus on a left value by the right value.
--- 
+--
 -- This function allows to perform composite operations in a single access
 -- to a map item.
 -- E.g., you can look up an item and delete it at the same time,
@@ -126,7 +124,7 @@ insertLeft rightKey =
 -- Insert the association by the right value.
 {-# INLINE insertRight #-}
 insertRight :: (Hashable leftKey, Hashable rightKey) => leftKey -> rightKey -> Bimap leftKey rightKey -> STM ()
-insertRight leftKey rightKey (Bimap leftMap rightMap) = 
+insertRight leftKey rightKey (Bimap leftMap rightMap) =
   insertLeft leftKey rightKey (Bimap rightMap leftMap)
 
 -- |
@@ -134,9 +132,9 @@ insertRight leftKey rightKey (Bimap leftMap rightMap) =
 {-# INLINE deleteLeft #-}
 deleteLeft :: (Hashable leftKey, Hashable rightKey) => leftKey -> Bimap leftKey rightKey -> STM ()
 deleteLeft leftKey (Bimap leftMap rightMap) =
-  A.focus B.lookupAndDelete leftKey leftMap >>= 
-  mapM_ (\ rightKey -> A.delete rightKey rightMap)
-  
+  A.focus B.lookupAndDelete leftKey leftMap
+    >>= mapM_ (\rightKey -> A.delete rightKey rightMap)
+
 -- |
 -- Delete the association by the right value.
 {-# INLINE deleteRight #-}
@@ -155,7 +153,7 @@ reset (Bimap leftMap rightMap) =
 
 -- |
 -- Stream associations actively.
--- 
+--
 -- Amongst other features this function provides an interface to folding.
 {-# INLINE unfoldlM #-}
 unfoldlM :: Bimap leftKey rightKey -> UnfoldlM STM (leftKey, rightKey)

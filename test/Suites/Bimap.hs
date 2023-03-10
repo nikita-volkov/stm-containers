@@ -1,15 +1,14 @@
 module Suites.Bimap (tests) where
 
-import Prelude
-import Test.Tasty
-import Test.Tasty.HUnit
-import StmContainers.Bimap
 import qualified Focus
 import qualified ListT
+import StmContainers.Bimap
+import Test.Tasty
+import Test.Tasty.HUnit
+import Prelude
 
 tests =
-  [
-    testCase "construction" $ do
+  [ testCase "construction" $ do
       m <- newIO :: IO (Bimap Int Int)
       atomically $ insertRight 3 1 m
       atomically $ insertRight 4 2 m
@@ -64,4 +63,3 @@ tests =
       assertEqual "" Nothing =<< atomically (lookupLeft 2 m)
       assertEqual "" (Just 'a') =<< atomically (lookupLeft 3 m)
   ]
-

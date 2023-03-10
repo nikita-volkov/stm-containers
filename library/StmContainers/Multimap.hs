@@ -1,37 +1,35 @@
 module StmContainers.Multimap
-(
-  Multimap,
-  new,
-  newIO,
-  null,
-  focus,
-  lookup,
-  lookupByKey,
-  insert,
-  delete,
-  deleteByKey,
-  reset,
-  unfoldlM,
-  unfoldlMKeys,
-  unfoldlMByKey,
-  listT,
-  listTKeys,
-  listTByKey,
-)
+  ( Multimap,
+    new,
+    newIO,
+    null,
+    focus,
+    lookup,
+    lookupByKey,
+    insert,
+    delete,
+    deleteByKey,
+    reset,
+    unfoldlM,
+    unfoldlMKeys,
+    unfoldlMByKey,
+    listT,
+    listTKeys,
+    listTByKey,
+  )
 where
 
-import StmContainers.Prelude hiding (insert, delete, lookup, foldM, toList, empty, null)
-import qualified StmContainers.Map as A
-import qualified StmContainers.Set as B
 import qualified Focus as C
-
+import qualified StmContainers.Map as A
+import StmContainers.Prelude hiding (delete, empty, foldM, insert, lookup, null, toList)
+import qualified StmContainers.Set as B
 
 -- |
 -- A multimap, based on an STM-specialized hash array mapped trie.
 --
 -- Basically it's just a wrapper API around @'A.Map' key ('B.Set' value)@.
-newtype Multimap key value =
-  Multimap (A.Map key (B.Set value))
+newtype Multimap key value
+  = Multimap (A.Map key (B.Set value))
   deriving (Typeable)
 
 -- |
@@ -68,22 +66,24 @@ null (Multimap map) =
 -- however we still can decide wether to keep or remove it.
 {-# INLINE focus #-}
 focus :: (Hashable key, Hashable value) => C.Focus () STM result -> value -> key -> Multimap key value -> STM result
-focus unitFocus@(Focus concealUnit _) value key (Multimap map) = A.focus setFocus key map where
-  setFocus = C.Focus conceal reveal where
-    conceal = do
-      (output, change) <- concealUnit
-      case change of
-        C.Set () ->
-          do
-            set <- B.new
-            B.insert value set
-            return (output, C.Set set)
-        _ ->
-          return (output, C.Leave)
-  reveal set = do
-    output <- B.focus unitFocus value set
-    change <- bool C.Leave C.Remove <$> B.null set
-    return (output, change)
+focus unitFocus@(Focus concealUnit _) value key (Multimap map) = A.focus setFocus key map
+  where
+    setFocus = C.Focus conceal reveal
+      where
+        conceal = do
+          (output, change) <- concealUnit
+          case change of
+            C.Set () ->
+              do
+                set <- B.new
+                B.insert value set
+                return (output, C.Set set)
+            _ ->
+              return (output, C.Leave)
+    reveal set = do
+      output <- B.focus unitFocus value set
+      change <- bool C.Leave C.Remove <$> B.null set
+      return (output, change)
 
 -- |
 -- Look up an item by a value and a key.
@@ -101,29 +101,33 @@ lookupByKey key (Multimap m) =
 
 -- |
 -- Insert an item.
-{-# INLINABLE insert #-}
+{-# INLINEABLE insert #-}
 insert :: (Hashable key, Hashable value) => value -> key -> Multimap key value -> STM ()
-insert value key (Multimap map) = A.focus setFocus key map where
-  setFocus = Focus conceal reveal where
-    conceal = do
-      set <- B.new
-      B.insert value set
-      return ((), C.Set set)
-    reveal set = do
-      B.insert value set
-      return ((), C.Leave)
+insert value key (Multimap map) = A.focus setFocus key map
+  where
+    setFocus = Focus conceal reveal
+      where
+        conceal = do
+          set <- B.new
+          B.insert value set
+          return ((), C.Set set)
+        reveal set = do
+          B.insert value set
+          return ((), C.Leave)
 
 -- |
 -- Delete an item by a value and a key.
-{-# INLINABLE delete #-}
+{-# INLINEABLE delete #-}
 delete :: (Hashable key, Hashable value) => value -> key -> Multimap key value -> STM ()
-delete value key (Multimap map) = A.focus setFocus key map where
-  setFocus = Focus conceal reveal where
-    conceal = returnChange C.Leave
-    reveal set = do
-      B.delete value set
-      B.null set >>= returnChange . bool C.Leave C.Remove
-    returnChange c = return ((), c)
+delete value key (Multimap map) = A.focus setFocus key map
+  where
+    setFocus = Focus conceal reveal
+      where
+        conceal = returnChange C.Leave
+        reveal set = do
+          B.delete value set
+          B.null set >>= returnChange . bool C.Leave C.Remove
+        returnChange c = return ((), c)
 
 -- |
 -- Delete all values associated with the key.
