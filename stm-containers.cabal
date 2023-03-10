@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name:          stm-containers
-version:       1.2
+version:       1.2.0.1
 synopsis:      Containers for STM
 description:
   This library is based on an STM-specialized implementation of
