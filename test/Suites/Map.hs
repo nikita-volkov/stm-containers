@@ -13,7 +13,7 @@ import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck
 import Prelude hiding (choose)
 
-interpretStmMapUpdate :: (Hashable k, Eq k) => Update.Update k v -> STM (StmMap.Map k v)
+interpretStmMapUpdate :: (Hashable k) => Update.Update k v -> STM (StmMap.Map k v)
 interpretStmMapUpdate update = do
   m <- StmMap.new
   flip iterM update $ \case
@@ -22,7 +22,7 @@ interpretStmMapUpdate update = do
     Update.Adjust f k c -> StmMap.focus ((Focus.adjustM . fmap return) f) k m >> c
   return m
 
-interpretHashMapUpdate :: (Hashable k, Eq k) => Update.Update k v -> HashMap.HashMap k v
+interpretHashMapUpdate :: (Hashable k) => Update.Update k v -> HashMap.HashMap k v
 interpretHashMapUpdate update =
   flip execState HashMap.empty $ flip iterM update $ \case
     Update.Insert k v c -> modify (HashMap.insert k v) >> c
@@ -34,10 +34,10 @@ interpretHashMapUpdate update =
         Nothing -> m
         Just a -> HashMap.insert k (f a) m
 
-stmMapToHashMap :: (Hashable k, Eq k) => StmMap.Map k v -> STM (HashMap.HashMap k v)
+stmMapToHashMap :: (Hashable k) => StmMap.Map k v -> STM (HashMap.HashMap k v)
 stmMapToHashMap = UnfoldlM.foldM (Foldl.generalize Foldl.hashMap) . StmMap.unfoldlM
 
-stmMapFromList :: (Hashable k, Eq k) => [(k, v)] -> STM (StmMap.Map k v)
+stmMapFromList :: (Hashable k) => [(k, v)] -> STM (StmMap.Map k v)
 stmMapFromList list = do
   m <- StmMap.new
   forM_ list $ \(k, v) -> StmMap.insert v k m
@@ -45,10 +45,6 @@ stmMapFromList list = do
 
 stmMapToList :: StmMap.Map k v -> STM [(k, v)]
 stmMapToList = UnfoldlM.foldM (Foldl.generalize Foldl.list) . StmMap.unfoldlM
-
-interpretStmMapUpdateAsHashMap :: (Hashable k, Eq k) => Update.Update k v -> HashMap.HashMap k v
-interpretStmMapUpdateAsHashMap =
-  unsafePerformIO . atomically . (stmMapToHashMap <=< interpretStmMapUpdate)
 
 -- * Intentional hash collision simulation
 
@@ -70,6 +66,7 @@ instance Hashable TestKey where
 
 -------------------------
 
+tests :: [TestTree]
 tests =
   [ testProperty "sizeAndList" $
       let gen = do
@@ -129,7 +126,7 @@ tests =
           StmMap.insert 2 'b' m
           stmMapToHashMap m,
     testCase "insert2" $ do
-      assertEqual "" (HashMap.fromList [(111 :: Int, ()), (207, ())]) =<< do
+      assertEqual  "" (HashMap.fromList [(111 :: Int, ()), (207, ())]) =<< do
         atomically $ do
           m <- StmMap.new
           StmMap.insert () 111 m

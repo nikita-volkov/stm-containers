@@ -1,9 +1,9 @@
 import qualified Suites.Bimap
 import qualified Suites.Map
 import Test.Tasty
-import Test.Tasty.HUnit
 import Prelude
 
+main :: IO ()
 main =
   defaultMain . testGroup "" $
     [ testGroup "Bimap" Suites.Bimap.tests,

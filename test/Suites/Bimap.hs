@@ -7,6 +7,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 import Prelude
 
+tests :: [TestTree]
 tests =
   [ testCase "construction" $ do
       m <- newIO :: IO (Bimap Int Int)
