@@ -36,7 +36,7 @@ instance (Show k, Show v, Show c) => Show (UpdateF k v c) where
     where
       showsPrecInner = showsPrec (succ 5)
 
-instance Show1 (UpdateF k v) where
+instance (Show k, Show v) => Show1 (UpdateF k v) where
   liftShowsPrec = undefined
 
 makeFree ''UpdateF
