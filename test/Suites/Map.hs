@@ -68,18 +68,18 @@ instance Hashable TestKey where
 
 tests :: [TestTree]
 tests =
-  [ testProperty "sizeAndList" $
-      let gen = do
-            keys <- nub <$> listOf (choose ('a', 'z'))
-            mapM (liftA2 (flip (,)) (choose (0, 99 :: Int)) . pure) keys
-          prop list =
-            length list == stmMapLength
-            where
-              stmMapLength =
-                unsafePerformIO $ atomically $ do
-                  x <- stmMapFromList list
-                  StmMap.size x
-       in forAll gen prop,
+  [ testProperty "sizeAndList"
+      $ let gen = do
+              keys <- nub <$> listOf (choose ('a', 'z'))
+              mapM (liftA2 (flip (,)) (choose (0, 99 :: Int)) . pure) keys
+            prop list =
+              length list == stmMapLength
+              where
+                stmMapLength =
+                  unsafePerformIO $ atomically $ do
+                    x <- stmMapFromList list
+                    StmMap.size x
+         in forAll gen prop,
     testProperty "fromListToListHashMapIsomorphism" $ \(list :: [(Text, Int)]) ->
       let hashMapList = HashMap.toList (HashMap.fromList list)
           stmMapList = unsafePerformIO $ atomically $ stmMapFromList list >>= stmMapToList
