@@ -5,7 +5,8 @@ import Prelude
 
 main :: IO ()
 main =
-  defaultMain . testGroup "" $
-    [ testGroup "Bimap" Suites.Bimap.tests,
-      testGroup "Map" Suites.Map.tests
-    ]
+  defaultMain
+    . testGroup ""
+    $ [ testGroup "Bimap" Suites.Bimap.tests,
+        testGroup "Map" Suites.Map.tests
+      ]
