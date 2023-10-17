@@ -11,6 +11,7 @@ module StmContainers.Map
     reset,
     unfoldlM,
     listT,
+    listTNonAtomic,
   )
 where
 
@@ -111,5 +112,11 @@ unfoldlM (Map hamt) =
 -- Stream the associations passively.
 {-# INLINE listT #-}
 listT :: Map key value -> ListT STM (key, value)
-listT (Map hamt) =
-  fmap (\(Product2 k v) -> (k, v)) (A.listT hamt)
+listT (Map hamt) = fmap (\(Product2 k v) -> (k, v)) (A.listT hamt)
+
+-- |
+-- Stream the associations passively.
+-- Data may be inconsistent/out of date.
+{-# INLINE listTNonAtomic #-}
+listTNonAtomic :: Map key value -> ListT IO (key, value)
+listTNonAtomic (Map hamt) = fmap (\(Product2 k v) -> (k, v)) (A.listTNonAtomic hamt)
