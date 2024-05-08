@@ -1,3 +1,5 @@
+name: Compile, test and check the docs
+
 on:
   push:
     branches:
@@ -7,7 +9,7 @@ on:
 jobs:
 
   format:
-    uses: nikita-volkov/haskell-hackage-lib-github-actions-workflows/.github/workflows/format.yaml@v1
+    uses: ./.github/workflows/format.yaml
     secrets: inherit
 
   check:
