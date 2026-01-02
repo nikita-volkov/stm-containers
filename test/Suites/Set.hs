@@ -5,6 +5,7 @@ import Control.Monad.Free
 import qualified DeferredFolds.UnfoldlM as UnfoldlM
 import qualified Focus
 import qualified StmContainers.Set as StmSet
+import qualified ListT
 import Test.QuickCheck.Instances ()
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -60,6 +61,12 @@ tests =
       let setList =
             unsafePerformIO $ atomically $
               stmSetFromList xs >>= stmSetToList
+       in sort (nub xs) === sort setList,
+    testProperty "listTNonAtomicIsomorphism" $ \(xs :: [Int]) ->
+      let setList =
+            unsafePerformIO $ do
+              set <- atomically (stmSetFromList xs)
+              ListT.toList (StmSet.listTNonAtomic set)
        in sort (nub xs) === sort setList,
     testProperty "insertDeleteWithCollisions" $ \(ks :: [TestKey]) ->
       let dropped = take (length ks `div` 2) ks
