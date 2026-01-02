@@ -132,6 +132,7 @@ test-suite test
   main-is: Main.hs
   other-modules:
     Suites.Bimap
+    Suites.Set
     Suites.Map
     Suites.Map.Update
 
