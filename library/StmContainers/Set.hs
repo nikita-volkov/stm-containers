@@ -11,6 +11,7 @@ module StmContainers.Set
     reset,
     unfoldlM,
     listT,
+    listTNonAtomic,
   )
 where
 
@@ -114,3 +115,10 @@ unfoldlM (Set hamt) =
 listT :: Set item -> ListT STM item
 listT (Set hamt) =
   A.listT hamt
+
+-- |
+-- Stream the elements passively.
+-- Data may be inconsistent/out of date.
+{-# INLINE listTNonAtomic #-}
+listTNonAtomic :: Set item -> ListT IO item
+listTNonAtomic (Set hamt) = A.listTNonAtomic hamt
