@@ -23,7 +23,6 @@ import qualified StmHamt.SizedHamt as A
 -- A hash set, based on an STM-specialized hash array mapped trie.
 newtype Set item
   = Set (A.SizedHamt item)
-  deriving (Typeable)
 
 -- |
 -- Construct a new set.

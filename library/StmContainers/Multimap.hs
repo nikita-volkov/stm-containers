@@ -30,7 +30,6 @@ import qualified StmContainers.Set as B
 -- Basically it's just a wrapper API around @'A.Map' key ('B.Set' value)@.
 newtype Multimap key value
   = Multimap (A.Map key (B.Set value))
-  deriving (Typeable)
 
 -- |
 -- Construct a new multimap.

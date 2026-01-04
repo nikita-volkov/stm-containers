@@ -30,7 +30,6 @@ import StmContainers.Prelude hiding (delete, empty, foldM, insert, lookup, null,
 -- of the right-hand type and vice versa.
 data Bimap leftKey rightKey
   = Bimap !(A.Map leftKey rightKey) !(A.Map rightKey leftKey)
-  deriving (Typeable)
 
 -- |
 -- Construct a new bimap.
