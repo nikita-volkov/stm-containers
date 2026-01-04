@@ -1,22 +1,22 @@
 module Suites.Set (tests) where
 
+import Control.Concurrent.STM
 import qualified Control.Foldl as Foldl
+import Control.Monad (forM_)
 import Control.Monad.Free
+import Data.Hashable
+import Data.List (nub, sort, splitAt)
+import Data.Word (Word8)
 import qualified DeferredFolds.UnfoldlM as UnfoldlM
 import qualified Focus
-import qualified StmContainers.Set as StmSet
 import qualified ListT
+import qualified StmContainers.Set as StmSet
+import System.IO.Unsafe (unsafePerformIO)
 import Test.QuickCheck.Instances ()
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck
-import Prelude hiding (null, choose)
-import System.IO.Unsafe (unsafePerformIO)
-import Control.Monad (forM_)
-import Control.Concurrent.STM
-import Data.Hashable
-import Data.List (nub, sort, splitAt)
-import Data.Word (Word8)
+import Prelude hiding (choose, null)
 
 -- helpers
 
@@ -47,20 +47,22 @@ instance Hashable TestKey where
 
 tests :: [TestTree]
 tests =
-  [ testProperty "sizeAndList" $
-      let gen = nub <$> listOf (choose ('a', 'z'))
-          prop xs =
-            length xs == stmSetSize
-            where
-              stmSetSize =
-                unsafePerformIO $ atomically $ do
-                  s <- stmSetFromList xs
-                  StmSet.size s
-       in forAll gen prop,
+  [ testProperty "sizeAndList"
+      $ let gen = nub <$> listOf (choose ('a', 'z'))
+            prop xs =
+              length xs == stmSetSize
+              where
+                stmSetSize =
+                  unsafePerformIO $ atomically $ do
+                    s <- stmSetFromList xs
+                    StmSet.size s
+         in forAll gen prop,
     testProperty "fromListToListSetIsomorphism" $ \(xs :: [Int]) ->
       let setList =
-            unsafePerformIO $ atomically $
-              stmSetFromList xs >>= stmSetToList
+            unsafePerformIO
+              $ atomically
+              $ stmSetFromList xs
+              >>= stmSetToList
        in sort (nub xs) === sort setList,
     testProperty "listTNonAtomicIsomorphism" $ \(xs :: [Int]) ->
       let setList =
@@ -82,25 +84,28 @@ tests =
               return (sz, sort ls)
           expected =
             let remaining = nub (filter (`notElem` dropped) ks)
-            in (length remaining, sort remaining)
+             in (length remaining, sort remaining)
        in (finalSize, finalList) === expected,
-    testCase "insert" $
-      assertEqual "" (sort ['a','b','c']) =<< do
+    testCase "insert"
+      $ assertEqual "" (sort ['a', 'b', 'c'])
+      =<< do
         atomically $ do
           s <- StmSet.new
           StmSet.insert 'a' s
           StmSet.insert 'c' s
           StmSet.insert 'b' s
           sort <$> stmSetToList s,
-    testCase "focusInsert" $
-      assertEqual "" (sort ['a','b']) =<< do
+    testCase "focusInsert"
+      $ assertEqual "" (sort ['a', 'b'])
+      =<< do
         atomically $ do
           s <- StmSet.new
           StmSet.focus (Focus.insert ()) 'a' s
           StmSet.focus (Focus.insert ()) 'b' s
           sort <$> stmSetToList s,
-    testCase "insertAndDelete" $
-      assertEqual "" ['b'] =<< do
+    testCase "insertAndDelete"
+      $ assertEqual "" ['b']
+      =<< do
         atomically $ do
           s <- StmSet.new
           StmSet.focus (Focus.insert ()) 'a' s
@@ -110,8 +115,9 @@ tests =
     testCase "nullAndNotNull" $ do
       assertEqual "" True =<< atomically (StmSet.null =<< StmSet.new)
       assertEqual "" False =<< atomically (StmSet.null =<< stmSetFromList ['a']),
-    testCase "nullAfterDeletingTheLastElement" $
-      assertEqual "" True =<< do
+    testCase "nullAfterDeletingTheLastElement"
+      $ assertEqual "" True
+      =<< do
         atomically $ do
           s <- stmSetFromList ['a']
           StmSet.delete 'a' s
