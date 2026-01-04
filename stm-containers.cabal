@@ -24,7 +24,7 @@ license-file: LICENSE
 
 source-repository head
   type: git
-  location: git://github.com/nikita-volkov/stm-containers.git
+  location: https://github.com/nikita-volkov/stm-containers
 
 library
   hs-source-dirs: library
